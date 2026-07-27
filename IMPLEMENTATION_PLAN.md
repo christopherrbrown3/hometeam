@@ -109,7 +109,7 @@ Model tiers:
 | 76 | Implement scheduled processor for generation, missed policies, due work, and retries | 9 | Implementation | High Intelligence | #33, #34, #73–#75 |
 | 77 | Add PWA, offline, notification, scheduler, and push contract tests | 9 | Test | High Intelligence | #71–#76 |
 | 78 | Epic: Security and authorization hardening | 10 | Epic | High Intelligence | #19, #45, #69 |
-| 79 | Complete exhaustive full-member, guest, outsider, and removed-user RLS matrix | 10 | Security/Test | High Intelligence | #26, #54, #68, #72–#76 |
+| 79 | Complete exhaustive full-member, guest, outsider, and removed-user RLS matrix | 10 | Security/Test | High Intelligence | #26, #54, #68, #72–#76, #99 |
 | 80 | Audit security-definer functions, grants, search_path, and append-only protections | 10 | Security | High Intelligence | #20, #23, #40, #47–#52, #73–#76 |
 | 81 | Harden secret handling, invitation/push privacy, logging, and CI scanning | 10 | Security | High Intelligence | #22, #23, #70–#76 |
 | 82 | Perform cross-household abuse-case security review and remediate findings | 10 | Security | High Intelligence | #79–#81 |

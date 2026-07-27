@@ -51,7 +51,7 @@ flowchart TD
 
 The expected critical path is:
 
-`#2 → #8 → (#9 ∥ #15) → #97 → #20 → (#10 ∥ #28) → #29 → #30 → #31 → #33 → (#38 → #39 ∥ #46 → #47) → #48 → #65 → (#70 ∥ #73) → #75 → #76 → (#79 ∥ #80 ∥ #99) → #85 → #86 → #90`
+`#2 → #8 → (#9 ∥ #15) → #97 → #20 → (#10 ∥ #28) → #29 → #30 → #31 → #33 → (#38 → #39 ∥ #46 → #47) → #48 → #65 → (#70 ∥ #73) → #75 → #76 → #99 → (#79 ∥ #80) → #85 → #86 → #90`
 
 Why: tooling and local Supabase precede identity/authentication; preview approval must gate household authorization; household authorization precedes task access; recurrence/rotation precede atomic completion; mutation events feed Realtime and notifications; platform/guest/RPC hardening precedes system E2E and final release validation.
 
@@ -81,6 +81,7 @@ After #2–#4:
 - #48 completion precedes Undo/reopen and interval-successor integration acceptance.
 - #73 outbox and #70 compatibility decision precede #75 delivery.
 - #79 guest isolation and #80 definer-function audit precede release-grade database/E2E tests.
+- #99 focused preview-approval isolation tests precede #79's exhaustive authorization matrix.
 - #84–#86 must pass before #90 release validation.
 
 ## 6. Atomic dependency table
