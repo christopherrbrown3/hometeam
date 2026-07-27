@@ -6,7 +6,7 @@ HomeTeam is a planned production-quality shared household task coordination PWA.
 
 ## Planning status
 
-This repository is in the planning baseline phase. It intentionally contains no React, Vite, Supabase, or production application implementation yet. Implementation work must be performed one GitHub issue at a time on an `issue-<issue-number>-<short-description>` branch and submitted through a pull request.
+Implementation is underway, beginning with the repository foundation. Work is performed one ready GitHub issue at a time on a focused branch, with its acceptance criteria verified before merge.
 
 ## Documentation
 
@@ -47,6 +47,8 @@ npm install
 npm run dev
 ```
 
-Run `npm run typecheck` for strict TypeScript validation and `npm run build` for the production bundle. Routing, the design system, tests, Supabase, and deployment workflows are delivered by their separately scoped implementation issues.
+Copy `.env.example` to `.env.local` and provide only the Supabase project URL and publishable key. Do not put database passwords, secret keys, or service-role keys in any `VITE_` environment variable; Vite embeds those values in the browser bundle.
+
+Run `npm run typecheck` for strict TypeScript validation and `npm run build` for the production bundle. Hash routing, the query provider, environment validation, and stable query-key factories are now in place. The design system, tests, authentication, database migrations, and deployment workflows are delivered by their separately scoped implementation issues.
 
 Local setup, migration, testing, Supabase, VAPID, Pages, custom-domain, iPhone installation, and operations instructions will be added by the implementation issues identified in `IMPLEMENTATION_PLAN.md`.
