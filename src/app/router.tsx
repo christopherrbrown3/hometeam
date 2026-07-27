@@ -1,7 +1,12 @@
 import { Navigate, Outlet, createHashRouter } from 'react-router'
+import { AppShell } from './AppShell'
 
 function AppLayout() {
-  return <Outlet />
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  )
 }
 
 function PlannedRoute({ title }: Readonly<{ title: string }>) {
