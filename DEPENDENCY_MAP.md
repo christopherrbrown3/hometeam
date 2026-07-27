@@ -109,4 +109,4 @@ No privileged credentials should be placed in an issue body, repository file, Pr
 
 ## 9. Graph validation
 
-The planned graph is acyclic: all dependencies point to a lower issue number or an explicitly documented external condition. Epics depend conceptually on earlier epics but are tracking containers, not implementation blockers. Atomic issues are sized for one focused branch/PR and have at least one test owner.
+The planned graph is acyclic: all atomic dependencies point to a lower issue number or an explicitly documented external condition. Epics depend conceptually on earlier epics but are tracking containers, not implementation blockers. Atomic issues are sized for one focused branch/PR and have at least one test owner.

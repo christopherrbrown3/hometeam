@@ -40,7 +40,7 @@ Model tiers:
 | 7 | Epic: Supabase database foundation | 2 | Epic | Standard | #1 |
 | 8 | Configure local Supabase development and migration conventions | 2 | Implementation | Mechanical | #2 |
 | 9 | Create profiles, households, memberships, and shared database enums | 2 | Implementation | Standard | #8 |
-| 10 | Create task series, schedule, rotation, occurrence, and event schema | 2 | Implementation | Standard | #9, #28 |
+| 10 | Create task series, schedule, rotation, occurrence, and event schema | 2 | Implementation | Standard | #9 |
 | 11 | Create notification preference, subscription, and outbox schema | 2 | Implementation | Standard | #9 |
 | 12 | Add indexes, deterministic seed data, and generated database types | 2 | Implementation | Mechanical | #9–#11 |
 | 13 | Add migration replay, constraint, and seed validation tests | 2 | Test | Standard | #9–#12 |
@@ -70,9 +70,9 @@ Model tiers:
 | 37 | Epic: Assignment and round-robin rotation | 5 | Epic | High Intelligence | #27 |
 | 38 | Freeze round-robin cursor, completion-basis, recalculation, and Undo semantics | 5 | Design | High Intelligence | #28 |
 | 39 | Implement pure rotation engine and roster eligibility rules | 5 | Implementation | High Intelligence | #29, #38 |
-| 40 | Implement fixed, unassigned, claim, assign, and reassign RPCs | 5 | Implementation | Standard | #20, #29, #46 |
+| 40 | Implement fixed, unassigned, claim, assign, and reassign RPCs | 5 | Implementation | Standard | #20, #29 |
 | 41 | Integrate round-robin assignment into occurrence generation | 5 | Implementation | Standard | #33, #39 |
-| 42 | Implement future unlocked assignment recalculation and audit events | 5 | Implementation | High Intelligence | #39, #41, #47 |
+| 42 | Implement future unlocked assignment recalculation and audit events | 5 | Implementation | High Intelligence | #39, #41 |
 | 43 | Build assignment, claim, roster reorder, and lock UI | 5 | Implementation | Standard | #25, #35, #40–#42 |
 | 44 | Add rotation and assignment unit/database integration tests | 5 | Test | High Intelligence | #39–#43 |
 | 45 | Epic: Transactional task lifecycle and audit history | 6 | Epic | High Intelligence | #27, #37 |
