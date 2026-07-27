@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Product and architecture decisions
+    url: https://github.com/christopherrbrown3/hometeam/blob/main/DECISIONS.md
+    about: Review settled decisions before opening a change request.

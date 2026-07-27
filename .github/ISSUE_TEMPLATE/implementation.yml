@@ -1,0 +1,106 @@
+name: Atomic implementation task
+description: One coherent implementation outcome for one focused branch and pull request.
+title: ""
+labels:
+  - "type:implementation"
+body:
+  - type: markdown
+    attributes:
+      value: Read PRODUCT_SPEC.md, ARCHITECTURE.md, DECISIONS.md, SECURITY_MODEL.md, and linked dependencies first.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: User or system value
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: Background
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Use explicit "Blocked by #…" language or "None."
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: Detailed implementation plan
+      description: Name expected files, tables, functions, policies, components, hooks, queries, tests, and docs.
+    validations:
+      required: true
+  - type: textarea
+    id: contracts
+    attributes:
+      label: Data and API contracts
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security considerations
+    validations:
+      required: true
+  - type: textarea
+    id: concurrency
+    attributes:
+      label: Concurrency considerations
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Test plan
+      description: Separate unit, database/RLS, component, integration, and E2E ownership.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use objective checkboxes.
+    validations:
+      required: true
+  - type: checkboxes
+    id: done
+    attributes:
+      label: Definition of done
+      options:
+        - label: Code implemented
+          required: true
+        - label: Tests passing
+          required: true
+        - label: Documentation updated
+          required: true
+        - label: No unrelated changes
+          required: true
+        - label: Security requirements verified
+          required: true
+        - label: Acceptance criteria checked
+          required: true
+        - label: Pull request opened
+          required: true
+        - label: CI passing
+          required: true
