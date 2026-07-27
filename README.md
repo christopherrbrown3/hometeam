@@ -38,4 +38,15 @@ Authorization is enforced in PostgreSQL and transactional RPC functions, not onl
 4. Implement only that issue, including its tests and documentation.
 5. Open a pull request linked to the issue; do not merge without explicit approval.
 
+## Local development
+
+HomeTeam currently includes the strict React, TypeScript, and Vite foundation from issue #2. Use Node.js 20.19+ (or 22.12+) and npm:
+
+```sh
+npm install
+npm run dev
+```
+
+Run `npm run typecheck` for strict TypeScript validation and `npm run build` for the production bundle. Routing, the design system, tests, Supabase, and deployment workflows are delivered by their separately scoped implementation issues.
+
 Local setup, migration, testing, Supabase, VAPID, Pages, custom-domain, iPhone installation, and operations instructions will be added by the implementation issues identified in `IMPLEMENTATION_PLAN.md`.
