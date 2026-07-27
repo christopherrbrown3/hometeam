@@ -309,6 +309,72 @@ Never place the service-role key or VAPID private key in frontend files, GitHub 
 
 ---
 
+# 8A. Public-preview access approval and platform administration
+
+The version 1 deployment may be publicly reachable, but it must operate as an administrator-approved preview.
+
+Supabase passwordless authentication may create a valid authenticated session for a new email address. Authentication alone must not grant access to HomeTeam product data or features.
+
+Every authenticated user has a platform access state:
+
+* Pending
+* Approved
+* Rejected
+* Suspended
+
+Only an **Approved** user may:
+
+* Create or join a household
+* Accept a household invitation
+* Read household, membership, category, task, occurrence, history, notification, or subscription data
+* Open authorized Realtime subscriptions
+* Call HomeTeam product mutation functions
+
+A Pending, Rejected, or Suspended user may access only:
+
+* Their own minimum profile identity
+* Their own platform access status
+* A clear pending, rejected, or suspended access screen
+* Sign out
+
+Do not rely only on a frontend route guard. Enforce the Approved prerequisite in Row Level Security helpers and every product security-definer function.
+
+## Platform administrator
+
+Platform administrator is an application-wide preview-management role. It is separate from the household roles **Full Member** and **Guest**; version 1 still has exactly those two household roles.
+
+A platform administrator may:
+
+* View pending access requests with the minimum identity needed to decide
+* Approve a pending user
+* Reject a pending user
+* Suspend or restore an approved user
+* View the append-only history of platform access decisions
+
+Platform administrator status must not automatically:
+
+* Add the administrator to a household
+* Grant access to household tasks, descriptions, occurrences, history, members, or push subscriptions
+* Bypass household Row Level Security
+
+The initial administrator must be bootstrapped using the authenticated user UUID through a privileged migration or documented one-time administrative operation. Do not hard-code or guess an administrator email address in client code, migrations, or repository configuration.
+
+Every access decision records:
+
+* Target user
+* Previous and new access state
+* Administrator actor
+* Decision timestamp
+* Optional short administrative note
+
+Access decision history is append-only. Users may read their own current access state but not other applicants. Only platform administrators may list or decide access requests.
+
+When approval is revoked or suspended, the client must immediately stop Realtime subscriptions, clear protected query caches, and return to the access-status screen.
+
+Household invitations do not bypass platform approval. An invited user may authenticate and retain the intended invitation route, but may accept the invitation only after a platform administrator approves them.
+
+---
+
 # 9. Households and memberships
 
 A user may belong to multiple households.
@@ -1781,6 +1847,12 @@ Test:
 
 Test:
 
+* Pending user cannot read or mutate any HomeTeam product data
+* Rejected or suspended user cannot read or mutate any HomeTeam product data
+* Approved user can proceed to household authorization
+* Non-administrator cannot list or decide access requests
+* Administrator can approve, reject, suspend, and restore access
+* Administrator approval does not grant household data access
 * Full member permissions
 * Guest can read assigned occurrence
 * Guest cannot read unassigned occurrence
@@ -2095,6 +2167,8 @@ HomeTeam version 1 is complete only when:
 30. Lint, type checking, tests, and production build pass.
 31. GitHub Pages deployment is configured.
 32. No privileged secret exists in client code or the repository.
+33. A new authenticated user cannot use HomeTeam until a platform administrator approves them.
+34. An administrator can approve, reject, suspend, and restore preview access without gaining implicit household access.
 
 ---
 
@@ -2121,4 +2195,3 @@ After completing implementation:
 8. Do not describe the application as complete if any Definition of Done requirement remains unimplemented.
 
 Build HomeTeam as a real, maintainable application—not a static mockup.
-

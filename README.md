@@ -2,7 +2,7 @@
 
 **Tasks. Together. Done right.**
 
-HomeTeam is a planned production-quality shared household task coordination PWA. It gives every scheduled task occurrence one authoritative state, supports full members and tightly isolated guests, and coordinates recurring work, round-robin turns, realtime updates, and Web Push notifications.
+HomeTeam is a planned production-quality shared household task coordination PWA. It gives every scheduled task occurrence one authoritative state, supports full members and tightly isolated guests, and coordinates recurring work, round-robin turns, realtime updates, and Web Push notifications. During public preview, authenticated users must be explicitly approved by a platform administrator before they can access any household feature or data.
 
 ## Planning status
 
@@ -28,7 +28,7 @@ Implementation is underway, beginning with the repository foundation. Work is pe
 
 ## Security and safety
 
-Authorization is enforced in PostgreSQL and transactional RPC functions, not only in the UI. Privileged keys never enter frontend bundles or committed files. HomeTeam notifications are coordination aids and must not be treated as the sole medically reliable reminder system.
+Authorization is enforced in PostgreSQL and transactional RPC functions, not only in the UI. Platform approval is separate from household membership: administrators approve preview access but do not automatically gain access to household data. Privileged keys never enter frontend bundles or committed files. HomeTeam notifications are coordination aids and must not be treated as the sole medically reliable reminder system.
 
 ## Implementation workflow
 

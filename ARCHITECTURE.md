@@ -71,7 +71,7 @@ Business rules belong in pure domain modules, database functions, or typed servi
 
 ### Routing
 
-Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public routes are `/login`, `/verify`, and `/invite/:token`. Authenticated routes live under a session gate; `/today` is the default. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
+Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public routes are `/login`, `/verify`, and `/invite/:token`. Authenticated-but-unapproved users are restricted to `/access-status`. Approved users enter the product session gate; `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
 
 An intended location is serialized before authentication and restored only after validation. Invitation tokens must never be placed in logs or analytics; after acceptance, replace the route so the token is no longer visible.
 
@@ -81,6 +81,8 @@ TanStack Query owns server state. Query keys are factory-generated:
 
 ```ts
 ['profile', userId]
+['platform-access', userId]
+['platform-access-requests', adminFilters]
 ['memberships', userId]
 ['household', householdId]
 ['occurrences', householdScope, filters]
@@ -100,14 +102,44 @@ The shell is mobile-first with safe-area-aware bottom navigation and a centered 
 ## 4. Authentication flow
 
 1. Client requests a six-digit email OTP through Supabase Auth.
-2. Client verifies the token with the supplied email and restores the intended route.
-3. A profile bootstrap trigger or idempotent RPC creates/updates `profiles`.
-4. Session refresh is handled by Supabase; the app clears protected caches on sign-out.
-5. Invitation acceptance verifies the authenticated email against a normalized invited email inside a transactional function.
+2. Client verifies the token with the supplied email.
+3. A profile/access bootstrap trigger idempotently creates `profiles` and a `pending` `platform_access` row.
+4. The client fetches its authoritative platform access state.
+5. Pending, rejected, or suspended users are restricted to the access-status route and sign-out; protected queries and Realtime channels do not start.
+6. Approved users restore the validated intended route and may proceed to household authorization.
+7. Platform administrators may use the separate access-review route and RPCs; they receive no implicit household membership.
+8. Session refresh is handled by Supabase; the app clears protected caches on sign-out, suspension, or approval revocation.
+9. Invitation acceptance verifies both approved platform access and the authenticated email against a normalized invited email inside a transactional function.
 
 Only publishable frontend credentials are loaded by Vite. The service-role key and VAPID private key exist only as Supabase secrets.
 
-## 5. Household, membership, and category model
+## 5. Platform access approval model
+
+`platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. `platform_administrators` contains the small set of user UUIDs permitted to review access. `platform_access_events` is append-only and records every decision or restoration.
+
+The initial administrator is inserted by UUID through a privileged migration parameter or documented one-time SQL operation after their Supabase Auth user exists. No administrator email is hard-coded.
+
+Stable authorization helpers:
+
+```sql
+private.is_approved_user(actor uuid)
+private.is_platform_administrator(actor uuid)
+```
+
+Every household/product RLS predicate and security-definer RPC checks `private.is_approved_user(auth.uid())` before role- or target-specific authorization. Only the access-status projection remains readable to a non-approved authenticated user.
+
+Administrator RPCs are:
+
+```text
+approve_platform_access(target_user_id, note)
+reject_platform_access(target_user_id, note)
+suspend_platform_access(target_user_id, note)
+restore_platform_access(target_user_id, note)
+```
+
+Each function derives the administrator from `auth.uid()`, locks the target access row, validates the transition, updates state, and appends a decision event in one transaction. Approval is idempotent only when the requested final state already matches; conflicting transitions return structured errors.
+
+## 6. Household, membership, and category model
 
 `households` owns an IANA timezone and is soft-deletable. `household_memberships` has one active row per `(household_id, user_id)` and exactly two roles: `full_member` and `guest`. A partial unique index prevents duplicate active memberships. Membership removal sets `removed_at` and status, immediately failing RLS predicates.
 
@@ -115,7 +147,7 @@ Full members can read and manage household resources through policy-approved rea
 
 Invitations store a SHA-256 or stronger hash of a random high-entropy token, a normalized email, role, expiry, revocation, and acceptance metadata. The raw token exists only in the outbound invitation URL.
 
-## 6. Task-series and occurrence model
+## 7. Task-series and occurrence model
 
 `task_series` stores definition-level behavior. `task_schedule_slots` normalizes daily exact times, flexible windows, and all-day slots. A versioned `recurrence_config` JSONB stores rule shape that would be awkward to normalize; a CHECK function validates it. `task_rotation_members` stores the ordered active roster.
 
@@ -129,7 +161,7 @@ A unique constraint on `(series_id, occurrence_key)` makes generation idempotent
 
 Lifecycle state is stored as `open`, `completed`, `skipped`, `cancelled`, or `deleted`. Upcoming, due now, overdue, and snoozed are projections computed from state, due bounds, `snoozed_until`, and the household timezone. No database job changes a row merely because time passed.
 
-## 7. Recurrence engine
+## 8. Recurrence engine
 
 The recurrence engine is a pure, versioned TypeScript/PostgreSQL-compatible rules layer with fixtures shared across tests. It accepts:
 
@@ -156,7 +188,7 @@ Completion-interval series normally have one open occurrence. Their successor is
 
 The missed-policy processor is idempotent and locks candidate rows with `FOR UPDATE SKIP LOCKED`. It may close older open occurrences but never rewrites completed or skipped history.
 
-## 8. Round-robin engine
+## 9. Round-robin engine
 
 The roster is ordered by `rotation_position`. Generation chooses the next eligible active member after the persisted rotation cursor/event outcome. Fixed and unassigned modes bypass the rotation engine.
 
@@ -168,7 +200,7 @@ When a full member completes another participant’s occurrence:
 
 The completion transaction records original assignee, actual completer, and the chosen rotation basis. It then recalculates only future, open, automatically assigned, unlocked occurrences. Completed, skipped, deleted, cancelled, or manually locked rows are immutable to that recalculation. Undo/reopen appends compensating events and deterministically recomputes the future cursor from surviving events.
 
-## 9. Transactional mutations and concurrency
+## 10. Transactional mutations and concurrency
 
 All lifecycle operations are `SECURITY DEFINER` functions with `SET search_path = pg_catalog, public`, explicit schema qualification, authenticated actor lookup, membership validation, row locking, lifecycle validation, and expected-version compare-and-swap.
 
@@ -225,11 +257,11 @@ sequenceDiagram
 
 Claim, assign, reassign, complete, undo, reopen, skip, snooze, cancel, and delete all take `expected_version`. The first valid transaction commits; later contenders receive the current record and a typed conflict. Retries are safe only after refetching and explicit user intent.
 
-## 10. Append-only history
+## 11. Append-only history
 
 `task_events` is insert-only to client roles. RLS exposes scoped reads, while triggers reject update/delete even when a future policy is misconfigured. Payloads are versioned and contain non-secret identifiers plus the before/after facts necessary for audit. Corrections append compensating events.
 
-## 11. Realtime strategy
+## 12. Realtime strategy
 
 The client subscribes only after loading active memberships. Full members use household-scoped channels; guests use assignee-scoped occurrence/event feeds supported by RLS. Payloads are treated as invalidation signals, not trusted final state.
 
@@ -251,7 +283,7 @@ sequenceDiagram
 
 Channel managers are keyed by user and membership set. On sign-out or membership removal they unsubscribe first, cancel in-flight queries, and remove all protected cache entries. When the open occurrence changes remotely, show a nonintrusive banner and screen-reader announcement.
 
-## 12. Notification outbox and Web Push
+## 13. Notification outbox and Web Push
 
 Mutation and scheduled transactions create `notification_outbox` rows with a unique semantic idempotency key. A once-per-minute scheduled processor claims due work using `FOR UPDATE SKIP LOCKED`, materializes recipients according to role and preferences, and invokes delivery in bounded batches.
 
@@ -272,7 +304,7 @@ Subscriptions are per device. Endpoints and keys are readable only by the owning
 
 The Web Push implementation must be validated against the current Supabase Deno runtime in the dedicated compatibility issue before a library is selected.
 
-## 13. Scheduled processing
+## 14. Scheduled processing
 
 One idempotent Edge Function, invoked about once per minute, orchestrates:
 
@@ -285,13 +317,13 @@ One idempotent Edge Function, invoked about once per minute, orchestrates:
 
 Jobs use advisory locks or claim tables plus deterministic keys. Each phase has a time budget and cursor so the free-tier workload can resume safely. Completion-interval generation remains inside lifecycle RPCs, not the scheduler.
 
-## 14. PWA and offline behavior
+## 15. PWA and offline behavior
 
 Use `vite-plugin-pwa`/Workbox to precache the app shell and safe static assets. Runtime caching may preserve recently fetched read screens, but authenticated API responses must be short-lived and cleared on identity/membership changes. Never register background sync for task mutations.
 
 An online-state guard disables complete, skip, snooze, claim, assign, edit, cancel, and delete controls while offline and explains why. Push permission is requested only from a user-initiated action, with iPhone installation guidance first when needed. Service worker updates prompt the user before activation when an active form or mutation could be disrupted.
 
-## 15. GitHub Pages and configuration
+## 16. GitHub Pages and configuration
 
 Vite base comes from validated `VITE_APP_BASE_PATH`; all manifest, icon, and service-worker URLs derive from it. Hash routing prevents server fallback requirements. GitHub Actions runs install, lint, typecheck, unit tests, and build before uploading a Pages artifact. Deployment uses GitHub’s Pages environment and no Supabase service-role secret.
 
@@ -312,7 +344,7 @@ VAPID_PRIVATE_KEY
 VAPID_SUBJECT
 ```
 
-## 16. Testing layers
+## 17. Testing layers
 
 - pure unit tests: due-state, recurrence, rotation, filtering, and timezone fixtures;
 - component tests: forms, dialogs, route guards, status sections, offline/conflict behavior;
@@ -323,39 +355,45 @@ VAPID_SUBJECT
 
 `TEST_STRATEGY.md` owns the traceability matrix and fixture standards.
 
-## 17. Logging and observability
+## 18. Logging and observability
 
 Frontend errors use structured codes and correlation IDs without emails, tokens, push endpoints, descriptions, or task titles by default. Edge Functions log job ID, phase, counts, duration, result class, and redacted error code. Database events are product audit records, not a substitute for operational logs. Outbox attempts preserve bounded diagnostic metadata with retention reviewed before release.
 
-## 18. Migration strategy
+## 19. Migration strategy
 
 Migrations are immutable, timestamped, and ordered:
 
-1. extensions, enums, profiles, households, memberships;
-2. invitations and categories;
-3. task series, schedule slots, rotations, occurrences;
-4. events, notification preferences, subscriptions, outbox;
-5. indexes and constraints;
-6. RLS helper predicates and policies;
-7. transactional functions and triggers;
-8. Realtime publication and scheduled-processing support.
+1. extensions, enums, profiles, platform access, platform administrators, and access events;
+2. households and memberships;
+3. invitations and categories;
+4. task series, schedule slots, rotations, occurrences;
+5. events, notification preferences, subscriptions, outbox;
+6. indexes and constraints;
+7. platform approval and household RLS helper predicates and policies;
+8. transactional functions and triggers;
+9. Realtime publication and scheduled-processing support.
 
 Each migration includes a forward test. Destructive fixes require a new migration. Generated TypeScript types are refreshed after schema changes. Production deployment applies database migrations before publishing frontend code that depends on them.
 
-## 19. Security boundaries
+## 20. Security boundaries
 
-The browser is untrusted. Household IDs, roles, assignees, occurrence versions, and notification recipients supplied by a client are claims to validate, not authority. Direct writes are denied for lifecycle/event/outbox tables; controlled functions apply mutations. Privileged Edge Functions accept only cron/service authentication and never proxy arbitrary client input. See `SECURITY_MODEL.md`.
+The browser is untrusted. Authentication is not product authorization: an approved platform access row is required before household checks. Administrator status authorizes only access-review functions and never bypasses household RLS. Household IDs, roles, assignees, occurrence versions, and notification recipients supplied by a client are claims to validate, not authority. Direct writes are denied for lifecycle/event/outbox tables; controlled functions apply mutations. Privileged Edge Functions accept only cron/service authentication and never proxy arbitrary client input. See `SECURITY_MODEL.md`.
 
-## 20. Version 2 extension points
+## 21. Version 2 extension points
 
 Versioned recurrence and event payloads allow richer monthly schedules without rewriting v1 rows. Optional child tables can later support comments, attachments, medicine fields, task-specific notification preferences, or analytics. The occurrence state machine can add new closed states through migrations. Native apps can reuse the typed RPC boundary. None of these extensions are part of version 1.
 
-## 21. Major issue dependencies
+## 22. Major issue dependencies
 
 ```mermaid
 flowchart TD
     I2["#2 Toolchain"] --> I8["#8 Supabase local foundation"]
     I8 --> I9["#9 Core schema"]
+    I15["#15 Auth service"] --> I92["#92 Preview access RLS/RPCs"]
+    I9 --> I92
+    I92 --> I20
+    I92 --> I93["#93 Admin approval UI + access gate"]
+    I93 --> I94["#94 Approval security/E2E tests"]
     I9 --> I20["#20 Household RLS/RPC"]
     I9 --> I29["#29 Task schema"]
     I28["#28 Recurrence contract"] --> I30["#30 Calendar engine"]
@@ -375,4 +413,5 @@ flowchart TD
     I65 --> I85["#85 End-to-end system suite"]
     I75 --> I85
     I85 --> I90["#90 Release validation"]
+    I94 --> I90
 ```

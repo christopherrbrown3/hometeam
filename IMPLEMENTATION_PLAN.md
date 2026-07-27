@@ -2,7 +2,7 @@
 
 ## 1. Planning rules
 
-This plan decomposes HomeTeam version 1 into 12 ordered milestones, 13 epics, and 77 atomic issues. Issue numbers are reserved in creation order in this document. Every atomic issue is intended for one focused branch and pull request. No application implementation is part of the planning baseline.
+This plan decomposes HomeTeam version 1 into 12 ordered milestones, 14 epics, and 80 atomic issues. Issue numbers are reserved in creation order in this document. Every atomic issue is intended for one focused branch and pull request.
 
 Model tiers:
 
@@ -16,7 +16,7 @@ Model tiers:
 |---|---|---|---|---|
 | 1. Repository and Tooling | Strict React/Vite foundation, routing, styles, tests, PWA/Pages workflow, contributor guardrails | clean install; lint/typecheck/unit/build workflows pass; subpath build works | None | Pages settings, version drift |
 | 2. Supabase and Database Foundation | Local Supabase, core tables/enums/indexes, seed, generated types | migrations replay from empty state; constraints/index tests pass; seed loads | M1 | schema churn, migration order |
-| 3. Authentication and Households | OTP, profiles, multi-household memberships, invitations, categories, guest foundations | two members and one guest authenticate/join; invitation and RLS tests pass | M2 | token/email handling, isolation |
+| 3. Authentication and Households | OTP, administrator-approved preview access, profiles, multi-household memberships, invitations, categories, guest foundations | unapproved users are product-data isolated; administrator approval works without household bypass; two members and one guest authenticate/join; invitation and RLS tests pass | M2 | approval bypass, admin overreach, token/email handling, isolation |
 | 4. Task and Recurrence Engine | task definitions, slots, recurrence, timezone, generation, missed policies, forms | all supported v1 schedules generate unique correct occurrences across DST | M2–M3 | DST, duplicate generation |
 | 5. Assignment and Rotation | fixed/unassigned/claim/round-robin and future recalculation | rotation matrix and database tests pass without rewriting locked/history rows | M3–M4 | override/undo semantics |
 | 6. Task Lifecycle and Audit History | atomic lifecycle RPCs, version conflicts, events, soft deletion | race tests prove first update wins; every action appends correct immutable events | M4–M5 | transactional complexity |
@@ -49,8 +49,8 @@ Model tiers:
 | 16 | Build email OTP request and six-digit verification screens | 3 | Implementation | Standard | #4, #15 |
 | 17 | Implement protected routing, intended-route restoration, and sign-out cleanup | 3 | Implementation | Standard | #3, #15 |
 | 18 | Add authentication component and session integration tests | 3 | Test | Standard | #15–#17 |
-| 19 | Epic: Households, memberships, invitations, and categories | 3 | Epic | High Intelligence | #7 |
-| 20 | Implement household/profile RLS and create_household RPC | 3 | Security | High Intelligence | #9 |
+| 19 | Epic: Households, memberships, invitations, and categories | 3 | Epic | High Intelligence | #7, #91 |
+| 20 | Implement household/profile RLS and create_household RPC | 3 | Security | High Intelligence | #9, #92 |
 | 21 | Build household list, switcher, creation, and timezone UI | 3 | Implementation | Standard | #4, #17, #20 |
 | 22 | Create invitation schema constraints and secure token lifecycle | 3 | Security | High Intelligence | #9 |
 | 23 | Implement invitation send, accept, revoke, and resend operations | 3 | Implementation | Standard | #15, #20, #22 |
@@ -120,13 +120,22 @@ Model tiers:
 | 87 | Epic: Production deployment and release readiness | 12 | Epic | Standard | #78, #83 |
 | 88 | Document and validate production Supabase, OTP, secrets, Functions, and cron setup | 12 | Documentation | Mechanical | #75, #76, #81, #85 |
 | 89 | Finalize GitHub Pages, custom-domain, observability, privacy, and operations runbooks | 12 | Documentation/Implementation | Standard | #5, #71, #81, #86 |
-| 90 | Execute release validation, manual iPhone acceptance, and launch checklist | 12 | Test/Release | High Intelligence | #82, #84–#89 |
+| 90 | Execute release validation, manual iPhone acceptance, and launch checklist | 12 | Test/Release | High Intelligence | #82, #84–#89, #94 |
+| 91 | Epic: Public-preview access approval and platform administration | 3 | Epic | High Intelligence | #14 |
+| 92 | Implement platform access schema, administrator bootstrap, RLS gate, and approval RPCs | 3 | Security/Implementation | High Intelligence | #9, #15 |
+| 93 | Build access-status gate and administrator approval dashboard | 3 | Implementation | Standard | #4, #17, #92 |
+| 94 | Prove preview approval isolation, administrator boundaries, and revocation behavior | 3 | Security/Test | High Intelligence | #18, #26, #92, #93 |
 
 ## 4. Product requirement traceability
 
 | Product requirement | Issues |
 |---|---|
 | Passwordless six-digit email OTP and persistent session | #15–#18, #84 |
+| Public deployment requires administrator approval before use | #91–#94, #79, #85, #90 |
+| Pending/rejected/suspended users see only own access status | #92–#94, #79 |
+| Administrator approves access without household-data bypass | #92, #94, #79, #82 |
+| Invitation acceptance waits for platform approval | #23, #92–#94 |
+| Suspension/revocation stops Realtime and clears caches | #65, #67–#68, #92–#94 |
 | Return to invitation/intended route | #17, #23, #84 |
 | Multiple households and household timezone | #20, #21, #31, #56 |
 | Full-member permissions | #20, #40, #48–#52, #79 |
@@ -175,9 +184,9 @@ Model tiers:
 
 No version 1 requirement is intentionally unmapped. Version 1 non-goals remain out of scope for every atomic issue unless a later approved decision changes the product specification.
 
-## 5. Ready queue at planning completion
+## 5. Ready queue
 
-Only #2 is initially `Ready`. High Intelligence design issue #28 may begin after #9 and #38 after #28; neither is initially Ready. Issues with unmet dependencies remain `Backlog` with `Dependency Status = Blocked`.
+Project status is dynamic as implementation issues close. New preview-access issue #92 remains Blocked until #9 and #15 are complete; #93 and #94 remain Blocked on their explicit prerequisites. Do not mark an item Ready merely because its milestone has begun.
 
 ## 6. Definition of done for every atomic issue
 

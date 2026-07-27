@@ -2,11 +2,13 @@
 
 ## 1. Protected assets and security goals
 
-Protected assets include household identity, membership, invitations, task definitions, occurrences, descriptions, assignees, audit history, notification preferences, Web Push subscriptions, secrets, and deployment credentials.
+Protected assets include platform access decisions, administrator identity, household identity, membership, invitations, task definitions, occurrences, descriptions, assignees, audit history, notification preferences, Web Push subscriptions, secrets, and deployment credentials.
 
 Security goals:
 
 - outsiders receive no household task data;
+- authenticated but unapproved users receive no HomeTeam product data;
+- platform administrators can manage preview access without implicit household visibility;
 - guests receive only explicitly assigned occurrences and the minimum related data;
 - removed members lose access immediately;
 - lifecycle changes are authorized, atomic, and auditable;
@@ -26,9 +28,23 @@ Security goals:
 
 ## 3. Authentication assumptions
 
-Supabase Auth validates passwordless email OTPs and issues JWTs. Authorization uses `auth.uid()`, never an email or user ID supplied in a request body. Email comparison is used only inside invitation acceptance after canonical normalization and authenticated lookup. Sessions are cleared on sign-out; protected query caches and Realtime channels are cleared on identity change.
+Supabase Auth validates passwordless email OTPs and issues JWTs. Authentication alone does not authorize product access. Authorization first requires an `approved` `platform_access` row for `auth.uid()`, then applies household role/target checks. Email comparison is used only inside invitation acceptance after canonical normalization and authenticated lookup. Sessions are cleared on sign-out; protected query caches and Realtime channels are cleared on identity change, suspension, or approval revocation.
 
 ## 4. Permission matrix
+
+### Platform access
+
+| Capability | Platform administrator | Approved user | Pending/rejected/suspended user |
+|---|---:|---:|---:|
+| Read own access state | Yes | Yes | Yes |
+| List pending access requests | Yes | No | No |
+| Approve/reject/suspend/restore access | Yes | No | No |
+| Access household data without membership | No | No | No |
+| Proceed to household authorization | Only when also approved | Yes | No |
+
+Platform administrator is an application-wide access-review role, not a household role.
+
+### Household access
 
 | Capability | Full member | Assigned guest | Unassigned/other guest | Outsider/removed |
 |---|---:|---:|---:|---:|
@@ -53,9 +69,19 @@ Stable helper functions:
 private.is_active_full_member(target_household uuid, actor uuid)
 private.is_active_guest(target_household uuid, actor uuid)
 private.can_read_occurrence(target_occurrence uuid, actor uuid)
+private.is_approved_user(actor uuid)
+private.is_platform_administrator(actor uuid)
 ```
 
-Helpers are non-user-overridable, explicitly schema-qualified, and do not accept a client-supplied household as sufficient proof. They join the target record back to its stored household.
+Helpers are non-user-overridable, explicitly schema-qualified, and do not accept a client-supplied household as sufficient proof. Every household/product helper first requires approved platform access, then joins the target record back to its stored household.
+
+### Pending, rejected, and suspended users
+
+May read only their own minimal profile and current platform access state. They cannot read memberships or invitations, accept invitations, create households, subscribe to product Realtime channels, manage push subscriptions, or call product RPCs.
+
+### Platform administrators
+
+May list minimum applicant identity/access metadata and execute controlled access-decision RPCs. Administrator status does not satisfy household membership predicates. Access decisions use target user IDs from stored rows, lock the row, validate state transitions, and append `platform_access_events`; client roles cannot update/delete those events.
 
 ### Full members
 
@@ -84,6 +110,7 @@ Every security-definer function:
 - sets `search_path = pg_catalog, public` or an equally explicit safe list;
 - schema-qualifies referenced tables/functions;
 - reads `auth.uid()` internally and rejects null;
+- verifies approved platform access for every product operation, or platform-administrator status for an access-review operation;
 - resolves household from the target row, not a trusted client parameter;
 - checks active membership/role and guest-specific assignment;
 - locks the target row before lifecycle/version decisions;
@@ -136,6 +163,10 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 | Threat | Mitigation |
 |---|---|
 | IDOR/cross-household row access | RLS on every table, target-derived household checks, two-household negative tests |
+| Public visitor authenticates and starts using preview | Approved platform-access predicate on all product reads, Realtime subscriptions, and RPCs |
+| User forges administrator UI or RPC call | Administrator table checked from `auth.uid()` inside RLS/security-definer functions |
+| Administrator gains household visibility | Separate predicates; administrator status never satisfies household membership |
+| Suspended user keeps cached/live data | RLS revocation plus immediate Realtime teardown and protected cache purge |
 | Guest enumerates unrelated tasks | Assignee-bound occurrence policies and guest-safe projections |
 | Forged role/assignee/version | Derive actor from JWT; lock and validate stored membership/target/version |
 | Double completion/race | Compare-and-swap under row lock; unique constraints; typed conflict |
@@ -152,6 +183,11 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 ## 16. Required security tests before release
 
 - full member, guest, removed member, and outsider matrix for every exposed table;
+- pending, rejected, suspended, approved, administrator, and non-administrator platform access matrix;
+- unapproved user denied household creation, invitation acceptance, product tables, Realtime, mutations, and push-subscription management;
+- administrator decision transitions and append-only access events;
+- administrator without household membership denied household data;
+- suspension/revocation tears down Realtime and clears protected client caches;
 - guest assigned/unassigned/other-assignee reads and RPC calls;
 - cross-household IDs supplied to every security-definer RPC;
 - safe `search_path`, ownership, EXECUTE grants, and direct-table privilege audit;

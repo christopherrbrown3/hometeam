@@ -12,7 +12,7 @@ Vitest exercises pure TypeScript domain modules with table-driven fixtures. Mand
 
 ### Component tests
 
-React Testing Library validates accessible behavior, not implementation details. Use a shared renderer with QueryClient, memory hash router, auth context, deterministic clock, and typed Supabase/RPC adapters. Cover loading, empty, error, offline, conflict, full-member, and guest states.
+React Testing Library validates accessible behavior, not implementation details. Use a shared renderer with QueryClient, memory hash router, auth context, deterministic clock, and typed Supabase/RPC adapters. Cover loading, empty, error, offline, conflict, pending/rejected/suspended access, administrator, full-member, and guest states.
 
 ### Database and RLS tests
 
@@ -24,7 +24,7 @@ Run the real local database, Auth-compatible sessions, generated client types, a
 
 ### End-to-end tests
 
-Playwright uses separate browser contexts for two full members and one guest. Email and Web Push delivery may be replaced with deterministic test adapters in CI, but token validation, outbox creation, subscription code, and notification click routing remain real.
+Playwright uses separate browser contexts for a platform administrator, an unapproved applicant, two approved full members, and one approved guest. Email and Web Push delivery may be replaced with deterministic test adapters in CI, but approval, token validation, outbox creation, subscription code, and notification click routing remain real.
 
 ### PWA and deployment tests
 
@@ -32,7 +32,7 @@ Build under `/hometeam/` and `/`, inspect manifest/icon/service-worker paths and
 
 ## 3. Fixture standards
 
-Canonical actors: Alex and Sam (full members), Grandma (guest), and an outsider. Use two households. Include overdue medicine, due-now dog feeding, snoozed cleaning, completed bedtime, unassigned recycling, fixed recurring, round-robin, flexible-window, and completion-interval examples. Never use real personal emails or sensitive medicine data.
+Canonical actors: Admin (platform administrator), Pending User, Suspended User, Alex and Sam (approved full members), Grandma (approved guest), and an outsider. Use two households. Include overdue medicine, due-now dog feeding, snoozed cleaning, completed bedtime, unassigned recycling, fixed recurring, round-robin, flexible-window, and completion-interval examples. Never use real personal emails or sensitive medicine data.
 
 Timezone fixtures include `America/New_York`, `America/Los_Angeles`, `Europe/London`, and a non-DST zone. Every date test names the household timezone and UTC instant.
 
@@ -54,6 +54,9 @@ Repeat for complete/complete, complete/skip, claim/claim, snooze/complete, undo/
 | Requirement | Primary automated coverage | Owning issues |
 |---|---|---|
 | OTP, persistent session, intended route | Component + Playwright | #15–#18, #84 |
+| Public preview requires administrator approval | RLS + component + Playwright | #91–#94, #79, #85, #90 |
+| Administrator does not bypass household isolation | RLS + database negative tests | #92, #94, #79, #82 |
+| Suspension/revocation purges Realtime and caches | Integration + multi-context E2E | #93, #94, #65, #67–#68 |
 | Multiple households and switching | DB + component + E2E | #20, #21, #25, #84 |
 | Invitation expiry/email/reuse | DB function + E2E | #22, #23, #25 |
 | Guest assigned-only isolation | RLS + E2E | #26, #79, #84 |
@@ -86,6 +89,7 @@ Each epic has explicit child ownership:
 - Repository/tooling: #4–#6
 - Database foundation: #13
 - Authentication: #18
+- Preview access administration: #94
 - Households/invitations: #25–#26
 - Recurrence: #36
 - Assignment/rotation: #44
@@ -110,6 +114,7 @@ Manual work supplements rather than replaces automation:
 - real iPhone Home Screen install, safe-area layout, permission prompt, push receipt/click;
 - VoiceOver and keyboard dialog/navigation pass;
 - Supabase production email template/link settings;
+- initial platform administrator UUID bootstrap and approval workflow;
 - free-tier scheduled job timing and delivery monitoring;
 - GitHub Pages repository subpath and optional custom domain.
 

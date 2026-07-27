@@ -107,3 +107,12 @@ Completion interval:
 ## D-018 — Sensitive notification disclaimer
 
 - **Decision:** README and settings state that HomeTeam notifications are coordination aids, not the sole medically reliable reminder system.
+
+## D-019 — Public-preview access approval
+
+- **Decision:** A Supabase-authenticated user is not authorized to use HomeTeam until a platform administrator changes their platform access state to `approved`.
+- **Role separation:** Platform administrator is not a third household role. Household roles remain exactly `full_member` and `guest`; administrator status does not create membership or bypass household RLS.
+- **Unauthorised states:** `pending`, `rejected`, and `suspended` users can read only their own minimal profile/access status and sign out.
+- **Bootstrap:** The initial administrator is configured by authenticated user UUID through a privileged migration parameter or documented one-time SQL operation. No administrator email is hard-coded.
+- **Invitation behavior:** An invitation preserves intended navigation but cannot be accepted until platform approval.
+- **Audit:** Approval, rejection, suspension, and restoration are transactional and append an immutable platform access event.
