@@ -34,7 +34,7 @@ jobs:
         run: npm ci
       - name: Build Pages artifact
         env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
