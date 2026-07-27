@@ -359,6 +359,7 @@ flowchart TD
     I9 --> I20["#20 Household RLS/RPC"]
     I9 --> I29["#29 Task schema"]
     I28["#28 Recurrence contract"] --> I30["#30 Calendar engine"]
+    I28 --> I29
     I29 --> I30
     I30 --> I33["#33 Occurrence generation"]
     I38["#38 Rotation semantics"] --> I39["#39 Rotation engine"]

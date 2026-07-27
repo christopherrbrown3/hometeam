@@ -50,7 +50,7 @@ flowchart TD
 
 The expected critical path is:
 
-`#2 → #8 → #9 → #20 → #29 → #28/#30/#31 → #33 → #38/#39 → #46 → #48 → #65 → #70 → #73/#75/#76 → #79/#80 → #85/#86 → #90`
+`#2 → #8 → #9 → (#10 ∥ #20 ∥ #28) → #29 → #30 → #31 → #33 → (#38 → #39 ∥ #46 → #47) → #48 → #65 → (#70 ∥ #73) → #75 → #76 → (#79 ∥ #80) → #85 → #86 → #90`
 
 Why: tooling and local Supabase precede the authoritative schema; household authorization precedes task access; recurrence/rotation precede atomic completion; mutation events feed Realtime and notifications; guest/RPC hardening precedes system E2E and final release validation.
 
