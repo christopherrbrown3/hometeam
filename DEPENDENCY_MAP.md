@@ -23,8 +23,8 @@ Tooling unlocks all code. Database identity/household structures and task schema
 flowchart TD
     E1["#1 Repository/tooling"] --> E7["#7 Database foundation"]
     E7 --> E14["#14 Passwordless auth"]
-    E14 --> E91["#91 Preview access administration"]
-    E91 --> E19["#19 Households/invitations"]
+    E14 --> E96["#96 Preview access administration"]
+    E96 --> E19["#19 Households/invitations"]
     E7 --> E27["#27 Task/recurrence"]
     E19 --> E27
     E27 --> E37["#37 Assignment/rotation"]
@@ -51,7 +51,7 @@ flowchart TD
 
 The expected critical path is:
 
-`#2 → #8 → (#9 ∥ #15) → #92 → #20 → (#10 ∥ #28) → #29 → #30 → #31 → #33 → (#38 → #39 ∥ #46 → #47) → #48 → #65 → (#70 ∥ #73) → #75 → #76 → (#79 ∥ #80 ∥ #94) → #85 → #86 → #90`
+`#2 → #8 → (#9 ∥ #15) → #97 → #20 → (#10 ∥ #28) → #29 → #30 → #31 → #33 → (#38 → #39 ∥ #46 → #47) → #48 → #65 → (#70 ∥ #73) → #75 → #76 → (#79 ∥ #80 ∥ #99) → #85 → #86 → #90`
 
 Why: tooling and local Supabase precede identity/authentication; preview approval must gate household authorization; household authorization precedes task access; recurrence/rotation precede atomic completion; mutation events feed Realtime and notifications; platform/guest/RPC hardening precedes system E2E and final release validation.
 
@@ -62,7 +62,7 @@ After #2–#4:
 - #5 Pages workflow and #6 documentation/tooling can proceed in parallel.
 - #10 task schema planning, #11 notification schema, and #12 seed/type generation can be prepared after #9.
 - Auth UI (#16) can proceed against the contract from #15 while household database work (#20, #22) proceeds.
-- Preview approval schema/RPC work (#92) can begin when #9 and #15 are complete; the administrator UI (#93) can then proceed while household feature work continues.
+- Preview approval schema/RPC work (#97) can begin when #9 and #15 are complete; the administrator UI (#98) can then proceed while household feature work continues.
 - Recurrence contract (#28) and task schema (#29) can proceed in parallel, converging at #30/#33.
 - Rotation semantics (#38) may proceed alongside recurrence tests (#36).
 - Today presentation (#57) can use typed fixtures while backend query work (#56) proceeds.
@@ -73,8 +73,8 @@ After #2–#4:
 ## 5. Sequential work
 
 - #9 core schema precedes RLS helpers, task schema, and generated types.
-- #92 platform access predicates precede #20 household RLS and every later product-data policy.
-- #93 access-status/admin UI plus #94 approval isolation tests must pass before public-preview release.
+- #97 platform access predicates precede #20 household RLS and every later product-data policy.
+- #98 access-status/admin UI plus #99 approval isolation tests must pass before public-preview release.
 - #28 recurrence contract plus #29 task schema precede calendar generation.
 - #38 semantics precede #39 engine; #39 precedes round-robin transaction integration.
 - #46 concurrency contract precedes every lifecycle RPC.
@@ -94,7 +94,7 @@ Each atomic issue states `Blocked by #…` or `Blocked by external condition …
 | Supabase organization/project and project reference | Database integration, production deployment | Local work can proceed; production deploy blocked |
 | Supabase CLI authentication/access token | Remote migrations/Functions | Local work can proceed |
 | OTP email provider/template configuration | Real email E2E | CI can use local/mock flow |
-| Christopher's Supabase Auth user UUID | Initial administrator bootstrap in #92/#88 | Product implementation can proceed; preview administration cannot be activated without it |
+| Christopher's Supabase Auth user UUID | Initial administrator bootstrap in #97/#88 | Product implementation can proceed; preview administration cannot be activated without it |
 | VAPID key pair and subject | Real Web Push | Compatibility and mocked tests can proceed |
 | iPhone/iOS Safari device | Install/push manual validation | Automated PWA checks can proceed |
 | GitHub Pages enablement/environment | Production static deployment | Workflow can be built/tested |
@@ -116,4 +116,4 @@ No privileged credentials should be placed in an issue body, repository file, Pr
 
 ## 9. Graph validation
 
-The planned graph is acyclic. Preview-access issues #91–#94 were added after the original issue sequence, so some earlier-numbered downstream issues explicitly depend on them. Epics are tracking containers, and atomic issues remain sized for one focused branch/PR with explicit test ownership.
+The planned graph is acyclic. Preview-access issues #96–#99 were added after the original issue sequence and implementation pull requests #91–#95, so some earlier-numbered downstream issues explicitly depend on them. Epics are tracking containers, and atomic issues remain sized for one focused branch/PR with explicit test ownership.

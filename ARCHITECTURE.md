@@ -389,11 +389,11 @@ Versioned recurrence and event payloads allow richer monthly schedules without r
 flowchart TD
     I2["#2 Toolchain"] --> I8["#8 Supabase local foundation"]
     I8 --> I9["#9 Core schema"]
-    I15["#15 Auth service"] --> I92["#92 Preview access RLS/RPCs"]
-    I9 --> I92
-    I92 --> I20
-    I92 --> I93["#93 Admin approval UI + access gate"]
-    I93 --> I94["#94 Approval security/E2E tests"]
+    I15["#15 Auth service"] --> I97["#97 Preview access RLS/RPCs"]
+    I9 --> I97
+    I97 --> I20
+    I97 --> I98["#98 Admin approval UI + access gate"]
+    I98 --> I99["#99 Approval security/E2E tests"]
     I9 --> I20["#20 Household RLS/RPC"]
     I9 --> I29["#29 Task schema"]
     I28["#28 Recurrence contract"] --> I30["#30 Calendar engine"]
@@ -413,5 +413,5 @@ flowchart TD
     I65 --> I85["#85 End-to-end system suite"]
     I75 --> I85
     I85 --> I90["#90 Release validation"]
-    I94 --> I90
+    I99 --> I90
 ```

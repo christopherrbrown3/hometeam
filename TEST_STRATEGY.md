@@ -54,9 +54,9 @@ Repeat for complete/complete, complete/skip, claim/claim, snooze/complete, undo/
 | Requirement | Primary automated coverage | Owning issues |
 |---|---|---|
 | OTP, persistent session, intended route | Component + Playwright | #15–#18, #84 |
-| Public preview requires administrator approval | RLS + component + Playwright | #91–#94, #79, #85, #90 |
-| Administrator does not bypass household isolation | RLS + database negative tests | #92, #94, #79, #82 |
-| Suspension/revocation purges Realtime and caches | Integration + multi-context E2E | #93, #94, #65, #67–#68 |
+| Public preview requires administrator approval | RLS + component + Playwright | #96–#99, #79, #85, #90 |
+| Administrator does not bypass household isolation | RLS + database negative tests | #97, #99, #79, #82 |
+| Suspension/revocation purges Realtime and caches | Integration + multi-context E2E | #98, #99, #65, #67–#68 |
 | Multiple households and switching | DB + component + E2E | #20, #21, #25, #84 |
 | Invitation expiry/email/reuse | DB function + E2E | #22, #23, #25 |
 | Guest assigned-only isolation | RLS + E2E | #26, #79, #84 |
@@ -89,7 +89,7 @@ Each epic has explicit child ownership:
 - Repository/tooling: #4–#6
 - Database foundation: #13
 - Authentication: #18
-- Preview access administration: #94
+- Preview access administration: #99
 - Households/invitations: #25–#26
 - Recurrence: #36
 - Assignment/rotation: #44

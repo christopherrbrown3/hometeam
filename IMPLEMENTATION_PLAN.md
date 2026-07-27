@@ -49,8 +49,8 @@ Model tiers:
 | 16 | Build email OTP request and six-digit verification screens | 3 | Implementation | Standard | #4, #15 |
 | 17 | Implement protected routing, intended-route restoration, and sign-out cleanup | 3 | Implementation | Standard | #3, #15 |
 | 18 | Add authentication component and session integration tests | 3 | Test | Standard | #15–#17 |
-| 19 | Epic: Households, memberships, invitations, and categories | 3 | Epic | High Intelligence | #7, #91 |
-| 20 | Implement household/profile RLS and create_household RPC | 3 | Security | High Intelligence | #9, #92 |
+| 19 | Epic: Households, memberships, invitations, and categories | 3 | Epic | High Intelligence | #7, #96 |
+| 20 | Implement household/profile RLS and create_household RPC | 3 | Security | High Intelligence | #9, #97 |
 | 21 | Build household list, switcher, creation, and timezone UI | 3 | Implementation | Standard | #4, #17, #20 |
 | 22 | Create invitation schema constraints and secure token lifecycle | 3 | Security | High Intelligence | #9 |
 | 23 | Implement invitation send, accept, revoke, and resend operations | 3 | Implementation | Standard | #15, #20, #22 |
@@ -120,22 +120,22 @@ Model tiers:
 | 87 | Epic: Production deployment and release readiness | 12 | Epic | Standard | #78, #83 |
 | 88 | Document and validate production Supabase, OTP, secrets, Functions, and cron setup | 12 | Documentation | Mechanical | #75, #76, #81, #85 |
 | 89 | Finalize GitHub Pages, custom-domain, observability, privacy, and operations runbooks | 12 | Documentation/Implementation | Standard | #5, #71, #81, #86 |
-| 90 | Execute release validation, manual iPhone acceptance, and launch checklist | 12 | Test/Release | High Intelligence | #82, #84–#89, #94 |
-| 91 | Epic: Public-preview access approval and platform administration | 3 | Epic | High Intelligence | #14 |
-| 92 | Implement platform access schema, administrator bootstrap, RLS gate, and approval RPCs | 3 | Security/Implementation | High Intelligence | #9, #15 |
-| 93 | Build access-status gate and administrator approval dashboard | 3 | Implementation | Standard | #4, #17, #92 |
-| 94 | Prove preview approval isolation, administrator boundaries, and revocation behavior | 3 | Security/Test | High Intelligence | #18, #26, #92, #93 |
+| 90 | Execute release validation, manual iPhone acceptance, and launch checklist | 12 | Test/Release | High Intelligence | #82, #84–#89, #99 |
+| 96 | Epic: Public-preview access approval and platform administration | 3 | Epic | High Intelligence | #14 |
+| 97 | Implement platform access schema, administrator bootstrap, RLS gate, and approval RPCs | 3 | Security/Implementation | High Intelligence | #9, #15 |
+| 98 | Build access-status gate and administrator approval dashboard | 3 | Implementation | Standard | #4, #17, #97 |
+| 99 | Prove preview approval isolation, administrator boundaries, and revocation behavior | 3 | Security/Test | High Intelligence | #18, #26, #97, #98 |
 
 ## 4. Product requirement traceability
 
 | Product requirement | Issues |
 |---|---|
 | Passwordless six-digit email OTP and persistent session | #15–#18, #84 |
-| Public deployment requires administrator approval before use | #91–#94, #79, #85, #90 |
-| Pending/rejected/suspended users see only own access status | #92–#94, #79 |
-| Administrator approves access without household-data bypass | #92, #94, #79, #82 |
-| Invitation acceptance waits for platform approval | #23, #92–#94 |
-| Suspension/revocation stops Realtime and clears caches | #65, #67–#68, #92–#94 |
+| Public deployment requires administrator approval before use | #96–#99, #79, #85, #90 |
+| Pending/rejected/suspended users see only own access status | #97–#99, #79 |
+| Administrator approves access without household-data bypass | #97, #99, #79, #82 |
+| Invitation acceptance waits for platform approval | #23, #97–#99 |
+| Suspension/revocation stops Realtime and clears caches | #65, #67–#68, #97–#99 |
 | Return to invitation/intended route | #17, #23, #84 |
 | Multiple households and household timezone | #20, #21, #31, #56 |
 | Full-member permissions | #20, #40, #48–#52, #79 |
@@ -186,7 +186,7 @@ No version 1 requirement is intentionally unmapped. Version 1 non-goals remain o
 
 ## 5. Ready queue
 
-Project status is dynamic as implementation issues close. New preview-access issue #92 remains Blocked until #9 and #15 are complete; #93 and #94 remain Blocked on their explicit prerequisites. Do not mark an item Ready merely because its milestone has begun.
+Project status is dynamic as implementation issues close. New preview-access issue #97 remains Blocked until #9 and #15 are complete; #98 and #99 remain Blocked on their explicit prerequisites. Do not mark an item Ready merely because its milestone has begun.
 
 ## 6. Definition of done for every atomic issue
 
