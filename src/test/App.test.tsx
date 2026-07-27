@@ -1,13 +1,16 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { App } from '../App'
+import { router } from '../app/router'
 
 describe('App', () => {
-  it('renders the HomeTeam identity', () => {
+  it('routes the application root to Today', async () => {
+    await router.navigate('/')
+
     render(<App />)
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'HomeTeam' }),
+      await screen.findByRole('heading', { level: 1, name: 'Today' }),
     ).toBeVisible()
   })
 })

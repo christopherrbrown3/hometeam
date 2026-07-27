@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 
-test('renders the HomeTeam landing page', async ({ page }) => {
+test('routes the HomeTeam root to Today', async ({ page }) => {
   await page.goto('/')
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'HomeTeam' }),
+    page.getByRole('heading', { level: 1, name: 'Today' }),
   ).toBeVisible()
 })
