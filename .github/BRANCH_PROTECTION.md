@@ -1,25 +1,19 @@
 # Main branch protection
 
-The planning run attempted to enable protection for `main`, but GitHub returned:
-
-> Upgrade to GitHub Pro or make this repository public to enable this feature.
-
-The repository must remain private, so protection is documented here until the account supports private-repository branch protection.
-
-## Required settings when available
+The repository is now public, so GitHub supports branch protection for `main`. The target configuration is:
 
 - Require a pull request before merging.
-- Require at least one approving review.
+- Do not require a separate approval while Christopher is the only maintainer.
 - Dismiss stale approvals when new commits are pushed.
 - Require conversation resolution before merging.
 - Require a linear history.
 - Require the branch to be up to date before merging.
-- Require the CI checks created by issue #5: lint, strict typecheck, tests, and production build.
+- Require the `quality` CI check created by issue #5; it runs lint, strict typecheck, tests, production build, and browser smoke tests.
 - Do not allow force pushes.
 - Do not allow deletion of `main`.
-- Apply the rule to administrators after initial setup is complete.
+- Apply the rule to administrators.
 
-Until protection can be enabled, implementation agents must follow the repository workflow:
+Implementation agents must continue to follow the repository workflow:
 
 - no direct implementation commits to `main`;
 - branch name `issue-<issue-number>-<short-description>`;
