@@ -81,7 +81,7 @@ May read only their own minimal profile and current platform access state. They 
 
 ### Platform administrators
 
-May list minimum applicant identity/access metadata and execute controlled access-decision RPCs. Administrator status does not satisfy household membership predicates. Access decisions use target user IDs from stored rows, lock the row, validate state transitions, and append `platform_access_events`; client roles cannot update/delete those events.
+May list minimum applicant identity/access metadata and execute controlled access-decision RPCs. Administrator status does not satisfy household membership predicates. The privileged initial bootstrap atomically creates the administrator, approves that same UUID, and records a bootstrap event; there is no client-callable bootstrap. Later access decisions use target user IDs from stored rows, lock the row, validate state transitions, and append `platform_access_events`; client roles cannot update/delete those events.
 
 ### Full members
 

@@ -117,7 +117,7 @@ Only publishable frontend credentials are loaded by Vite. The service-role key a
 
 `platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. `platform_administrators` contains the small set of user UUIDs permitted to review access. `platform_access_events` is append-only and records every decision or restoration.
 
-The initial administrator is inserted by UUID through a privileged migration parameter or documented one-time SQL operation after their Supabase Auth user exists. No administrator email is hard-coded.
+The initial administrator is inserted by UUID through a privileged migration parameter or documented one-time SQL operation after their Supabase Auth user exists. That operation atomically creates the administrator record, sets the same user to `approved`, and appends a bootstrap access event so there is no unapproved-administrator deadlock. No administrator email is hard-coded.
 
 Stable authorization helpers:
 

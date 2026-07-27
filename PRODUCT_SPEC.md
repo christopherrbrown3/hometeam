@@ -357,7 +357,7 @@ Platform administrator status must not automatically:
 * Grant access to household tasks, descriptions, occurrences, history, members, or push subscriptions
 * Bypass household Row Level Security
 
-The initial administrator must be bootstrapped using the authenticated user UUID through a privileged migration or documented one-time administrative operation. Do not hard-code or guess an administrator email address in client code, migrations, or repository configuration.
+The initial administrator must be bootstrapped using the authenticated user UUID through a privileged migration or documented one-time administrative operation. The bootstrap must atomically add the administrator, set that same user’s platform access state to Approved, and record a bootstrap access event so the preview cannot deadlock with no approved administrator. Do not hard-code or guess an administrator email address in client code, migrations, or repository configuration.
 
 Every access decision records:
 
