@@ -51,4 +51,6 @@ Copy `.env.example` to `.env.local` and provide only the Supabase project URL an
 
 Run `npm run typecheck` for strict TypeScript validation and `npm run build` for the production bundle. Hash routing, the query provider, environment validation, and stable query-key factories are now in place. The design system, tests, authentication, database migrations, and deployment workflows are delivered by their separately scoped implementation issues.
 
+The GitHub Pages workflow builds the repository deployment at `/hometeam/`. To verify that same asset layout locally, run `VITE_BASE_PATH=/hometeam/ npm run build`. The normal `npm run build` continues to target `/`, which is suitable for a configured custom domain.
+
 Local setup, migration, testing, Supabase, VAPID, Pages, custom-domain, iPhone installation, and operations instructions will be added by the implementation issues identified in `IMPLEMENTATION_PLAN.md`.
