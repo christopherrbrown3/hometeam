@@ -1,9 +1,9 @@
 import type { AuthError, Session, SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '../../types/database'
-import { emailCodeSchema, emailSchema } from './schemas'
+import { loginSchema } from './schemas'
 
 export type AuthServiceError = Readonly<{
-  code: 'invalid_email' | 'invalid_code' | 'request_failed' | 'verification_failed'
+  code: 'invalid_credentials' | 'sign_in_failed' | 'signup_failed' | 'signup_requires_configuration'
   message: string
 }>
 
@@ -13,81 +13,93 @@ export type AuthServiceResult<T> =
 
 type HomeTeamSupabaseClient = SupabaseClient<Database>
 
-function normalizeEmail(value: string) {
+export function normalizeUsername(value: string) {
   return value.trim().toLowerCase()
 }
 
-function isRateLimitError(error: AuthError) {
-  return /rate limit|security purposes/i.test(error.message)
+export function usernameToAuthEmail(username: string) {
+  return `u-${normalizeUsername(username)}@auth.hometeam.invalid`
 }
 
-export async function requestEmailCode(
-  client: HomeTeamSupabaseClient,
-  email: string,
-): Promise<AuthServiceResult<{ email: string }>> {
-  const parsedEmail = emailSchema.safeParse(email)
-
-  if (!parsedEmail.success) {
-    return {
-      ok: false,
-      error: {
-        code: 'invalid_email',
-        message: 'Enter a valid email address.',
-      },
-    }
-  }
-
-  const normalizedEmail = normalizeEmail(parsedEmail.data)
-  const { error } = await client.auth.signInWithOtp({
-    email: normalizedEmail,
-    options: { shouldCreateUser: true },
-  })
-
-  if (error) {
-    return {
-      ok: false,
-      error: {
-        code: 'request_failed',
-        message: isRateLimitError(error)
-          ? 'Please wait a moment before requesting another code.'
-          : 'We could not send a sign-in code. Please try again.',
-      },
-    }
-  }
-
-  return { ok: true, data: { email: normalizedEmail } }
+function isInvalidCredentialError(error: AuthError) {
+  return /invalid login credentials|invalid credentials/i.test(error.message)
 }
 
-export async function verifyEmailCode(
+export async function signInWithUsernamePassword(
   client: HomeTeamSupabaseClient,
-  email: string,
-  code: string,
+  username: string,
+  password: string,
 ): Promise<AuthServiceResult<{ session: Session }>> {
-  const parsedEmail = emailSchema.safeParse(email)
-  const parsedCode = emailCodeSchema.safeParse(code)
+  const parsed = loginSchema.safeParse({ username, password })
 
-  if (!parsedEmail.success || !parsedCode.success) {
+  if (!parsed.success) {
     return {
       ok: false,
       error: {
-        code: 'invalid_code',
-        message: 'Enter the six-digit code from your email.',
+        code: 'invalid_credentials',
+        message: 'Enter a valid username and password.',
       },
     }
   }
 
-  const { data, error } = await client.auth.verifyOtp({
-    email: normalizeEmail(parsedEmail.data),
-    token: parsedCode.data,
-    type: 'email',
+  const { data, error } = await client.auth.signInWithPassword({
+    email: usernameToAuthEmail(parsed.data.username),
+    password: parsed.data.password,
   })
 
   if (error || !data.session) {
     return {
       ok: false,
       error: {
-        code: 'verification_failed',
-        message: 'That code is invalid or has expired. Request a new code and try again.',
+        code: 'sign_in_failed',
+        message: error && isInvalidCredentialError(error)
+          ? 'Invalid username or password.'
+          : 'We could not sign you in. Please try again.',
+      },
+    }
+  }
+
+  return { ok: true, data: { session: data.session } }
+}
+
+export async function signUpWithUsernamePassword(
+  client: HomeTeamSupabaseClient,
+  username: string,
+  password: string,
+): Promise<AuthServiceResult<{ session: Session }>> {
+  const parsed = loginSchema.safeParse({ username, password })
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: {
+        code: 'invalid_credentials',
+        message: 'Enter a valid username and password.',
+      },
+    }
+  }
+
+  const { data, error } = await client.auth.signUp({
+    email: usernameToAuthEmail(parsed.data.username),
+    password: parsed.data.password,
+  })
+
+  if (error) {
+    return {
+      ok: false,
+      error: {
+        code: 'signup_failed',
+        message: 'We could not create that account. Try another username or try again later.',
+      },
+    }
+  }
+
+  if (!data.session) {
+    return {
+      ok: false,
+      error: {
+        code: 'signup_requires_configuration',
+        message: 'Account creation is not ready yet. Please ask an administrator to disable email confirmation in Supabase Auth.',
       },
     }
   }
@@ -102,7 +114,7 @@ export async function signOut(client: HomeTeamSupabaseClient): Promise<AuthServi
     return {
       ok: false,
       error: {
-        code: 'request_failed',
+        code: 'sign_in_failed',
         message: 'We could not sign you out. Please try again.',
       },
     }

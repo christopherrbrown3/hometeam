@@ -1,5 +1,4 @@
 const intendedRouteStorageKey = 'hometeam.intended-route'
-const pendingEmailStorageKey = 'hometeam.pending-email'
 
 const defaultAuthenticatedRoute = '/today'
 
@@ -36,22 +35,4 @@ export function consumeReturnLocation() {
   window.sessionStorage.removeItem(intendedRouteStorageKey)
 
   return route && isAllowedIntendedRoute(route) ? route : defaultAuthenticatedRoute
-}
-
-export function savePendingEmail(email: string) {
-  if (canUseSessionStorage()) {
-    window.sessionStorage.setItem(pendingEmailStorageKey, email)
-  }
-}
-
-export function getPendingEmail() {
-  return canUseSessionStorage()
-    ? window.sessionStorage.getItem(pendingEmailStorageKey)
-    : null
-}
-
-export function clearPendingEmail() {
-  if (canUseSessionStorage()) {
-    window.sessionStorage.removeItem(pendingEmailStorageKey)
-  }
 }

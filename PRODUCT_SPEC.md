@@ -273,17 +273,15 @@ The layout should also work on tablets and desktop browsers, but iPhone usabilit
 
 # 8. Authentication
 
-Use Supabase passwordless email authentication.
-
-Prefer a six-digit email one-time password flow.
+Use Supabase username and password authentication. Supabase's email/password provider may use a non-routable, app-derived identifier internally, but personal email is not collected, stored, or displayed.
 
 Version 1 authentication must support:
 
-* Requesting an email code
-* Verifying an email code
+* Creating an account with a normalized username and password
+* Signing in with username and password
 * Persistent sessions
 * Signing out
-* Handling expired or invalid codes
+* Handling invalid credentials and duplicate usernames
 * Returning the user to the intended invitation or route after login
 
 Do not implement Sign in with Apple in version 1.
@@ -313,7 +311,7 @@ Never place the service-role key or VAPID private key in frontend files, GitHub 
 
 The version 1 deployment may be publicly reachable, but it must operate as an administrator-approved preview.
 
-Supabase passwordless authentication may create a valid authenticated session for a new email address. Authentication alone must not grant access to HomeTeam product data or features.
+Supabase password authentication may create a valid authenticated session for a new username. Authentication alone must not grant access to HomeTeam product data or features.
 
 Every authenticated user has a platform access state:
 
@@ -471,14 +469,14 @@ Enforce guest restrictions through Row Level Security and transactional function
 
 # 10. Invitations
 
-Full members may invite people by email.
+Full members may invite people by username.
 
 Invitation flow:
 
-1. A full member enters an email address.
+1. A full member enters a username.
 2. They select Full Member or Guest.
 3. Create a time-limited invitation.
-4. The recipient signs in using the invited email.
+4. The recipient signs in using the invited username.
 5. The recipient accepts the invitation.
 6. The invitation becomes an active membership.
 7. Expired, reused, revoked, or mismatched invitations fail safely.
@@ -1358,7 +1356,7 @@ At minimum, implement these tables.
 ```text
 user_id
 display_name
-email
+username
 detected_timezone
 created_at
 updated_at
@@ -1403,7 +1401,7 @@ guest
 ```text
 id
 household_id
-email
+username
 role
 token_hash
 expires_at
@@ -1866,7 +1864,7 @@ Test:
 * Events are append-only
 * Soft deletion preserves history
 * Reopening creates a new event
-* Invitation acceptance validates email
+* Invitation acceptance validates username
 
 ## Component tests
 
@@ -1886,7 +1884,7 @@ Test:
 
 Test:
 
-1. Create account with email OTP.
+1. Create account with username and password.
 2. Create household.
 3. Invite a full member.
 4. Invite a guest.
@@ -1912,7 +1910,7 @@ Test:
 24. Build the PWA.
 25. Exercise push subscription code with documented test steps.
 
-Use mocked email and push delivery where external delivery cannot run in CI.
+Use mocked push delivery where external delivery cannot run in CI. Email collection and verification are deferred roadmap work.
 
 ---
 
@@ -2005,7 +2003,7 @@ Implement in this order.
 
 ## Milestone 3: Authentication and households
 
-* Email OTP login
+* Username/password login
 * Profile creation
 * Household creation
 * Household switching
@@ -2113,7 +2111,7 @@ The README must include:
 * Running Playwright
 * Generating database types
 * Creating a Supabase project
-* Configuring email OTP
+* Configuring username/password authentication with email confirmation disabled
 * Configuring Edge Function secrets
 * Configuring VAPID
 * Deploying Edge Functions

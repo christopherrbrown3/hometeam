@@ -1,15 +1,24 @@
 import { z } from 'zod'
 
-export const emailSchema = z.string().trim().email().max(320)
-export const emailCodeSchema = z.string().trim().regex(/^\d{6}$/)
+export const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9][a-z0-9_-]{1,30}[a-z0-9]$/, 'Use 3–32 lowercase letters, numbers, hyphens, or underscores.')
+
+export const passwordSchema = z.string().min(12, 'Use a password with at least 12 characters.').max(128)
 
 export const loginSchema = z.object({
-  email: z.string().trim().email('Enter a valid email address.').max(320),
+  username: usernameSchema,
+  password: passwordSchema,
 })
 
-export const verifySchema = z.object({
-  code: z.string().trim().regex(/^\d{6}$/, 'Enter the six-digit code from your email.'),
+export const signupSchema = loginSchema.extend({
+  confirmPassword: z.string(),
+}).refine((value) => value.password === value.confirmPassword, {
+  message: 'Passwords do not match.',
+  path: ['confirmPassword'],
 })
 
 export type LoginValues = z.infer<typeof loginSchema>
-export type VerifyValues = z.infer<typeof verifySchema>
+export type SignUpValues = z.infer<typeof signupSchema>

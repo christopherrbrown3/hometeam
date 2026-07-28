@@ -6,7 +6,7 @@ type MemberRole = Database['public']['Enums']['household_member_role']
 
 export type HouseholdMember = Readonly<{
   displayName: string
-  email: string
+  username: string
   role: MemberRole
   userId: string
 }>
@@ -23,13 +23,13 @@ export async function listHouseholdMembers(client: HomeTeamClient, householdId: 
 
   const { data: profiles, error: profileError } = await client
     .from('profiles')
-    .select('user_id, display_name, email')
+    .select('user_id, display_name, username')
 
   if (profileError) throw profileError
 
   return memberships.flatMap((membership) => {
     const profile = profiles.find((candidate) => candidate.user_id === membership.user_id)
-    return profile ? [{ displayName: profile.display_name, email: profile.email, role: membership.role, userId: membership.user_id }] : []
+    return profile ? [{ displayName: profile.display_name, username: profile.username, role: membership.role, userId: membership.user_id }] : []
   })
 }
 
@@ -42,11 +42,11 @@ export async function listHouseholdInvitations(client: HomeTeamClient, household
 export async function createInvitation(
   client: HomeTeamClient,
   householdId: string,
-  email: string,
+  username: string,
   role: MemberRole,
 ) {
   const { data, error } = await client.rpc('create_household_invitation', {
-    input_email: email,
+    input_username: username,
     input_household_id: householdId,
     input_role: role,
   })

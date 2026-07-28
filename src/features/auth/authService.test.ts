@@ -1,65 +1,64 @@
 import { describe, expect, it, vi } from 'vitest'
-import { requestEmailCode, verifyEmailCode } from './authService'
+import { signInWithUsernamePassword, signUpWithUsernamePassword, usernameToAuthEmail } from './authService'
 
 function createClient() {
   return {
     auth: {
-      signInWithOtp: vi.fn(),
-      verifyOtp: vi.fn(),
+      signInWithPassword: vi.fn(),
+      signUp: vi.fn(),
+      signOut: vi.fn(),
     },
   }
 }
 
-describe('authService', () => {
-  it('normalizes an email before requesting a six-digit code', async () => {
-    const client = createClient()
-    client.auth.signInWithOtp.mockResolvedValue({ error: null })
-
-    const result = await requestEmailCode(client as never, '  Person@Example.com ')
-
-    expect(result).toEqual({ ok: true, data: { email: 'person@example.com' } })
-    expect(client.auth.signInWithOtp).toHaveBeenCalledWith({
-      email: 'person@example.com',
-      options: { shouldCreateUser: true },
-    })
+describe('username and password authentication', () => {
+  it('derives a non-routable Supabase Auth identifier from a normalized username', () => {
+    expect(usernameToAuthEmail('  Home_User  ')).toBe('u-home_user@auth.hometeam.invalid')
   })
 
-  it('rejects a malformed email without sending an auth request', async () => {
+  it('signs in using the derived identifier without exposing it to the UI', async () => {
     const client = createClient()
+    const session = { access_token: 'token' }
+    client.auth.signInWithPassword.mockResolvedValue({ data: { session }, error: null })
 
-    const result = await requestEmailCode(client as never, 'not-an-email')
-
-    expect(result.ok).toBe(false)
-    expect(client.auth.signInWithOtp).not.toHaveBeenCalled()
-  })
-
-  it('verifies only six-digit codes and returns the session', async () => {
-    const client = createClient()
-    const session = { access_token: 'token', user: { id: 'person-id' } }
-    client.auth.verifyOtp.mockResolvedValue({ data: { session }, error: null })
-
-    const result = await verifyEmailCode(client as never, 'person@example.com', '123456')
+    const result = await signInWithUsernamePassword(client as never, '  Home_User  ', 'a-safe-password')
 
     expect(result).toEqual({ ok: true, data: { session } })
-    expect(client.auth.verifyOtp).toHaveBeenCalledWith({
-      email: 'person@example.com',
-      token: '123456',
-      type: 'email',
+    expect(client.auth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'u-home_user@auth.hometeam.invalid',
+      password: 'a-safe-password',
     })
   })
 
-  it('returns a safe error for an expired or invalid code', async () => {
+  it('rejects invalid username or password values before calling Supabase', async () => {
     const client = createClient()
-    client.auth.verifyOtp.mockResolvedValue({ data: { session: null }, error: { message: 'bad token' } })
 
-    const result = await verifyEmailCode(client as never, 'person@example.com', '123456')
+    const result = await signInWithUsernamePassword(client as never, 'No spaces', 'short')
 
-    expect(result).toEqual({
-      ok: false,
-      error: {
-        code: 'verification_failed',
-        message: 'That code is invalid or has expired. Request a new code and try again.',
-      },
+    expect(result.ok).toBe(false)
+    expect(client.auth.signInWithPassword).not.toHaveBeenCalled()
+  })
+
+  it('creates an immediately signed-in account when email confirmation is disabled', async () => {
+    const client = createClient()
+    const session = { access_token: 'token' }
+    client.auth.signUp.mockResolvedValue({ data: { session }, error: null })
+
+    const result = await signUpWithUsernamePassword(client as never, 'new_member', 'a-safe-password')
+
+    expect(result).toEqual({ ok: true, data: { session } })
+    expect(client.auth.signUp).toHaveBeenCalledWith({
+      email: 'u-new_member@auth.hometeam.invalid',
+      password: 'a-safe-password',
     })
+  })
+
+  it('reports a configuration problem instead of pretending an unconfirmed account can sign in', async () => {
+    const client = createClient()
+    client.auth.signUp.mockResolvedValue({ data: { session: null }, error: null })
+
+    const result = await signUpWithUsernamePassword(client as never, 'new_member', 'a-safe-password')
+
+    expect(result).toEqual({ ok: false, error: expect.objectContaining({ code: 'signup_requires_configuration' }) })
   })
 })
