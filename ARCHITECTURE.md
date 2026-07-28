@@ -159,6 +159,8 @@ Invitations store a SHA-256 or stronger hash of a random high-entropy token, a n
 
 A unique constraint on `(series_id, occurrence_key)` makes generation idempotent. UTC timestamps are authoritative; local recurrence rules and household timezone are retained so UTC instants can be regenerated deterministically.
 
+For round-robin series, `rotation_cursor_user_id` records the last confirmed lifecycle basis. Generation assigns from the active roster without changing that confirmed cursor; roster edits recalculate only open, unlocked, automatically assigned future rows. A manual assignment or lock remains intact and becomes the basis for the next automatic future row. Closed rows are never rewritten.
+
 Lifecycle state is stored as `open`, `completed`, `skipped`, `cancelled`, or `deleted`. Upcoming, due now, overdue, and snoozed are projections computed from state, due bounds, `snoozed_until`, and the household timezone. No database job changes a row merely because time passed.
 
 ## 8. Recurrence engine

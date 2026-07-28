@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       categories: {
@@ -812,6 +837,8 @@ export type Database = {
           missed_policy: Database["public"]["Enums"]["task_missed_policy"]
           recurrence_config: Json
           recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at: string | null
+          rotation_cursor_user_id: string | null
           series_status: Database["public"]["Enums"]["task_series_status"]
           series_type: Database["public"]["Enums"]["task_series_type"]
           title: string
@@ -835,6 +862,8 @@ export type Database = {
           missed_policy?: Database["public"]["Enums"]["task_missed_policy"]
           recurrence_config?: Json
           recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at?: string | null
+          rotation_cursor_user_id?: string | null
           series_status?: Database["public"]["Enums"]["task_series_status"]
           series_type: Database["public"]["Enums"]["task_series_type"]
           title: string
@@ -858,6 +887,8 @@ export type Database = {
           missed_policy?: Database["public"]["Enums"]["task_missed_policy"]
           recurrence_config?: Json
           recurrence_type?: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at?: string | null
+          rotation_cursor_user_id?: string | null
           series_status?: Database["public"]["Enums"]["task_series_status"]
           series_type?: Database["public"]["Enums"]["task_series_type"]
           title?: string
@@ -892,6 +923,13 @@ export type Database = {
             referencedRelation: "households"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "task_series_rotation_cursor_user_id_fkey"
+            columns: ["rotation_cursor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
     }
@@ -903,9 +941,79 @@ export type Database = {
         Args: { input_token: string }
         Returns: string
       }
-      apply_missed_policies: {
-        Args: { input_now?: string }
-        Returns: number
+      apply_missed_policies: { Args: { input_now?: string }; Returns: number }
+      assign_occurrence: {
+        Args: {
+          input_assignee_user_id: string
+          input_expected_version: number
+          input_lock?: boolean
+          input_occurrence_id: string
+        }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      claim_occurrence: {
+        Args: { input_expected_version: number; input_occurrence_id: string }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_category: {
         Args: {
@@ -989,11 +1097,79 @@ export type Database = {
       }
       pause_task_series: {
         Args: { input_series_id: string }
-        Returns: Database['public']['Tables']['task_series']['Row']
+        Returns: {
+          assignment_mode: Database["public"]["Enums"]["task_assignment_mode"]
+          category_id: string | null
+          confirmation_required: boolean
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          effective_from: string
+          end_after_occurrences: number | null
+          end_at: string | null
+          end_type: Database["public"]["Enums"]["task_end_type"]
+          fixed_assignee_id: string | null
+          household_id: string
+          id: string
+          missed_policy: Database["public"]["Enums"]["task_missed_policy"]
+          recurrence_config: Json
+          recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at: string | null
+          rotation_cursor_user_id: string | null
+          series_status: Database["public"]["Enums"]["task_series_status"]
+          series_type: Database["public"]["Enums"]["task_series_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_series"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      recalculate_future_assignments: {
+        Args: { input_cursor_user_id?: string; input_series_id: string }
+        Returns: number
+      }
+      replace_rotation_roster: {
+        Args: { input_member_ids: string[]; input_series_id: string }
+        Returns: number
       }
       resume_task_series: {
         Args: { input_series_id: string }
-        Returns: Database['public']['Tables']['task_series']['Row']
+        Returns: {
+          assignment_mode: Database["public"]["Enums"]["task_assignment_mode"]
+          category_id: string | null
+          confirmation_required: boolean
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          effective_from: string
+          end_after_occurrences: number | null
+          end_at: string | null
+          end_type: Database["public"]["Enums"]["task_end_type"]
+          fixed_assignee_id: string | null
+          household_id: string
+          id: string
+          missed_policy: Database["public"]["Enums"]["task_missed_policy"]
+          recurrence_config: Json
+          recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at: string | null
+          rotation_cursor_user_id: string | null
+          series_status: Database["public"]["Enums"]["task_series_status"]
+          series_type: Database["public"]["Enums"]["task_series_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_series"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       revoke_household_invitation: {
         Args: { input_invitation_id: string }
@@ -1001,7 +1177,75 @@ export type Database = {
       }
       save_task_series: {
         Args: { input: Json }
-        Returns: Database['public']['Tables']['task_series']['Row']
+        Returns: {
+          assignment_mode: Database["public"]["Enums"]["task_assignment_mode"]
+          category_id: string | null
+          confirmation_required: boolean
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          effective_from: string
+          end_after_occurrences: number | null
+          end_at: string | null
+          end_type: Database["public"]["Enums"]["task_end_type"]
+          fixed_assignee_id: string | null
+          household_id: string
+          id: string
+          missed_policy: Database["public"]["Enums"]["task_missed_policy"]
+          recurrence_config: Json
+          recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at: string | null
+          rotation_cursor_user_id: string | null
+          series_status: Database["public"]["Enums"]["task_series_status"]
+          series_type: Database["public"]["Enums"]["task_series_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_series"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      set_occurrence_assignment_lock: {
+        Args: {
+          input_expected_version: number
+          input_locked: boolean
+          input_occurrence_id: string
+        }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       set_platform_access_status: {
         Args: {
@@ -1034,6 +1278,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      validate_recurrence_config: {
+        Args: {
+          input_config: Json
+          input_recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          input_series_type: Database["public"]["Enums"]["task_series_type"]
+        }
+        Returns: boolean
       }
     }
     Enums: {
@@ -1102,6 +1354,7 @@ export type Database = {
     }
   }
 }
+
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
@@ -1220,6 +1473,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       household_member_role: ["full_member", "guest"],

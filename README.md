@@ -13,6 +13,7 @@ Implementation is underway, beginning with the repository foundation. Work is pe
 - [Product specification](PRODUCT_SPEC.md) — authoritative product behavior and version 1 scope
 - [Architecture](ARCHITECTURE.md) — system boundaries, contracts, data flow, and implementation shape
 - [Implementation plan](IMPLEMENTATION_PLAN.md) — milestones, issue catalog, and requirements traceability
+- [Rotation semantics](supabase/docs/rotation-semantics.md) — cursor, roster eligibility, recalculation, and lock behavior
 - [Decisions](DECISIONS.md) — defaults selected where the specification leaves a choice open
 - [Dependency map](DEPENDENCY_MAP.md) — critical path, parallel work, and external blockers
 - [Security model](SECURITY_MODEL.md) — authorization, RLS, secrets, and threat mitigations

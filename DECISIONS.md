@@ -76,6 +76,12 @@ Completion interval:
 
 - **Decision:** `task_events.event_payload` is versioned JSONB with the minimum facts needed for audit. It must not contain invitation tokens, push keys, or secret values.
 
+## D-020 — Rotation cursor and roster recalculation
+
+- **Decision:** `task_series.rotation_cursor_user_id` is the most recently confirmed lifecycle basis, not a speculative future assignment. Calendar generation chooses the next eligible active roster member after the closest prior assignment (falling back to that cursor). Roster changes recompute open, unlocked, automatically assigned occurrences in due order; locked/manual rows are preserved and, when eligible, become the next basis.
+- **Eligibility:** A roster member must be both active in the roster and currently active in the household. Guests are eligible when both conditions hold.
+- **Reason:** This makes retries deterministic, prevents a future-horizon refresh from advancing turns, and preserves manual commitments and history.
+
 ## D-012 — Notification idempotency
 
 - **Decision:** Use semantic keys such as `<type>:<occurrence-id>:<recipient-id>:<schedule-version-or-event-id>`. A unique database constraint is the final duplicate defense.
