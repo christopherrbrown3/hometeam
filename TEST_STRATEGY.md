@@ -119,3 +119,15 @@ Manual work supplements rather than replaces automation:
 - GitHub Pages repository subpath and optional custom domain.
 
 Manual results are recorded in the release issue with device/browser versions and evidence.
+
+## 9. Milestone 3 evidence
+
+`supabase/tests/milestone_3_rls.test.sql` and
+`supabase/tests/platform_access_rls.test.sql` provide deterministic local coverage
+for pending/approved/suspended access, non-administrator decision denial, direct
+table-write denial, administrator non-bypass, household isolation, guest assigned-only
+occurrences, and approval-gated household/invitation RPCs. `AccessGate.test.tsx`
+asserts that an unapproved session cannot mount product routes and that protected
+query data is cleared. `e2e/households.spec.ts` verifies unauthenticated visitors
+cannot reach household management. The production administrator bootstrap and real
+email delivery remain manual, credential-bound validation steps.

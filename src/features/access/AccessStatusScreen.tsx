@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { supabase } from '../../lib/supabase'
+import { signOut } from '../auth/authService'
 import { useSession } from '../auth/useSession'
 import { getCurrentAccess, setAccessStatus } from './accessService'
 import { Button } from '../../components/ui/Button'
 
-export function AccessStatusScreen() {
+export function AccessStatusScreen({ administratorOnly = false }: Readonly<{ administratorOnly?: boolean }>) {
   const { session } = useSession()
+  const [signOutError, setSignOutError] = useState<string | null>(null)
   const access = useQuery({ queryKey: ['current-access', session?.user.id], queryFn: () => getCurrentAccess(supabase), retry: false })
   const applicants = useQuery({
     enabled: access.data?.isAdministrator === true,
@@ -22,11 +25,18 @@ export function AccessStatusScreen() {
 
   if (access.isPending) return <p>Checking your access…</p>
   if (access.isError || !access.data) return <p role="alert">{access.error?.message ?? 'Access status is unavailable.'}</p>
+  if (administratorOnly && !access.data.isAdministrator) return <main><h1>Administrator access required</h1><p>You can view your own preview-access status, but cannot review other accounts.</p><Link to="/access">View your access status</Link></main>
 
   async function decide(userId: string, status: 'approved' | 'rejected' | 'suspended') {
     await setAccessStatus(supabase, userId, status)
     await applicants.refetch()
     await access.refetch()
+  }
+
+  async function handleSignOut() {
+    setSignOutError(null)
+    const result = await signOut(supabase)
+    if (!result.ok) setSignOutError(result.error.message)
   }
 
   return (
@@ -35,6 +45,8 @@ export function AccessStatusScreen() {
         <p className="text-sm font-semibold text-brand">HomeTeam preview</p>
         <h1 className="mt-1 text-2xl font-bold">Your access is {access.data.status}</h1>
         {access.data.status === 'approved' && <Link className="mt-4 inline-block font-semibold text-brand underline" to="/today">Continue to HomeTeam</Link>}
+        <Button className="ml-4" onClick={() => void handleSignOut()} variant="secondary">Sign out</Button>
+        {signOutError && <p className="mt-3 text-danger" role="alert">{signOutError}</p>}
       </section>
       {access.data.isAdministrator && (
         <section className="space-y-3 rounded-panel border border-border p-5">

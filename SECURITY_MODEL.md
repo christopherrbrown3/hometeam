@@ -201,3 +201,13 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 - soft-delete history visibility and normal-screen exclusion.
 
 Release is blocked until P0/P1 security tests pass and the High Intelligence security review issue is accepted.
+
+## 17. Milestone 3 implementation evidence
+
+The initial preview-access and household boundary matrix is executable locally in
+`supabase/tests/milestone_3_rls.test.sql` and
+`supabase/tests/platform_access_rls.test.sql`. Browser access gates clear TanStack
+Query state when access is no longer approved; database RLS remains authoritative if
+a stale client tries another request. Realtime subscription revocation is a later
+dedicated implementation in Milestone 8, so no Milestone 3 client claims a
+subscription teardown it does not yet create.
