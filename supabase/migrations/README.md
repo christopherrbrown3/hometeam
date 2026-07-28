@@ -33,6 +33,12 @@ policies until the corresponding authorization work lands. The outbox's unique
 idempotency key is the database-level duplicate-delivery defense; queue
 claiming and delivery are intentionally deferred to the notification worker.
 
+The index migration, `20260728135641_indexes.sql`, adds the lookup paths used
+by active memberships, open occurrences, assignee and series occurrence lists,
+household event history, pending notification work, and enabled device
+subscriptions. Invitation and category indexes follow the migrations that
+introduce those tables.
+
 ## Local workflow
 
 Install a Docker-compatible container runtime, then start the local stack from
@@ -50,6 +56,19 @@ The status command prints local connection details. Copy only
 connection string, service-role key, or any private key into a Vite variable.
 The local email inbox is available at `http://127.0.0.1:54324` while the stack
 is running.
+
+`supabase/seed.sql` provides fixed, development-only fixture data for Alex,
+Sam, Grandma, two households, representative task states, recurring patterns,
+and history records. It deliberately contains no real email address, push
+endpoint, subscription key, invitation token, or medical detail. `db reset`
+loads it automatically.
+
+Generate the public-schema TypeScript contract from the local replayed schema;
+do not hand-edit the generated file:
+
+```sh
+npx --yes supabase@2.110.0 gen types --local --schema public > src/types/database.ts
+```
 
 ## Creating a migration
 
