@@ -25,6 +25,14 @@ occurrence_key)` unique, preventing duplicate generation. It deliberately
 stores only the versioned recurrence JSON container; the recurrence contract
 and semantic validator remain owned by the later recurrence issues.
 
+The notification migration, `20260728135020_notifications.sql`, adds one
+preference record per user, device-specific push subscriptions, and a durable
+notification outbox. Push endpoints and encryption keys remain protected
+personal data: all three tables have forced RLS with no browser-role grants or
+policies until the corresponding authorization work lands. The outbox's unique
+idempotency key is the database-level duplicate-delivery defense; queue
+claiming and delivery are intentionally deferred to the notification worker.
+
 ## Local workflow
 
 Install a Docker-compatible container runtime, then start the local stack from
