@@ -4,6 +4,20 @@
 HomeTeam database. Do not apply hand-written changes directly to a shared or
 production database.
 
+## Current schema baseline
+
+The first migration, `20260728132552_identity_households.sql`, defines the
+shared `household_member_role` (`full_member` or `guest`) and
+`household_membership_status` (`active` or `removed`) enums, along with
+`profiles`, `households`, and `household_memberships`. It validates stored IANA
+timezone names and permits only one active membership for a user in a
+household.
+
+All three tables have forced RLS and no browser-role grants or policies at this
+stage. This deliberate default-deny baseline is not a client API: the
+platform-access and household authorization work in later issues will add only
+the narrowly authorized reads and controlled writes required by the product.
+
 ## Local workflow
 
 Install a Docker-compatible container runtime, then start the local stack from
