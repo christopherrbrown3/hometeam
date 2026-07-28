@@ -14,6 +14,7 @@ const commonSchema = z.object({
   endType: z.enum(['never', 'on_date', 'after_occurrences']).default('never'),
   fixedAssigneeId: z.string().uuid().optional().or(z.literal('')),
   missedPolicy: z.enum(['keep_overdue', 'skip_when_next_occurrence_begins', 'keep_newest']).default('keep_overdue'),
+  rotationMemberIds: z.array(z.string().uuid()).max(50).default([]),
   slots: z.array(scheduleSlotSchema).min(1).max(12),
   title: z.string().trim().min(1, 'Enter a task title.').max(200),
 })
@@ -24,6 +25,7 @@ export const taskFormSchema = z.discriminatedUnion('recurrenceType', [
   commonSchema.extend({ recurrenceConfig: completionIntervalSchema, recurrenceType: z.literal('completion_interval'), seriesType: z.literal('recurring') }),
 ]).superRefine((value, context) => {
   if (value.assignmentMode === 'fixed' && !value.fixedAssigneeId) context.addIssue({ code: 'custom', message: 'Choose who is assigned.', path: ['fixedAssigneeId'] })
+  if (value.assignmentMode === 'round_robin' && value.rotationMemberIds.length === 0) context.addIssue({ code: 'custom', message: 'Choose at least one rotation member.', path: ['rotationMemberIds'] })
   if (value.endType === 'on_date' && !value.endAt) context.addIssue({ code: 'custom', message: 'Choose an end date.', path: ['endAt'] })
   if (value.endType === 'after_occurrences' && !value.endAfterOccurrences) context.addIssue({ code: 'custom', message: 'Enter an occurrence count.', path: ['endAfterOccurrences'] })
 })
