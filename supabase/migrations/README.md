@@ -98,10 +98,12 @@ state:
 ```sh
 npx --yes supabase@2.110.0 db reset
 npx --yes supabase@2.110.0 migration list --local
+npm run test:db
 ```
 
 `db reset` runs migrations in timestamp order and, once issue #12 supplies it,
-loads `supabase/seed.sql`. Database/RLS test suites belong with the migration
-issue that introduces behavior. Generated TypeScript database types are
-refreshed after schema changes by issue #12 and later schema issues; do not
-hand-author them.
+loads `supabase/seed.sql`. `npm run test:db` runs the pgTAP migration replay,
+constraint/default-deny, and seed fixtures. Database/RLS test suites belong
+with the migration issue that introduces behavior. Generated TypeScript
+database types are refreshed after schema changes by issue #12 and later schema
+issues; do not hand-author them.
