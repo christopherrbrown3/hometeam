@@ -1,6 +1,9 @@
+import { useQuery } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router'
+import { getCurrentAccess } from '../features/access/accessService'
 import { signOut } from '../features/auth/authService'
+import { useSession } from '../features/auth/useSession'
 import { supabase } from '../lib/supabase'
 
 type AppShellProps = Readonly<{
@@ -16,7 +19,14 @@ const navigation = [
 ] as const
 
 export function AppShell({ children }: AppShellProps) {
+  const { session } = useSession()
   const [signOutError, setSignOutError] = useState<string | null>(null)
+  const access = useQuery({
+    enabled: Boolean(session),
+    queryFn: () => getCurrentAccess(supabase),
+    queryKey: ['current-access', session?.user.id],
+    staleTime: Infinity,
+  })
 
   async function handleSignOut() {
     setSignOutError(null)
@@ -32,14 +42,17 @@ export function AppShell({ children }: AppShellProps) {
       <a className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded-control bg-brand px-4 py-2 font-semibold text-white" href="#main-content">
         Skip to content
       </a>
-      <header className="flex items-center justify-between border-b border-border px-5 py-4">
+      <header className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
         <div>
           <span className="text-lg font-bold tracking-tight">HomeTeam</span>
           <span className="ml-2 text-sm text-muted">Tasks, together.</span>
         </div>
-        <button className="min-h-11 rounded-control px-2 text-sm font-semibold text-brand underline" onClick={() => void handleSignOut()} type="button">
-          Sign out
-        </button>
+        <div className="flex items-center gap-2">
+          {access.data?.isAdministrator && <NavLink className="min-h-11 content-center rounded-control px-2 text-sm font-semibold text-brand underline" to="/admin/access">Access requests</NavLink>}
+          <button className="min-h-11 rounded-control px-2 text-sm font-semibold text-brand underline" onClick={() => void handleSignOut()} type="button">
+            Sign out
+          </button>
+        </div>
       </header>
       {signOutError && <p className="px-5 pt-3 text-sm text-danger" role="alert">{signOutError}</p>}
       <main className="flex-1 px-5 py-6 pb-28" id="main-content">
