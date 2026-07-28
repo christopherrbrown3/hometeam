@@ -1,4 +1,8 @@
 import { Navigate, Outlet, createHashRouter } from 'react-router'
+import { ProtectedRoute } from './ProtectedRoute'
+import { OtpRequestScreen } from '../features/auth/OtpRequestScreen'
+import { OtpVerifyScreen } from '../features/auth/OtpVerifyScreen'
+import { PublicOnly } from '../features/auth/PublicOnly'
 import { AppShell } from './AppShell'
 
 function AppLayout() {
@@ -28,17 +32,31 @@ function NotFoundRoute() {
 
 export const router = createHashRouter([
   {
-    Component: AppLayout,
+    Component: PublicOnly,
     children: [
-      { index: true, element: <Navigate replace to="/today" /> },
-      { path: 'login', element: <PlannedRoute title="Sign in" /> },
-      { path: 'verify', element: <PlannedRoute title="Verify your email" /> },
-      { path: 'invite/:token', Component: InvitationRoute },
-      { path: 'today', element: <PlannedRoute title="Today" /> },
-      { path: 'upcoming', element: <PlannedRoute title="Upcoming" /> },
-      { path: 'tasks', element: <PlannedRoute title="Tasks" /> },
-      { path: 'history', element: <PlannedRoute title="History" /> },
-      { path: 'more/*', element: <PlannedRoute title="More" /> },
+      { path: 'login', Component: OtpRequestScreen },
+      { path: 'verify', Component: OtpVerifyScreen },
+    ],
+  },
+  {
+    Component: ProtectedRoute,
+    children: [
+      {
+        Component: AppLayout,
+        children: [
+          { index: true, element: <Navigate replace to="/today" /> },
+          { path: 'invite/:token', Component: InvitationRoute },
+          { path: 'today', element: <PlannedRoute title="Today" /> },
+          { path: 'upcoming', element: <PlannedRoute title="Upcoming" /> },
+          { path: 'tasks', element: <PlannedRoute title="Tasks" /> },
+          { path: 'history', element: <PlannedRoute title="History" /> },
+          { path: 'more/*', element: <PlannedRoute title="More" /> },
+        ],
+      },
+    ],
+  },
+  {
+    children: [
       { path: '*', Component: NotFoundRoute },
     ],
   },

@@ -4,13 +4,13 @@ import { App } from '../App'
 import { router } from '../app/router'
 
 describe('App', () => {
-  it('routes the application root to Today', async () => {
+  it('redirects an unauthenticated visitor to sign in', async () => {
     await router.navigate('/')
 
     render(<App />)
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Today' }),
+      await screen.findByRole('heading', { level: 1, name: 'Sign in' }),
     ).toBeVisible()
   })
 })

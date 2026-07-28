@@ -18,6 +18,11 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
+    env: {
+      ...process.env,
+      VITE_SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key',
+      VITE_SUPABASE_URL: 'https://example.supabase.co',
+    },
     reuseExistingServer: process.env.CI === undefined,
     url: 'http://127.0.0.1:4173',
   },
