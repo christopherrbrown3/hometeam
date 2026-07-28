@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       categories: {
@@ -71,7 +66,7 @@ export type Database = {
           household_id: string
           id: string
           invited_by: string
-          invited_email: string
+          invited_username: string
           revoked_at: string | null
           role: Database["public"]["Enums"]["household_member_role"]
           status: Database["public"]["Enums"]["invitation_status"]
@@ -86,7 +81,7 @@ export type Database = {
           household_id: string
           id?: string
           invited_by: string
-          invited_email: string
+          invited_username: string
           revoked_at?: string | null
           role: Database["public"]["Enums"]["household_member_role"]
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -101,7 +96,7 @@ export type Database = {
           household_id?: string
           id?: string
           invited_by?: string
-          invited_email?: string
+          invited_username?: string
           revoked_at?: string | null
           role?: Database["public"]["Enums"]["household_member_role"]
           status?: Database["public"]["Enums"]["invitation_status"]
@@ -468,25 +463,25 @@ export type Database = {
           created_at: string
           detected_timezone: string | null
           display_name: string
-          email: string
           updated_at: string
           user_id: string
+          username: string
         }
         Insert: {
           created_at?: string
           detected_timezone?: string | null
           display_name: string
-          email: string
           updated_at?: string
           user_id: string
+          username: string
         }
         Update: {
           created_at?: string
           detected_timezone?: string | null
           display_name?: string
-          email?: string
           updated_at?: string
           user_id?: string
+          username?: string
         }
         Relationships: []
       }
@@ -951,10 +946,10 @@ export type Database = {
       }
       create_household_invitation: {
         Args: {
-          input_email: string
           input_expires_in_hours?: number
           input_household_id: string
           input_role: Database["public"]["Enums"]["household_member_role"]
+          input_username: string
         }
         Returns: {
           expires_at: string
@@ -975,7 +970,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          invited_email: string
+          invited_username: string
           role: Database["public"]["Enums"]["household_member_role"]
           status: Database["public"]["Enums"]["invitation_status"]
         }[]
@@ -1083,7 +1078,6 @@ export type Database = {
     }
   }
 }
-
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]

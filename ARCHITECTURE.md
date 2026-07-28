@@ -71,7 +71,7 @@ Business rules belong in pure domain modules, database functions, or typed servi
 
 ### Routing
 
-Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public routes are `/login`, `/verify`, and `/invite/:token`. Authenticated-but-unapproved users are restricted to `/access-status`. Approved users enter the product session gate; `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
+Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public routes are `/login`, `/register`, and `/invite/:token`; the retired `/verify` route safely redirects to `/login`. Authenticated-but-unapproved users are restricted to `/access`. Approved users enter the product session gate; `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
 
 An intended location is serialized before authentication and restored only after validation. Invitation tokens must never be placed in logs or analytics; after acceptance, replace the route so the token is no longer visible.
 
@@ -101,15 +101,15 @@ The shell is mobile-first with safe-area-aware bottom navigation and a centered 
 
 ## 4. Authentication flow
 
-1. Client requests a six-digit email OTP through Supabase Auth.
-2. Client verifies the token with the supplied email.
-3. A profile/access bootstrap trigger idempotently creates `profiles` and a `pending` `platform_access` row.
+1. Client validates a normalized username and password, then maps the username to a non-routable internal identifier for Supabase's password provider.
+2. Supabase creates or restores the password session; hosted Auth email confirmation must remain disabled because HomeTeam has no email-verification flow.
+3. A profile/access bootstrap trigger derives and persists the normalized username, then idempotently creates a `pending` `platform_access` row.
 4. The client fetches its authoritative platform access state.
 5. Pending, rejected, or suspended users are restricted to the access-status route and sign-out; protected queries and Realtime channels do not start.
 6. Approved users restore the validated intended route and may proceed to household authorization.
 7. Platform administrators may use the separate access-review route and RPCs; they receive no implicit household membership.
 8. Session refresh is handled by Supabase; the app clears protected caches on sign-out, suspension, or approval revocation.
-9. Invitation acceptance verifies both approved platform access and the authenticated email against a normalized invited email inside a transactional function.
+9. Invitation acceptance verifies both approved platform access and the authenticated username against a normalized invited username inside a transactional function.
 
 Only publishable frontend credentials are loaded by Vite. The service-role key and VAPID private key exist only as Supabase secrets.
 
@@ -117,7 +117,7 @@ Only publishable frontend credentials are loaded by Vite. The service-role key a
 
 `platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. `platform_administrators` contains the small set of user UUIDs permitted to review access. `platform_access_events` is append-only and records every decision or restoration.
 
-The initial administrator is inserted by UUID through a privileged migration parameter or documented one-time SQL operation after their Supabase Auth user exists. That operation atomically creates the administrator record, sets the same user to `approved`, and appends a bootstrap access event so there is no unapproved-administrator deadlock. No administrator email is hard-coded.
+The initial administrator is inserted by UUID through a privileged migration parameter or documented one-time SQL operation after their Supabase Auth user exists. That operation atomically creates the administrator record, sets the same user to `approved`, and appends a bootstrap access event so there is no unapproved-administrator deadlock. No administrator username is hard-coded.
 
 Stable authorization helpers:
 
@@ -145,7 +145,7 @@ Each function derives the administrator from `auth.uid()`, locks the target acce
 
 Full members can read and manage household resources through policy-approved reads and controlled writes. Guests can read minimal household identity, their own membership, occurrences assigned to them, the minimum series/category projection required to render those occurrences, and related event records. Category deletion nulls task references or presents them as uncategorized; it never deletes tasks.
 
-Invitations store a SHA-256 or stronger hash of a random high-entropy token, a normalized email, role, expiry, revocation, and acceptance metadata. The raw token exists only in the outbound invitation URL.
+Invitations store a SHA-256 or stronger hash of a random high-entropy token, a normalized username, role, expiry, revocation, and acceptance metadata. The raw token exists only in the invitation URL.
 
 ## 7. Task-series and occurrence model
 

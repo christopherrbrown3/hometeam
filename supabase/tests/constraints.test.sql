@@ -6,11 +6,11 @@ select plan(7);
 
 select throws_ok(
   $$
-    insert into public.profiles (user_id, display_name, email, detected_timezone)
+    insert into public.profiles (user_id, display_name, username, detected_timezone)
     values (
       '00000000-0000-0000-0000-000000000901',
       'Invalid timezone',
-      'invalid-timezone@example.test',
+      'invalid_timezone',
       'Mars/Olympus_Mons'
     )
   $$,

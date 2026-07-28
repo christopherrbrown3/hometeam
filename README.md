@@ -40,7 +40,7 @@ Authorization is enforced in PostgreSQL and transactional RPC functions, not onl
 
 ## Local development
 
-HomeTeam currently includes the foundation, passwordless email sign-in, preview-access approval, household creation/switching, invitation links, categories, and database-enforced full-member/guest isolation. Use Node.js 22+ and npm:
+HomeTeam currently includes the foundation, username-and-password sign-in, preview-access approval, household creation/switching, invitation links, categories, and database-enforced full-member/guest isolation. Use Node.js 22+ and npm:
 
 ```sh
 npm install
@@ -49,7 +49,7 @@ npm run dev
 
 Copy `.env.example` to `.env.local` and provide only the Supabase project URL and publishable key. Do not put database passwords, secret keys, or service-role keys in any `VITE_` environment variable; Vite embeds those values in the browser bundle.
 
-Run `npm run typecheck` for strict TypeScript validation and `npm run build` for the production bundle. Hash routing, session persistence, intended-route restoration, six-digit email-code verification, the query provider, environment validation, and stable query-key factories are now in place. Set the Supabase Auth email template to include `{{ .Token }}` (rather than a confirmation URL) to deliver six-digit codes. New Supabase Free projects need custom SMTP to customize that email template; keep its credentials in Supabase, never in this repository.
+Run `npm run typecheck` for strict TypeScript validation and `npm run build` for the production bundle. Hash routing, persistent password sessions, intended-route restoration, the query provider, environment validation, and stable query-key factories are now in place. HomeTeam maps each normalized username to a non-routable Supabase Auth identifier internally; the product never asks for, stores, or displays a personal email address. In Supabase Dashboard, keep **Authentication → Providers → Email → Confirm email** disabled, or password sign-up will not create a usable session.
 
 The first production sign-in creates a `pending` access request. Bootstrap that known account exactly once from the Supabase SQL editor, using its UUID from `auth.users`:
 
@@ -57,7 +57,7 @@ The first production sign-in creates a `pending` access request. Bootstrap that 
 select private.bootstrap_platform_administrator('<authenticated-user-uuid>');
 ```
 
-This database-only operation approves that account and makes it the platform administrator. It is not callable from the browser. The administrator can then approve other preview requests in `#/access`; administrator status never supplies household membership or household-data access. Invitation links are one-time, email-bound links. The app copies each newly created link for the full member to deliver through their chosen private channel; production email delivery needs a configured transactional email provider and is deliberately not attempted from the browser.
+This database-only operation approves that account and makes it the platform administrator. It is not callable from the browser. The administrator can then approve other preview requests in `#/access`; administrator status never supplies household membership or household-data access. Invitation links are one-time and username-bound. The app copies each newly created link for the full member to deliver through their chosen private channel; HomeTeam deliberately does not send invitation email.
 
 The GitHub Pages workflow uses the base path supplied by GitHub Pages: `/hometeam/` on the default project URL and `/` for `hometeam.christopherbrown.ai`. To verify either layout locally, run `VITE_APP_BASE_PATH=/hometeam/ npm run build` or `VITE_APP_BASE_PATH=/ npm run build` (the legacy `VITE_BASE_PATH` alias is also supported).
 
@@ -75,8 +75,7 @@ npx --yes supabase@2.110.0 status -o env
 Copy the local `API_URL` and browser-safe `ANON_KEY`/publishable key reported by
 the status command into `.env.local` as `VITE_SUPABASE_URL` and
 `VITE_SUPABASE_PUBLISHABLE_KEY`; then run `npm run dev`. The local Studio is at
-`http://127.0.0.1:54323` and the local email inbox is at
-`http://127.0.0.1:54324`. Do not put the database URL, password, service-role
+`http://127.0.0.1:54323`. Do not put the database URL, password, service-role
 key, VAPID private key, or any other privileged value into `.env.local` or a
 `VITE_` variable.
 

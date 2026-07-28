@@ -8,11 +8,22 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000103', 'grandma@example.test')
 on conflict (id) do nothing;
 
-insert into public.profiles (user_id, display_name, email, detected_timezone) values
-  ('00000000-0000-0000-0000-000000000101', 'Alex', 'alex@example.test', 'America/New_York'),
-  ('00000000-0000-0000-0000-000000000102', 'Sam', 'sam@example.test', 'America/New_York'),
-  ('00000000-0000-0000-0000-000000000103', 'Grandma', 'grandma@example.test', 'America/Los_Angeles')
-on conflict (user_id) do nothing;
+update public.profiles
+set display_name = case user_id
+  when '00000000-0000-0000-0000-000000000101' then 'Alex'
+  when '00000000-0000-0000-0000-000000000102' then 'Sam'
+  when '00000000-0000-0000-0000-000000000103' then 'Grandma'
+end,
+detected_timezone = case user_id
+  when '00000000-0000-0000-0000-000000000101' then 'America/New_York'
+  when '00000000-0000-0000-0000-000000000102' then 'America/New_York'
+  when '00000000-0000-0000-0000-000000000103' then 'America/Los_Angeles'
+end
+where user_id in (
+  '00000000-0000-0000-0000-000000000101',
+  '00000000-0000-0000-0000-000000000102',
+  '00000000-0000-0000-0000-000000000103'
+);
 
 insert into public.households (id, name, timezone, created_by) values
   ('00000000-0000-0000-0000-000000000201', 'Maple Home', 'America/New_York', '00000000-0000-0000-0000-000000000101'),

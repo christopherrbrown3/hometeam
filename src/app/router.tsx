@@ -1,7 +1,7 @@
 import { Navigate, Outlet, createHashRouter } from 'react-router'
 import { ProtectedRoute } from './ProtectedRoute'
-import { OtpRequestScreen } from '../features/auth/OtpRequestScreen'
-import { OtpVerifyScreen } from '../features/auth/OtpVerifyScreen'
+import { PasswordLoginScreen } from '../features/auth/PasswordLoginScreen'
+import { SignUpScreen } from '../features/auth/SignUpScreen'
 import { PublicOnly } from '../features/auth/PublicOnly'
 import { AppShell } from './AppShell'
 import { AccessGate } from '../features/access/AccessGate'
@@ -34,8 +34,9 @@ export const router = createHashRouter([
   {
     Component: PublicOnly,
     children: [
-      { path: 'login', Component: OtpRequestScreen },
-      { path: 'verify', Component: OtpVerifyScreen },
+      { path: 'login', Component: PasswordLoginScreen },
+      { path: 'register', Component: SignUpScreen },
+      { path: 'verify', element: <Navigate replace to="/login" /> },
     ],
   },
   {
@@ -44,6 +45,10 @@ export const router = createHashRouter([
       {
         path: 'access',
         Component: AccessStatusScreen,
+      },
+      {
+        path: 'admin/access',
+        element: <AccessStatusScreen administratorOnly />,
       },
       {
         Component: AccessGate,
