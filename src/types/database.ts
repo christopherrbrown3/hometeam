@@ -7,8 +7,131 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          archived_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          household_id: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          color?: string | null
+          created_at?: string
+          created_by: string
+          household_id: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          household_id?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "categories_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      household_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          expires_at: string
+          household_id: string
+          id: string
+          invited_by: string
+          invited_email: string
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["household_member_role"]
+          status: Database["public"]["Enums"]["invitation_status"]
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          expires_at: string
+          household_id: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          revoked_at?: string | null
+          role: Database["public"]["Enums"]["household_member_role"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          expires_at?: string
+          household_id?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["household_member_role"]
+          status?: Database["public"]["Enums"]["invitation_status"]
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_invitations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "household_invitations_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       household_memberships: {
         Row: {
           created_at: string
@@ -217,6 +340,122 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      platform_access: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          reason: string | null
+          requested_at: string
+          status: Database["public"]["Enums"]["platform_access_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          reason?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["platform_access_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          reason?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["platform_access_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_access_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "platform_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      platform_access_events: {
+        Row: {
+          actor_user_id: string | null
+          created_at: string
+          id: string
+          next_status: Database["public"]["Enums"]["platform_access_status"]
+          previous_status:
+            | Database["public"]["Enums"]["platform_access_status"]
+            | null
+          user_id: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          next_status: Database["public"]["Enums"]["platform_access_status"]
+          previous_status?:
+            | Database["public"]["Enums"]["platform_access_status"]
+            | null
+          user_id: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          created_at?: string
+          id?: string
+          next_status?: Database["public"]["Enums"]["platform_access_status"]
+          previous_status?:
+            | Database["public"]["Enums"]["platform_access_status"]
+            | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_access_events_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "platform_access_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      platform_administrators: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_administrators_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
@@ -631,6 +870,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "task_series_category_household_fkey"
+            columns: ["category_id", "household_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id", "household_id"]
+          },
+          {
             foreignKeyName: "task_series_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -658,11 +904,123 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_household_invitation: {
+        Args: { input_token: string }
+        Returns: string
+      }
+      create_category: {
+        Args: {
+          input_color?: string
+          input_household_id: string
+          input_name: string
+        }
+        Returns: {
+          archived_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          household_id: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "categories"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_household: {
+        Args: { input_name: string; input_timezone: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          id: string
+          name: string
+          timezone: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "households"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      create_household_invitation: {
+        Args: {
+          input_email: string
+          input_expires_in_hours?: number
+          input_household_id: string
+          input_role: Database["public"]["Enums"]["household_member_role"]
+        }
+        Returns: {
+          expires_at: string
+          invitation_id: string
+          token: string
+        }[]
+      }
+      get_current_access: {
+        Args: never
+        Returns: {
+          is_administrator: boolean
+          status: Database["public"]["Enums"]["platform_access_status"]
+        }[]
+      }
+      list_household_invitations: {
+        Args: { input_household_id: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          invited_email: string
+          role: Database["public"]["Enums"]["household_member_role"]
+          status: Database["public"]["Enums"]["invitation_status"]
+        }[]
+      }
+      revoke_household_invitation: {
+        Args: { input_invitation_id: string }
+        Returns: undefined
+      }
+      set_platform_access_status: {
+        Args: {
+          decision_reason?: string
+          target_status: Database["public"]["Enums"]["platform_access_status"]
+          target_user_id: string
+        }
+        Returns: undefined
+      }
+      update_category: {
+        Args: {
+          archive?: boolean
+          input_category_id: string
+          input_color?: string
+          input_name: string
+        }
+        Returns: {
+          archived_at: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          household_id: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "categories"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       household_member_role: "full_member" | "guest"
       household_membership_status: "active" | "removed"
+      invitation_status: "active" | "accepted" | "revoked" | "expired"
       notification_outbox_status:
         | "pending"
         | "processing"
@@ -678,6 +1036,7 @@ export type Database = {
         | "snoozed"
         | "new_task"
         | "membership_changed"
+      platform_access_status: "pending" | "approved" | "rejected" | "suspended"
       task_assignment_mode: "fixed" | "unassigned" | "round_robin"
       task_assignment_source:
         | "fixed"
@@ -847,6 +1206,7 @@ export const Constants = {
     Enums: {
       household_member_role: ["full_member", "guest"],
       household_membership_status: ["active", "removed"],
+      invitation_status: ["active", "accepted", "revoked", "expired"],
       notification_outbox_status: [
         "pending",
         "processing",
@@ -864,6 +1224,7 @@ export const Constants = {
         "new_task",
         "membership_changed",
       ],
+      platform_access_status: ["pending", "approved", "rejected", "suspended"],
       task_assignment_mode: ["fixed", "unassigned", "round_robin"],
       task_assignment_source: [
         "fixed",
