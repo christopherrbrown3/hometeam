@@ -4,6 +4,10 @@ import { OtpRequestScreen } from '../features/auth/OtpRequestScreen'
 import { OtpVerifyScreen } from '../features/auth/OtpVerifyScreen'
 import { PublicOnly } from '../features/auth/PublicOnly'
 import { AppShell } from './AppShell'
+import { AccessGate } from '../features/access/AccessGate'
+import { AccessStatusScreen } from '../features/access/AccessStatusScreen'
+import { HouseholdSettingsScreen } from '../features/households/HouseholdSettingsScreen'
+import { InvitationScreen } from '../features/households/InvitationScreen'
 
 function AppLayout() {
   return (
@@ -22,10 +26,6 @@ function PlannedRoute({ title }: Readonly<{ title: string }>) {
   )
 }
 
-function InvitationRoute() {
-  return <PlannedRoute title="Invitation" />
-}
-
 function NotFoundRoute() {
   return <PlannedRoute title="Page not found" />
 }
@@ -42,15 +42,24 @@ export const router = createHashRouter([
     Component: ProtectedRoute,
     children: [
       {
-        Component: AppLayout,
+        path: 'access',
+        Component: AccessStatusScreen,
+      },
+      {
+        Component: AccessGate,
         children: [
-          { index: true, element: <Navigate replace to="/today" /> },
-          { path: 'invite/:token', Component: InvitationRoute },
-          { path: 'today', element: <PlannedRoute title="Today" /> },
-          { path: 'upcoming', element: <PlannedRoute title="Upcoming" /> },
-          { path: 'tasks', element: <PlannedRoute title="Tasks" /> },
-          { path: 'history', element: <PlannedRoute title="History" /> },
-          { path: 'more/*', element: <PlannedRoute title="More" /> },
+          {
+            Component: AppLayout,
+            children: [
+              { index: true, element: <Navigate replace to="/today" /> },
+              { path: 'invite/:token', Component: InvitationScreen },
+              { path: 'today', element: <PlannedRoute title="Today" /> },
+              { path: 'upcoming', element: <PlannedRoute title="Upcoming" /> },
+              { path: 'tasks', element: <PlannedRoute title="Tasks" /> },
+              { path: 'history', element: <PlannedRoute title="History" /> },
+              { path: 'more/*', Component: HouseholdSettingsScreen },
+            ],
+          },
         ],
       },
     ],
