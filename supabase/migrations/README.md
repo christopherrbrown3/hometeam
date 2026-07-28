@@ -18,6 +18,13 @@ stage. This deliberate default-deny baseline is not a client API: the
 platform-access and household authorization work in later issues will add only
 the narrowly authorized reads and controlled writes required by the product.
 
+The task-core migration, `20260728134450_task_core.sql`, adds the series,
+daily-slot, rotation-roster, occurrence, and event records. It locks an
+occurrence to the household of its series and makes `(series_id,
+occurrence_key)` unique, preventing duplicate generation. It deliberately
+stores only the versioned recurrence JSON container; the recurrence contract
+and semantic validator remain owned by the later recurrence issues.
+
 ## Local workflow
 
 Install a Docker-compatible container runtime, then start the local stack from
