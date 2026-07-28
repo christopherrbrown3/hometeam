@@ -1,0 +1,59 @@
+# HomeTeam database migrations
+
+`supabase/migrations/` is the immutable, ordered source of truth for the
+HomeTeam database. Do not apply hand-written changes directly to a shared or
+production database.
+
+## Local workflow
+
+Install a Docker-compatible container runtime, then start the local stack from
+the repository root. The commands below use the version tested for this
+repository without adding a global dependency:
+
+```sh
+npx --yes supabase@2.110.0 start
+npx --yes supabase@2.110.0 status -o env
+```
+
+The status command prints local connection details. Copy only
+`API_URL` and the browser-safe `ANON_KEY`/publishable key into `.env.local` as
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Do not copy a database
+connection string, service-role key, or any private key into a Vite variable.
+The local email inbox is available at `http://127.0.0.1:54324` while the stack
+is running.
+
+## Creating a migration
+
+Create each migration with the CLI; it supplies the sortable timestamped file
+name:
+
+```sh
+npx --yes supabase@2.110.0 migration new describe_change_in_lowercase
+```
+
+Write forward-only SQL in the generated file. Migrations must be idempotent
+only where PostgreSQL permits a safe repeatable declaration, but each file is
+applied once and must never be edited after it has been shared or applied. A
+correction is a new migration.
+
+Use explicit schema qualification in privileged SQL, enable and force RLS for
+every exposed table, and grant Data API access deliberately. Client-supplied
+user, household, role, or target identifiers are claims to validate, never
+authorization. Do not place secrets, real household data, or raw invitation and
+push tokens in migrations or seed fixtures.
+
+## Replay and verification
+
+Before review, replay the local database from scratch and inspect migration
+state:
+
+```sh
+npx --yes supabase@2.110.0 db reset
+npx --yes supabase@2.110.0 migration list --local
+```
+
+`db reset` runs migrations in timestamp order and, once issue #12 supplies it,
+loads `supabase/seed.sql`. Database/RLS test suites belong with the migration
+issue that introduces behavior. Generated TypeScript database types are
+refreshed after schema changes by issue #12 and later schema issues; do not
+hand-author them.

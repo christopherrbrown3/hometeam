@@ -53,4 +53,26 @@ Run `npm run typecheck` for strict TypeScript validation and `npm run build` for
 
 The GitHub Pages workflow uses the base path supplied by GitHub Pages: `/hometeam/` on the default project URL and `/` for `hometeam.christopherbrown.ai`. To verify either layout locally, run `VITE_BASE_PATH=/hometeam/ npm run build` or `VITE_BASE_PATH=/ npm run build`.
 
-Local setup, migration, testing, Supabase, VAPID, Pages, custom-domain, iPhone installation, and operations instructions will be added by the implementation issues identified in `IMPLEMENTATION_PLAN.md`.
+## Local Supabase development
+
+HomeTeam uses versioned Supabase migrations as its database source of truth.
+Install Docker Desktop or another Docker-compatible container runtime, then
+start the local stack from the repository root:
+
+```sh
+npx --yes supabase@2.110.0 start
+npx --yes supabase@2.110.0 status -o env
+```
+
+Copy the local `API_URL` and browser-safe `ANON_KEY`/publishable key reported by
+the status command into `.env.local` as `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_PUBLISHABLE_KEY`; then run `npm run dev`. The local Studio is at
+`http://127.0.0.1:54323` and the local email inbox is at
+`http://127.0.0.1:54324`. Do not put the database URL, password, service-role
+key, VAPID private key, or any other privileged value into `.env.local` or a
+`VITE_` variable.
+
+Migration files will be added by their dedicated database issues. Create them
+only through the CLI, treat them as immutable once shared, and replay them with
+`npx --yes supabase@2.110.0 db reset` before review. The full migration
+workflow and security rules are in [supabase/migrations/README.md](supabase/migrations/README.md).
