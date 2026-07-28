@@ -1,5 +1,7 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router'
+import { signOut } from '../features/auth/authService'
+import { supabase } from '../lib/supabase'
 
 type AppShellProps = Readonly<{
   children: ReactNode
@@ -14,15 +16,32 @@ const navigation = [
 ] as const
 
 export function AppShell({ children }: AppShellProps) {
+  const [signOutError, setSignOutError] = useState<string | null>(null)
+
+  async function handleSignOut() {
+    setSignOutError(null)
+    const result = await signOut(supabase)
+
+    if (!result.ok) {
+      setSignOutError(result.error.message)
+    }
+  }
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-3xl flex-col bg-canvas">
       <a className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 rounded-control bg-brand px-4 py-2 font-semibold text-white" href="#main-content">
         Skip to content
       </a>
       <header className="flex items-center justify-between border-b border-border px-5 py-4">
-        <span className="text-lg font-bold tracking-tight">HomeTeam</span>
-        <span className="text-sm text-muted">Tasks, together.</span>
+        <div>
+          <span className="text-lg font-bold tracking-tight">HomeTeam</span>
+          <span className="ml-2 text-sm text-muted">Tasks, together.</span>
+        </div>
+        <button className="min-h-11 rounded-control px-2 text-sm font-semibold text-brand underline" onClick={() => void handleSignOut()} type="button">
+          Sign out
+        </button>
       </header>
+      {signOutError && <p className="px-5 pt-3 text-sm text-danger" role="alert">{signOutError}</p>}
       <main className="flex-1 px-5 py-6 pb-28" id="main-content">
         {children}
       </main>

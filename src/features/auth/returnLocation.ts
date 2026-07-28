@@ -1,0 +1,57 @@
+const intendedRouteStorageKey = 'hometeam.intended-route'
+const pendingEmailStorageKey = 'hometeam.pending-email'
+
+const defaultAuthenticatedRoute = '/today'
+
+function isAllowedIntendedRoute(route: string) {
+  return (
+    route === '/today' ||
+    route === '/upcoming' ||
+    route === '/tasks' ||
+    route === '/history' ||
+    route === '/more' ||
+    route.startsWith('/more/') ||
+    /^\/invite\/[^/?#]+$/.test(route)
+  )
+}
+
+function canUseSessionStorage() {
+  return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined'
+}
+
+export function saveReturnLocation(pathname: string, search = '') {
+  const route = `${pathname}${search}`
+
+  if (canUseSessionStorage() && isAllowedIntendedRoute(route)) {
+    window.sessionStorage.setItem(intendedRouteStorageKey, route)
+  }
+}
+
+export function consumeReturnLocation() {
+  if (!canUseSessionStorage()) {
+    return defaultAuthenticatedRoute
+  }
+
+  const route = window.sessionStorage.getItem(intendedRouteStorageKey)
+  window.sessionStorage.removeItem(intendedRouteStorageKey)
+
+  return route && isAllowedIntendedRoute(route) ? route : defaultAuthenticatedRoute
+}
+
+export function savePendingEmail(email: string) {
+  if (canUseSessionStorage()) {
+    window.sessionStorage.setItem(pendingEmailStorageKey, email)
+  }
+}
+
+export function getPendingEmail() {
+  return canUseSessionStorage()
+    ? window.sessionStorage.getItem(pendingEmailStorageKey)
+    : null
+}
+
+export function clearPendingEmail() {
+  if (canUseSessionStorage()) {
+    window.sessionStorage.removeItem(pendingEmailStorageKey)
+  }
+}
