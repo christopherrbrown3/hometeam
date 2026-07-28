@@ -8,6 +8,7 @@ import { AccessGate } from '../features/access/AccessGate'
 import { AccessStatusScreen } from '../features/access/AccessStatusScreen'
 import { HouseholdSettingsScreen } from '../features/households/HouseholdSettingsScreen'
 import { InvitationScreen } from '../features/households/InvitationScreen'
+import { TasksScreen } from '../features/tasks/TasksScreen'
 
 function AppLayout() {
   return (
@@ -60,7 +61,7 @@ export const router = createHashRouter([
               { path: 'invite/:token', Component: InvitationScreen },
               { path: 'today', element: <PlannedRoute title="Today" /> },
               { path: 'upcoming', element: <PlannedRoute title="Upcoming" /> },
-              { path: 'tasks', element: <PlannedRoute title="Tasks" /> },
+              { path: 'tasks', Component: TasksScreen },
               { path: 'history', element: <PlannedRoute title="History" /> },
               { path: 'more/*', Component: HouseholdSettingsScreen },
             ],

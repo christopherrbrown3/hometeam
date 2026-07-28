@@ -153,9 +153,9 @@ Invitations store a SHA-256 or stronger hash of a random high-entropy token, a n
 
 `task_occurrences` is the authoritative scheduled instance. `occurrence_key` is deterministic and unique per series:
 
-- calendar schedule: `calendar:<local-date>:<slot-id>`;
-- one-time: `once:<series-id>`;
-- completion interval: `interval:<predecessor-occurrence-id>`.
+- calendar schedule: `<local-date>|<start-or-all-day>|<end-day-offset>|<slot-sort-order>`;
+- one-time: the same local-date/slot key generated once for its effective date;
+- completion interval: `interval:<predecessor-occurrence-id>` (created by the lifecycle transaction in Milestone 6).
 
 A unique constraint on `(series_id, occurrence_key)` makes generation idempotent. UTC timestamps are authoritative; local recurrence rules and household timezone are retained so UTC instants can be regenerated deterministically.
 
@@ -184,9 +184,9 @@ It returns candidate local dates, resolved UTC due bounds, and deterministic occ
 - all-day: start at local midnight and become overdue at the next local midnight;
 - flexible windows resolve each endpoint independently and may span midnight only when explicitly represented by an end-day offset.
 
-Completion-interval series normally have one open occurrence. Their successor is inserted in the same transaction that completes or skips the predecessor. End dates/counts are checked before insertion.
+Completion-interval series normally have one open occurrence. `next_interval_successor` computes a successor from the actual completion/skip timestamp; its lifecycle insertion is added in Milestone 6. End dates/counts are checked before insertion.
 
-The missed-policy processor is idempotent and locks candidate rows with `FOR UPDATE SKIP LOCKED`. It may close older open occurrences but never rewrites completed or skipped history.
+The missed-policy processor is idempotent. It may close older open occurrences for `skip_when_next_occurrence_begins` or `keep_newest`, but never rewrites completed or skipped history. `keep_overdue` performs no automatic close.
 
 ## 9. Round-robin engine
 

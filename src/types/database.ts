@@ -903,6 +903,10 @@ export type Database = {
         Args: { input_token: string }
         Returns: string
       }
+      apply_missed_policies: {
+        Args: { input_now?: string }
+        Returns: number
+      }
       create_category: {
         Args: {
           input_color?: string
@@ -957,6 +961,10 @@ export type Database = {
           token: string
         }[]
       }
+      generate_calendar_occurrences: {
+        Args: { input_from: string; input_through: string }
+        Returns: number
+      }
       get_current_access: {
         Args: never
         Returns: {
@@ -975,9 +983,25 @@ export type Database = {
           status: Database["public"]["Enums"]["invitation_status"]
         }[]
       }
+      next_interval_successor: {
+        Args: { input_anchor: string; input_series_id: string }
+        Returns: string
+      }
+      pause_task_series: {
+        Args: { input_series_id: string }
+        Returns: Database['public']['Tables']['task_series']['Row']
+      }
+      resume_task_series: {
+        Args: { input_series_id: string }
+        Returns: Database['public']['Tables']['task_series']['Row']
+      }
       revoke_household_invitation: {
         Args: { input_invitation_id: string }
         Returns: undefined
+      }
+      save_task_series: {
+        Args: { input: Json }
+        Returns: Database['public']['Tables']['task_series']['Row']
       }
       set_platform_access_status: {
         Args: {
