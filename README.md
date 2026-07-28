@@ -76,3 +76,7 @@ Migration files will be added by their dedicated database issues. Create them
 only through the CLI, treat them as immutable once shared, and replay them with
 `npx --yes supabase@2.110.0 db reset` before review. The full migration
 workflow and security rules are in [supabase/migrations/README.md](supabase/migrations/README.md).
+
+After starting the local stack, run the database contract suite with
+`npm run test:db`. It uses pgTAP to check migration replay, foundation
+constraints and default-deny access, and deterministic seed fixtures.
