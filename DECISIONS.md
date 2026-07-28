@@ -20,8 +20,8 @@ This log records minor implementation defaults selected within the product speci
 
 ## D-004 — Time representation and DST
 
-- **Decision:** Store instants in UTC; retain IANA household timezone and versioned local recurrence rules. Use `date-fns` plus `date-fns-tz` behind a domain adapter.
-- **DST defaults:** Nonexistent local times move forward to the first valid instant; repeated local times choose the earlier offset. The generator records the resolution in event metadata.
+- **Decision:** Store instants in UTC; retain IANA household timezone and versioned local recurrence rules. The `householdTime` adapter uses the platform `Intl` timezone database so the browser and database contract can be tested without a device timezone dependency.
+- **DST defaults:** Nonexistent local times move forward to the first valid instant; repeated local times choose the earlier offset. The resolution is deterministic from local date, local time, and IANA zone.
 - **Reason:** Deterministic behavior is required across devices and travel.
 
 ## D-005 — Recurrence configuration
@@ -32,10 +32,8 @@ This log records minor implementation defaults selected within the product speci
 ```json
 {
   "version": 1,
-  "kind": "calendar",
   "frequency": "daily",
-  "weekdays": [1, 3, 5],
-  "interval": 1
+  "weekdays": [1, 3, 5]
 }
 ```
 
@@ -44,13 +42,11 @@ Completion interval:
 ```json
 {
   "version": 1,
-  "kind": "completion_interval",
-  "amount": 8,
-  "unit": "hour"
+  "intervalMinutes": 480
 }
 ```
 
-- **Validation:** Reject unknown versions, invalid weekday values, zero/negative intervals, incompatible slots, and end conditions that precede the effective date.
+- **Validation:** Reject unknown versions, invalid weekday values, zero/negative intervals, incompatible slots, and end conditions that precede the effective date. `one_time` uses exactly `{ "version": 1 }`; daily schedules omit `weekdays` and weekly schedules require 1–7 unique day numbers (Sunday `0` through Saturday `6`).
 
 ## D-006 — Occurrence uniqueness
 

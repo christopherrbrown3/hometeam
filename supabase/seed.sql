@@ -47,8 +47,8 @@ insert into public.task_series (
   ('00000000-0000-0000-0000-000000000404', '00000000-0000-0000-0000-000000000201', 'Bedtime routine', 'recurring', 'calendar', '{"version":1,"frequency":"daily"}', 'fixed', '00000000-0000-0000-0000-000000000101', '2026-01-01', '00000000-0000-0000-0000-000000000101'),
   ('00000000-0000-0000-0000-000000000405', '00000000-0000-0000-0000-000000000201', 'Take out recycling', 'one_time', 'one_time', '{"version":1}', 'unassigned', null, '2026-01-16', '00000000-0000-0000-0000-000000000102'),
   ('00000000-0000-0000-0000-000000000406', '00000000-0000-0000-0000-000000000201', 'Water the plants', 'recurring', 'calendar', '{"version":1,"frequency":"weekly","weekdays":[0]}', 'round_robin', null, '2026-01-01', '00000000-0000-0000-0000-000000000101'),
-  ('00000000-0000-0000-0000-000000000407', '00000000-0000-0000-0000-000000000201', 'Tidy the entryway', 'recurring', 'calendar', '{"version":1,"frequency":"daily","window":"09:00-17:00"}', 'unassigned', null, '2026-01-01', '00000000-0000-0000-0000-000000000102'),
-  ('00000000-0000-0000-0000-000000000408', '00000000-0000-0000-0000-000000000202', 'Change air filter', 'recurring', 'completion_interval', '{"version":1,"intervalDays":90}', 'fixed', '00000000-0000-0000-0000-000000000103', '2026-01-01', '00000000-0000-0000-0000-000000000103')
+  ('00000000-0000-0000-0000-000000000407', '00000000-0000-0000-0000-000000000201', 'Tidy the entryway', 'recurring', 'calendar', '{"version":1,"frequency":"daily"}', 'unassigned', null, '2026-01-01', '00000000-0000-0000-0000-000000000102'),
+  ('00000000-0000-0000-0000-000000000408', '00000000-0000-0000-0000-000000000202', 'Change air filter', 'recurring', 'completion_interval', '{"version":1,"intervalMinutes":129600}', 'fixed', '00000000-0000-0000-0000-000000000103', '2026-01-01', '00000000-0000-0000-0000-000000000103')
 on conflict (id) do nothing;
 
 insert into public.task_schedule_slots (id, series_id, local_start_time, local_end_time, sort_order) values
