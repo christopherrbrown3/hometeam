@@ -71,7 +71,7 @@ Business rules belong in pure domain modules, database functions, or typed servi
 
 ### Routing
 
-Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public routes are `/login`, `/register`, and `/invite/:token`; the retired `/verify` route safely redirects to `/login`. Authenticated-but-unapproved users are restricted to `/access`. Approved users enter the product session gate; `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
+Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public authentication routes are `/login` and `/register`; `/join/:token` and the legacy `/invite/:token` preserve their intended destination while authentication and approval are completed. The retired `/verify` route safely redirects to `/login`. Authenticated-but-unapproved users are restricted to `/access`. Approved users enter the product session gate; `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
 
 An intended location is serialized before authentication and restored only after validation. Invitation tokens must never be placed in logs or analytics; after acceptance, replace the route so the token is no longer visible.
 
@@ -145,7 +145,9 @@ Each function derives the administrator from `auth.uid()`, locks the target acce
 
 Full members can read and manage household resources through policy-approved reads and controlled writes. Guests can read minimal household identity, their own membership, occurrences assigned to them, the minimum series/category projection required to render those occurrences, and related event records. Category deletion nulls task references or presents them as uncategorized; it never deletes tasks.
 
-Invitations store a SHA-256 or stronger hash of a random high-entropy token, a normalized username, role, expiry, revocation, and acceptance metadata. The raw token exists only in the invitation URL.
+Primary invitations use a revocable, expiring, usage-capped household join link and store only a SHA-256 hash of its high-entropy token. One current link per household prevents ambiguous sharing state. The raw token exists only in the generated URL and is not recoverable after creation. Legacy normalized-username invitations remain accepted for already-issued links.
+
+Household creation inserts the default category set in the same transaction. A migration backfills missing defaults for existing households with case-insensitive conflict checks, preserving user-created categories.
 
 ## 7. Task-series and occurrence model
 

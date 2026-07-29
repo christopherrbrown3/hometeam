@@ -6,27 +6,30 @@ import type { HouseholdMember } from '../../households/membershipService'
 import { AssignmentFields } from '../AssignmentFields'
 import { taskFormSchema, type TaskFormValues } from '../taskFormSchema'
 import { Icon } from '../../../components/ui/Icon'
+import { addDefaultEndTime, changeSlotEnd, changeSlotStart } from '../taskTime'
+import type { LocalTime } from '../../recurrence/types'
+import { householdDateAt } from '../../../lib/householdTime'
 
 export type TaskFormProps = Readonly<{
   categories: readonly Readonly<{ id: string; name: string }>[]
-  householdId: string
+  currentUserId?: string
   initialValue?: Partial<TaskFormValues>
   members: readonly HouseholdMember[]
   onSave: (values: TaskFormValues) => Promise<void>
+  timeZone: string
 }>
 
-function today() { return new Date().toISOString().slice(0, 10) }
+const defaultSlot: ScheduleSlotInput = { endDayOffset: 0, isAllDay: false, startTime: '09:00' }
 
-const defaultSlot: ScheduleSlotInput = { endDayOffset: 0, endTime: '09:15', isAllDay: false, startTime: '09:00' }
-
-function defaultValues(initial?: Partial<TaskFormValues>): TaskFormValues {
+function defaultValues(initial: Partial<TaskFormValues> | undefined, currentUserId: string | undefined, timeZone: string): TaskFormValues {
+  const creatorIsMember = Boolean(currentUserId)
   return {
-    assignmentMode: 'unassigned', categoryId: '', confirmationRequired: false, description: '', effectiveFrom: today(), endType: 'never', fixedAssigneeId: '', missedPolicy: 'keep_overdue', rotationMemberIds: [], slots: [defaultSlot], title: '', recurrenceConfig: { version: 1 }, recurrenceType: 'one_time', seriesType: 'one_time', ...initial,
+    assignmentMode: creatorIsMember ? 'fixed' : 'unassigned', categoryId: '', confirmationRequired: false, description: '', effectiveFrom: householdDateAt(new Date(), timeZone), endType: 'never', fixedAssigneeId: creatorIsMember ? currentUserId : '', missedPolicy: 'keep_overdue', rotationMemberIds: [], slots: [defaultSlot], title: '', recurrenceConfig: { version: 1 }, recurrenceType: 'one_time', seriesType: 'one_time', ...initial,
   } as TaskFormValues
 }
 
-export function TaskForm({ categories, initialValue, members, onSave }: TaskFormProps) {
-  const [values, setValues] = useState<TaskFormValues>(() => defaultValues(initialValue))
+export function TaskForm({ categories, currentUserId, initialValue, members, onSave, timeZone }: TaskFormProps) {
+  const [values, setValues] = useState<TaskFormValues>(() => defaultValues(initialValue, currentUserId, timeZone))
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   function update(next: Partial<TaskFormValues>) { setValues((current) => ({ ...current, ...next }) as TaskFormValues) }
@@ -65,33 +68,41 @@ export function TaskForm({ categories, initialValue, members, onSave }: TaskForm
             </select>
           </label>
           <label className="block text-sm font-semibold">
-            First due date
-            <input className="mt-1.5 min-h-11 w-full rounded-control border px-3" onChange={(event) => update({ effectiveFrom: event.target.value })} required type="date" value={values.effectiveFrom} />
+            {values.recurrenceType === 'one_time' ? 'Due date' : 'Starts on'}
+            <input className="mt-1.5 min-h-11 w-full rounded-control border px-3" onInput={(event) => update({ effectiveFrom: event.currentTarget.value })} required type="date" value={values.effectiveFrom} />
           </label>
         </div>
         <ScheduleFields onChange={(recurrenceConfig) => update({ recurrenceConfig } as Partial<TaskFormValues>)} recurrenceType={values.recurrenceType} value={values.recurrenceConfig} />
         <fieldset className="space-y-3">
-          <legend className="text-sm font-semibold">Time or window</legend>
+          <legend className="text-sm font-semibold">When is it due?</legend>
           {values.slots.map((currentSlot, index) => (
-            <div className="rounded-control bg-surface p-3" key={index}>
-              <div className="flex items-center justify-between gap-2">
-                <label className="flex min-h-11 items-center gap-2 text-sm font-semibold"><input checked={currentSlot.isAllDay} onChange={(event) => updateSlot(index, { ...currentSlot, endTime: event.target.checked ? undefined : '09:15', isAllDay: event.target.checked, startTime: event.target.checked ? undefined : '09:00' })} type="checkbox" />All day</label>
+            <div className="space-y-3 rounded-control bg-surface p-3" key={index}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="inline-flex rounded-control bg-canvas p-1" role="group" aria-label={`Time type ${index + 1}`}>
+                  <button className={`min-h-9 rounded-[calc(var(--radius-control)-0.25rem)] px-3 text-sm font-semibold transition ${currentSlot.isAllDay ? 'text-muted hover:text-ink' : 'bg-surface text-ink shadow-sm'}`} onClick={() => updateSlot(index, { endDayOffset: 0, isAllDay: false, startTime: '09:00' })} type="button">At a time</button>
+                  <button className={`min-h-9 rounded-[calc(var(--radius-control)-0.25rem)] px-3 text-sm font-semibold transition ${currentSlot.isAllDay ? 'bg-surface text-ink shadow-sm' : 'text-muted hover:text-ink'}`} onClick={() => updateSlot(index, { endDayOffset: 0, isAllDay: true })} type="button">All day</button>
+                </div>
                 {values.slots.length > 1 && <button className="min-h-11 rounded-control px-2 text-sm font-semibold text-danger hover:bg-danger/10" onClick={() => update({ slots: values.slots.filter((_, slotIndex) => slotIndex !== index) })} type="button">Remove</button>}
               </div>
               {!currentSlot.isAllDay && (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="block text-sm font-semibold">Start<input className="mt-1 min-h-11 w-full rounded-control border px-3" onChange={(event) => updateSlot(index, { ...currentSlot, startTime: event.target.value })} required type="time" value={currentSlot.startTime} /></label>
-                  <label className="block text-sm font-semibold">End <span className="font-normal text-muted">(optional)</span><input className="mt-1 min-h-11 w-full rounded-control border px-3" onChange={(event) => updateSlot(index, { ...currentSlot, endTime: event.target.value || undefined })} type="time" value={currentSlot.endTime ?? ''} /></label>
+                <div className="space-y-3">
+                  <div className={`grid items-end gap-3 ${currentSlot.endTime ? 'sm:grid-cols-2' : ''}`}>
+                    <label className="block text-sm font-semibold">Time<input className="mt-1 min-h-11 w-full rounded-control border px-3" onInput={(event) => updateSlot(index, changeSlotStart(currentSlot, event.currentTarget.value as LocalTime))} required type="time" value={currentSlot.startTime} /></label>
+                    {currentSlot.endTime && <label className="block text-sm font-semibold">Ends {currentSlot.endDayOffset === 1 && <span className="font-normal text-muted">(next day)</span>}<input className="mt-1 min-h-11 w-full rounded-control border px-3" onInput={(event) => updateSlot(index, changeSlotEnd(currentSlot, event.currentTarget.value as LocalTime || undefined))} type="time" value={currentSlot.endTime} /></label>}
+                  </div>
+                  {currentSlot.endTime
+                    ? <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted"><span>The end moves with the start, keeping the same duration.</span><button className="min-h-9 font-semibold text-brand hover:underline" onClick={() => updateSlot(index, changeSlotEnd(currentSlot))} type="button">Remove end time</button></div>
+                    : <button className="min-h-9 text-sm font-semibold text-brand hover:underline" onClick={() => updateSlot(index, addDefaultEndTime(currentSlot))} type="button">+ Add an end time</button>}
                 </div>
               )}
             </div>
           ))}
-          {values.slots.length < 12 && <Button onClick={() => update({ slots: [...values.slots, defaultSlot] })} type="button" variant="secondary"><Icon name="plus" size={17} /> Add another time</Button>}
+          {values.slots.length < 12 && <button className="inline-flex min-h-9 items-center gap-1.5 text-sm font-semibold text-muted transition hover:text-brand" onClick={() => update({ slots: [...values.slots, defaultSlot] })} type="button"><Icon name="plus" size={16} /> Add another time</button>}
         </fieldset>
       </section>
 
       <section className="rounded-panel bg-canvas p-4">
-        <AssignmentFields members={members} onChange={update} values={values} />
+        <AssignmentFields currentUserId={currentUserId} members={members} onChange={update} values={values} />
       </section>
 
       <details className="group rounded-panel border border-border">

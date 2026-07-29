@@ -266,6 +266,7 @@ Use a bottom navigation bar with:
 Place Households, Members, Categories, Notification Settings, Profile, and PWA installation help under More.
 
 Today must be the default authenticated route.
+Today exposes a prominent New task action in the page header so the primary creation flow is always one step away.
 
 The layout should also work on tablets and desktop browsers, but iPhone usability is the primary target.
 
@@ -469,26 +470,26 @@ Enforce guest restrictions through Row Level Security and transactional function
 
 # 10. Invitations
 
-Full members may invite people by username.
+Full members may invite people with a household join link. Knowing the recipient's username is not required.
 
 Invitation flow:
 
-1. A full member enters a username.
-2. They select Full Member or Guest.
-3. Create a time-limited invitation.
-4. The recipient signs in using the invited username.
-5. The recipient accepts the invitation.
-6. The invitation becomes an active membership.
-7. Expired, reused, revoked, or mismatched invitations fail safely.
+1. A full member selects Full Member or Guest.
+2. They create a time-limited, usage-capped join link.
+3. They share the link through a private channel.
+4. The recipient signs in or creates an account.
+5. A new account retains the link through platform-access approval.
+6. The recipient accepts the invitation and becomes an active member.
+7. Expired, exhausted, or revoked links fail safely.
 
 Store only a cryptographic hash of any invitation token.
 
 Include:
 
-* Pending invitations
-* Invitation expiration
-* Invitation revocation
-* Resending an invitation
+* One current join link per household
+* Link expiration and a bounded usage count
+* Immediate link revocation
+* Replacing a link, which revokes the prior link
 * Prevention of duplicate active memberships
 * Handling an invite for an existing user
 * Handling an invite for a new user
@@ -501,13 +502,16 @@ Full members may create, rename, and soft-delete categories.
 
 Examples:
 
-* Kids
-* Pets
-* Medicine
+* Home
 * Cleaning
 * Errands
-* Home
+* Meals
+* Pets
+* Kids
+* Health & medicine
 * Events
+
+New households receive these categories by default. Existing households receive any missing defaults without replacing or renaming categories their members already created.
 
 A task may have zero or one category in version 1.
 
@@ -1052,6 +1056,8 @@ Default ordering:
 5. Unassigned tasks
 6. Completed tasks
 
+Within each status section, tasks are ordered by household-local due time, with all-day items first.
+
 Completed tasks must remain visible but be:
 
 * Collapsed by default
@@ -1059,7 +1065,7 @@ Completed tasks must remain visible but be:
 * Lower on the page
 * Lower priority than open tasks
 
-Overdue tasks from earlier dates should still appear at the top of Today.
+Today contains only occurrences whose due start falls on the selected calendar date in the household timezone. Earlier overdue work remains available through date navigation and history; it is not mixed into the current date.
 
 Task cards should show:
 
@@ -1067,6 +1073,7 @@ Task cards should show:
 * Title
 * Category icon or badge
 * Due time or window
+* Assigned person's display name, or Unassigned
 * Household when viewing multiple households
 * Assignee
 * Snooze information
@@ -1398,6 +1405,8 @@ guest
 
 ## `household_invitations`
 
+Legacy username-bound invitation records remain supported for already-issued links.
+
 ```text
 id
 household_id
@@ -1410,6 +1419,22 @@ accepted_by
 accepted_at
 revoked_at
 created_at
+```
+
+## `household_join_links`
+
+```text
+id
+household_id
+role
+token_hash
+expires_at
+max_uses
+use_count
+created_by
+revoked_at
+created_at
+updated_at
 ```
 
 ## `categories`

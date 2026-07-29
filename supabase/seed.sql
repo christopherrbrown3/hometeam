@@ -1,6 +1,6 @@
 -- Development-only fixtures for the schema currently present in this repository.
 -- All identifiers and timestamps are fixed so reset produces the same data.
--- Categories and invitations are seeded by their respective later schema work.
+-- Share links are created interactively; household defaults are added below.
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-000000000101', 'alex@example.test'),
@@ -29,6 +29,13 @@ insert into public.households (id, name, timezone, created_by) values
   ('00000000-0000-0000-0000-000000000201', 'Maple Home', 'America/New_York', '00000000-0000-0000-0000-000000000101'),
   ('00000000-0000-0000-0000-000000000202', 'Grandma House', 'America/Los_Angeles', '00000000-0000-0000-0000-000000000103')
 on conflict (id) do nothing;
+
+select private.add_default_categories(household.id, household.created_by)
+from public.households household
+where household.id in (
+  '00000000-0000-0000-0000-000000000201',
+  '00000000-0000-0000-0000-000000000202'
+);
 
 insert into public.household_memberships (id, household_id, user_id, role, invited_by) values
   ('00000000-0000-0000-0000-000000000301', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', 'full_member', '00000000-0000-0000-0000-000000000101'),

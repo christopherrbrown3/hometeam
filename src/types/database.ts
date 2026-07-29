@@ -152,6 +152,63 @@ export type Database = {
           },
         ]
       }
+      household_join_links: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          household_id: string
+          id: string
+          max_uses: number
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["household_member_role"]
+          token_hash: string
+          updated_at: string
+          use_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at: string
+          household_id: string
+          id?: string
+          max_uses?: number
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["household_member_role"]
+          token_hash: string
+          updated_at?: string
+          use_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          household_id?: string
+          id?: string
+          max_uses?: number
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["household_member_role"]
+          token_hash?: string
+          updated_at?: string
+          use_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_join_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "household_join_links_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       household_memberships: {
         Row: {
           created_at: string
@@ -937,6 +994,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_household_join_link: {
+        Args: { input_token: string }
+        Returns: string
+      }
       accept_household_invitation: {
         Args: { input_token: string }
         Returns: string
@@ -1079,6 +1140,20 @@ export type Database = {
           token: string
         }[]
       }
+      create_household_join_link: {
+        Args: {
+          input_expires_in_hours?: number
+          input_household_id: string
+          input_role?: Database["public"]["Enums"]["household_member_role"]
+        }
+        Returns: {
+          expires_at: string
+          join_link_id: string
+          max_uses: number
+          role: Database["public"]["Enums"]["household_member_role"]
+          token: string
+        }[]
+      }
       delete_task_series: {
         Args: { input_series_id: string }
         Returns: Database["public"]["Tables"]["task_series"]["Row"]
@@ -1103,6 +1178,16 @@ export type Database = {
         Returns: {
           is_administrator: boolean
           status: Database["public"]["Enums"]["platform_access_status"]
+        }[]
+      }
+      get_household_join_link_status: {
+        Args: { input_household_id: string }
+        Returns: {
+          expires_at: string
+          join_link_id: string
+          max_uses: number
+          role: Database["public"]["Enums"]["household_member_role"]
+          use_count: number
         }[]
       }
       list_household_invitations: {
@@ -1213,6 +1298,10 @@ export type Database = {
       }
       revoke_household_invitation: {
         Args: { input_invitation_id: string }
+        Returns: undefined
+      }
+      revoke_household_join_link: {
+        Args: { input_join_link_id: string }
         Returns: undefined
       }
       save_task_series: {

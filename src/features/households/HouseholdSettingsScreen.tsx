@@ -31,7 +31,8 @@ export function HouseholdSettingsScreen() {
 
   async function createHousehold(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     setError(null)
     const { data, error: requestError } = await supabase.rpc('create_household', {
       input_name: String(form.get('name') ?? ''), input_timezone: String(form.get('timezone') ?? browserTimezone()),
@@ -39,7 +40,7 @@ export function HouseholdSettingsScreen() {
     if (requestError || !data) { setError(requestError?.message ?? 'We could not create that household.'); return }
     await households.refetch()
     selectHousehold(data.id)
-    event.currentTarget.reset()
+    formElement.reset()
   }
 
   return (
@@ -84,11 +85,12 @@ function HouseholdManagement({ householdId }: Readonly<{ householdId: string }>)
 
   async function createCategory(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const { error: requestError } = await supabase.rpc('create_category', { input_household_id: householdId, input_name: String(form.get('category')) })
     if (requestError) { setError(requestError.message); return }
     await categories.refetch()
-    event.currentTarget.reset()
+    formElement.reset()
   }
 
   return (
@@ -104,7 +106,7 @@ function HouseholdManagement({ householdId }: Readonly<{ householdId: string }>)
       <details className="settings-panel group">
         <summary className="settings-panel-header">
           <span className="settings-panel-icon"><Icon name="inbox" size={19} /></span>
-          <span className="min-w-0 flex-1"><span className="settings-panel-title">Invitations</span><span className="settings-panel-description block">Invite someone with a private link</span></span>
+          <span className="min-w-0 flex-1"><span className="settings-panel-title">Invite people</span><span className="settings-panel-description block">Share one safe link—no usernames needed</span></span>
           <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
         </summary>
         <div className="settings-panel-content border-t border-border pt-4"><InvitationsScreen householdId={householdId} /></div>

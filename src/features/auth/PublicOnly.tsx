@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router'
 import { useSession } from './useSession'
-import { consumeReturnLocation } from './returnLocation'
+import { peekReturnLocation } from './returnLocation'
 import { FullPageState } from '../../components/ui/FullPageState'
 
 export function PublicOnly() {
@@ -10,5 +10,5 @@ export function PublicOnly() {
     return <FullPageState message="Getting HomeTeam ready…" />
   }
 
-  return session ? <Navigate replace to={consumeReturnLocation()} /> : <Outlet />
+  return session ? <Navigate replace to={peekReturnLocation()} /> : <Outlet />
 }
