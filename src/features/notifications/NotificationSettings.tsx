@@ -1,0 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '../../lib/supabase'
+import { useSession } from '../auth/useSession'
+export function NotificationSettings() { const { session } = useSession(); const query = useQuery({ enabled: Boolean(session), queryKey: ['notification-preferences', session?.user.id], queryFn: async () => { const { data, error } = await supabase.from('notification_preferences').select('*').eq('user_id', session!.user.id).maybeSingle(); if (error) throw error; return data } }); return <section className="rounded-panel border border-border p-5"><h2 className="text-lg font-bold">Notifications</h2><p className="mt-1 text-sm text-muted">{query.isPending ? 'Loading preferences…' : query.data ? `Due-soon reminder: ${query.data.due_soon_minutes} minutes` : 'Notification preferences are available after setup.'}</p></section> }

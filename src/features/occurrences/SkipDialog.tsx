@@ -1,0 +1,2 @@
+import { Button } from '../../components/ui/Button'
+export function SkipDialog({ onConfirm }: Readonly<{ onConfirm: () => void }>) { return <section aria-label="Skip task" className="rounded-panel border border-border p-4"><h2 className="font-bold">Skip this task?</h2><p className="mt-1 text-sm text-muted">Skipping is recorded separately from completion.</p><Button onClick={onConfirm}>Skip task</Button></section> }

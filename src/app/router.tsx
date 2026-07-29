@@ -6,9 +6,12 @@ import { PublicOnly } from '../features/auth/PublicOnly'
 import { AppShell } from './AppShell'
 import { AccessGate } from '../features/access/AccessGate'
 import { AccessStatusScreen } from '../features/access/AccessStatusScreen'
-import { HouseholdSettingsScreen } from '../features/households/HouseholdSettingsScreen'
 import { InvitationScreen } from '../features/households/InvitationScreen'
-import { TasksScreen } from '../features/tasks/TasksScreen'
+import { TodayRoute } from '../routes/TodayRoute'
+import { UpcomingRoute } from '../routes/UpcomingRoute'
+import { TasksRoute } from '../routes/TasksRoute'
+import { HistoryRoute } from '../routes/HistoryRoute'
+import { MoreRoute } from '../routes/MoreRoute'
 
 function AppLayout() {
   return (
@@ -59,11 +62,11 @@ export const router = createHashRouter([
             children: [
               { index: true, element: <Navigate replace to="/today" /> },
               { path: 'invite/:token', Component: InvitationScreen },
-              { path: 'today', element: <PlannedRoute title="Today" /> },
-              { path: 'upcoming', element: <PlannedRoute title="Upcoming" /> },
-              { path: 'tasks', Component: TasksScreen },
-              { path: 'history', element: <PlannedRoute title="History" /> },
-              { path: 'more/*', Component: HouseholdSettingsScreen },
+              { path: 'today', Component: TodayRoute },
+              { path: 'upcoming', Component: UpcomingRoute },
+              { path: 'tasks', Component: TasksRoute },
+              { path: 'history', Component: HistoryRoute },
+              { path: 'more/*', Component: MoreRoute },
             ],
           },
         ],
