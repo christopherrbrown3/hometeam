@@ -3,11 +3,43 @@ import type { TaskFormValues } from './taskFormSchema'
 import { RotationRosterEditor } from './RotationRosterEditor'
 
 type AssignmentFieldsProps = Readonly<{
+  currentUserId?: string
   members: readonly HouseholdMember[]
   onChange: (change: Partial<TaskFormValues>) => void
   values: Pick<TaskFormValues, 'assignmentMode' | 'fixedAssigneeId' | 'rotationMemberIds'>
 }>
 
-export function AssignmentFields({ members, onChange, values }: AssignmentFieldsProps) {
-  return <fieldset className="space-y-3"><legend className="text-sm font-semibold">Assignment</legend><label className="block text-sm font-semibold">Mode<select className="mt-1 min-h-11 w-full rounded-control border border-border bg-canvas px-3" onChange={(event) => onChange({ assignmentMode: event.target.value as TaskFormValues['assignmentMode'], fixedAssigneeId: '', rotationMemberIds: event.target.value === 'round_robin' ? values.rotationMemberIds : [] })} value={values.assignmentMode}><option value="unassigned">Unassigned</option><option value="fixed">Fixed person</option><option value="round_robin">Round robin</option></select></label>{values.assignmentMode === 'fixed' && <label className="block text-sm font-semibold">Assigned to<select className="mt-1 min-h-11 w-full rounded-control border border-border bg-canvas px-3" onChange={(event) => onChange({ fixedAssigneeId: event.target.value })} value={values.fixedAssigneeId}><option value="">Choose a household member</option>{members.map((member) => <option key={member.userId} value={member.userId}>{member.displayName} ({member.role === 'guest' ? 'Guest' : 'Member'})</option>)}</select></label>}{values.assignmentMode === 'round_robin' && <RotationRosterEditor members={members} onChange={(rotationMemberIds) => onChange({ rotationMemberIds })} selected={values.rotationMemberIds} />}</fieldset>
+export function AssignmentFields({ currentUserId, members, onChange, values }: AssignmentFieldsProps) {
+  const selected = values.assignmentMode === 'round_robin'
+    ? 'round_robin'
+    : values.assignmentMode === 'fixed' && values.fixedAssigneeId
+      ? `member:${values.fixedAssigneeId}`
+      : 'unassigned'
+
+  function changeAssignment(value: string) {
+    if (value === 'round_robin') {
+      onChange({ assignmentMode: 'round_robin', fixedAssigneeId: '', rotationMemberIds: values.rotationMemberIds })
+    } else if (value.startsWith('member:')) {
+      onChange({ assignmentMode: 'fixed', fixedAssigneeId: value.slice('member:'.length), rotationMemberIds: [] })
+    } else {
+      onChange({ assignmentMode: 'unassigned', fixedAssigneeId: '', rotationMemberIds: [] })
+    }
+  }
+
+  return (
+    <fieldset className="space-y-3">
+      <legend className="text-sm font-semibold">Who should do it?</legend>
+      <select
+        aria-label="Who should do it?"
+        className="min-h-11 w-full rounded-control border border-border bg-surface px-3"
+        onChange={(event) => changeAssignment(event.target.value)}
+        value={selected}
+      >
+        {members.map((member) => <option key={member.userId} value={`member:${member.userId}`}>{member.displayName}{member.userId === currentUserId ? ' (you)' : ''}</option>)}
+        <option value="unassigned">Leave unassigned</option>
+        <option value="round_robin">Rotate between people</option>
+      </select>
+      {values.assignmentMode === 'round_robin' && <RotationRosterEditor members={members} onChange={(rotationMemberIds) => onChange({ rotationMemberIds })} selected={values.rotationMemberIds} />}
+    </fieldset>
+  )
 }

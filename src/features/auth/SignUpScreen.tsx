@@ -1,18 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { Button } from '../../components/ui/Button'
 import { supabase } from '../../lib/supabase'
 import { signUpWithUsernamePassword } from './authService'
 import { AuthPageHeading } from './components/AuthPageHeading'
-import { consumeReturnLocation } from './returnLocation'
+import { peekReturnLocation } from './returnLocation'
 import { signupSchema, type SignUpValues } from './schemas'
 import { AuthFrame } from './components/AuthFrame'
 
 export function SignUpScreen() {
-  const navigate = useNavigate()
   const [signupError, setSignupError] = useState<string | null>(null)
+  const joiningHousehold = peekReturnLocation().startsWith('/join/')
   const { formState: { errors, isSubmitting }, register, handleSubmit } = useForm<SignUpValues>({
     defaultValues: { username: '', password: '', confirmPassword: '' },
     resolver: zodResolver(signupSchema),
@@ -25,12 +25,11 @@ export function SignUpScreen() {
       setSignupError(result.error.message)
       return
     }
-    void navigate(consumeReturnLocation(), { replace: true })
   }
 
   return (
     <AuthFrame>
-      <AuthPageHeading title="Create your account">Choose a username and a password. You can request access after signing in.</AuthPageHeading>
+      <AuthPageHeading title="Create your account">{joiningHousehold ? 'Create an account, then we’ll bring you back to join the household.' : 'Choose a username and a password. You can request access after signing in.'}</AuthPageHeading>
       <form aria-labelledby="auth-page-title" className="mt-8 space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label className="block text-sm font-semibold" htmlFor="username">Username</label>

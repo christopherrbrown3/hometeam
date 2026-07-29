@@ -104,7 +104,7 @@ Completion interval:
 
 ## D-017 — Multi-household Today date
 
-- **Decision:** Each occurrence is classified using its household timezone. The selected Today calendar date is interpreted separately per household; the UI displays a timezone label when the device zone differs.
+- **Decision:** Each occurrence is classified using its household timezone. The selected Today calendar date is interpreted separately per household, and only occurrences on that calendar date appear. Earlier overdue items are not carried into the current date. Within status sections, occurrences are ordered by due time.
 
 ## D-018 — Sensitive notification disclaimer
 
@@ -118,3 +118,9 @@ Completion interval:
 - **Bootstrap:** The initial administrator is configured by authenticated user UUID through a privileged migration parameter or documented one-time SQL operation. The operation atomically creates the administrator, marks that user approved, and appends a bootstrap event. No administrator email is hard-coded.
 - **Invitation behavior:** An invitation preserves intended navigation but cannot be accepted until platform approval.
 - **Audit:** Approval, rejection, suspension, and restoration are transactional and append an immutable platform access event.
+
+## D-021 — Shareable household join links
+
+- **Decision:** The primary invitation flow uses a high-entropy household join link rather than requiring a recipient username.
+- **Safety boundary:** Only a SHA-256 hash is stored. A household has at most one current link; links expire after seven days, allow at most twelve successful joins, and can be revoked or replaced immediately.
+- **Signup continuity:** The intended join route is retained through account creation and private-preview approval. Approval remains mandatory and the bearer link does not reveal household data before acceptance.

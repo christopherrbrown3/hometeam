@@ -7,7 +7,7 @@ export function TaskCard({ occurrence, onOpen }: Readonly<{ occurrence: Occurren
   const state = occurrenceDueState(occurrence)
   const tone = state === 'overdue' ? 'danger' : state === 'due' ? 'warning' : state === 'completed' ? 'success' : 'neutral'
   const due = new Date(occurrence.original_due_start)
-  const dueLabel = due.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+  const dueLabel = due.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: occurrence.householdTimeZone })
 
   return (
     <button className="group flex w-full items-center gap-3 bg-surface p-4 text-left transition-colors duration-200 hover:bg-brand-soft/25" onClick={onOpen} type="button">
@@ -20,8 +20,8 @@ export function TaskCard({ occurrence, onOpen }: Readonly<{ occurrence: Occurren
           {(state === 'overdue' || state === 'due' || state === 'snoozed') && <StatusBadge tone={tone}>{state === 'due' ? 'Due now' : state}</StatusBadge>}
         </span>
         <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-          <span>{state === 'snoozed' ? `Snoozed until ${new Date(occurrence.snoozed_until!).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}` : `Due ${dueLabel}`}</span>
-          {occurrence.assignee_user_id && <span className="inline-flex items-center gap-1"><Icon name="user" size={13} /> Assigned</span>}
+          <span>{state === 'snoozed' ? `Snoozed until ${new Date(occurrence.snoozed_until!).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: occurrence.householdTimeZone })}` : occurrence.is_all_day ? 'All day' : `Due ${dueLabel}`}</span>
+          <span className="inline-flex items-center gap-1"><Icon name="user" size={13} /> {occurrence.assigneeName ?? 'Unassigned'}</span>
         </span>
       </span>
       <Icon className="shrink-0 text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-brand" name="chevron-right" size={18} />

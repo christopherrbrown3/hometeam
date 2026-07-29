@@ -58,7 +58,7 @@ The first production sign-in creates a `pending` access request. Bootstrap that 
 select private.bootstrap_platform_administrator('<authenticated-user-uuid>');
 ```
 
-This database-only operation approves that account and makes it the platform administrator. It is not callable from the browser. The administrator can then approve other preview requests in `#/access`; administrator status never supplies household membership or household-data access. Invitation links are one-time and username-bound. The app copies each newly created link for the full member to deliver through their chosen private channel; HomeTeam deliberately does not send invitation email.
+This database-only operation approves that account and makes it the platform administrator. It is not callable from the browser. The administrator can then approve other preview requests in `#/access`; administrator status never supplies household membership or household-data access. Household join links do not require a recipient username. They expire after seven days, are capped at twelve successful joins, and can be revoked or replaced by a full member. The app copies each new link for delivery through a private channel; HomeTeam deliberately does not send invitation email.
 
 The GitHub Pages workflow uses the base path supplied by GitHub Pages: `/hometeam/` on the default project URL and `/` for `hometeam.christopherbrown.ai`. To verify either layout locally, run `VITE_APP_BASE_PATH=/hometeam/ npm run build` or `VITE_APP_BASE_PATH=/ npm run build` (the legacy `VITE_BASE_PATH` alias is also supported).
 

@@ -7,6 +7,7 @@ import { AppShell } from './AppShell'
 import { AccessGate } from '../features/access/AccessGate'
 import { AccessStatusScreen } from '../features/access/AccessStatusScreen'
 import { InvitationScreen } from '../features/households/InvitationScreen'
+import { JoinHouseholdScreen } from '../features/households/JoinHouseholdScreen'
 import { TodayRoute } from '../routes/TodayRoute'
 import { UpcomingRoute } from '../routes/UpcomingRoute'
 import { TasksRoute } from '../routes/TasksRoute'
@@ -62,6 +63,7 @@ export const router = createHashRouter([
             children: [
               { index: true, element: <Navigate replace to="/today" /> },
               { path: 'invite/:token', Component: InvitationScreen },
+              { path: 'join/:token', Component: JoinHouseholdScreen },
               { path: 'today', Component: TodayRoute },
               { path: 'upcoming', Component: UpcomingRoute },
               { path: 'tasks', Component: TasksRoute },

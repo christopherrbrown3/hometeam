@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { TaskForm } from './TaskForm/TaskForm'
 import { saveTaskSeries } from './taskService'
 import { supabase } from '../../lib/supabase'
@@ -15,7 +16,8 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { LoadingState } from '../../components/ui/LoadingState'
 
 export function TasksScreen() {
-  const [showForm, setShowForm] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [showForm, setShowForm] = useState(() => searchParams.get('new') === '1')
   const { session } = useSession()
   const queryClient = useQueryClient()
   const households = useQuery({ queryKey: ['households'], queryFn: async () => {
@@ -40,6 +42,14 @@ export function TasksScreen() {
     if (error) throw error
     return data
   } })
+  function closeForm() {
+    setShowForm(false)
+    if (searchParams.has('new')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('new')
+      setSearchParams(next, { replace: true })
+    }
+  }
   if (households.isPending) return <section className="page-stack"><LoadingState label="Loading your household…" /></section>
   if (!householdId) return <section className="page-stack"><PageHeader description="Set up a household before creating shared tasks." eyebrow="Task library" title="Tasks" /><EmptyState description="Create a household from More, then come back to build your shared task list." icon="home" title="A household comes first" /></section>
   const canManageAssignments = members.data?.some((member) => member.userId === session?.user.id && member.role === 'full_member') ?? false
@@ -53,7 +63,7 @@ export function TasksScreen() {
   return (
     <section className="page-stack">
       <PageHeader
-        action={<Button onClick={() => setShowForm((current) => !current)} variant={showForm ? 'secondary' : 'primary'}>{showForm ? 'Close' : <><Icon name="plus" size={18} /> New task</>}</Button>}
+        action={<Button onClick={() => showForm ? closeForm() : setShowForm(true)} variant={showForm ? 'secondary' : 'primary'}>{showForm ? 'Close' : <><Icon name="plus" size={18} /> New task</>}</Button>}
         description="Create the routines that keep everyone in sync."
         eyebrow={households.data?.find((item) => item.id === householdId)?.name}
         title="Tasks"
@@ -62,20 +72,21 @@ export function TasksScreen() {
         <div className="mb-7">
           <TaskForm
             categories={categories.data ?? []}
-            householdId={householdId}
+            currentUserId={session?.user.id}
             members={members.data ?? []}
             onSave={async (values) => {
               const saved = await saveTaskSeries(supabase, { ...values, householdId })
               if (values.assignmentMode === 'round_robin') await replaceRotationRoster(supabase, saved.id, values.rotationMemberIds)
               await Promise.all([queryClient.invalidateQueries({ queryKey: ['series', householdId] }), refreshTaskViews()])
-              setShowForm(false)
+              closeForm()
             }}
+            timeZone={households.data?.find((item) => item.id === householdId)?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone}
           />
         </div>
       )}
       {series.isPending && <LoadingState label="Loading tasks…" />}
       {series.isError && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{series.error.message}</p>}
-      {series.data?.length === 0 && <EmptyState action={<Button onClick={() => setShowForm(true)}><Icon name="plus" size={18} /> Add first task</Button>} description="Add a one-time chore or a repeating household routine." icon="list" title="Build your shared list" />}
+      {!showForm && series.data?.length === 0 && <EmptyState action={<Button onClick={() => setShowForm(true)}><Icon name="plus" size={18} /> Add first task</Button>} description="Add a one-time chore or a repeating household routine." icon="list" title="Build your shared list" />}
       <div className="space-y-2">{series.data?.map((task) => <TaskDetails key={task.id} onChanged={() => void queryClient.invalidateQueries({ queryKey: ['series', householdId] })} series={task} />)}</div>
 
       <details className="settings-panel group mt-8">

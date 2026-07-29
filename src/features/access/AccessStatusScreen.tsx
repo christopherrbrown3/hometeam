@@ -9,11 +9,18 @@ import { Button } from '../../components/ui/Button'
 import { HomeMark } from '../../components/ui/HomeMark'
 import { Icon } from '../../components/ui/Icon'
 import { FullPageState } from '../../components/ui/FullPageState'
+import { consumeReturnLocation, peekReturnLocation } from '../auth/returnLocation'
 
 export function AccessStatusScreen({ administratorOnly = false }: Readonly<{ administratorOnly?: boolean }>) {
   const { session } = useSession()
   const [signOutError, setSignOutError] = useState<string | null>(null)
-  const access = useQuery({ queryKey: ['current-access', session?.user.id], queryFn: () => getCurrentAccess(supabase), retry: false })
+  const access = useQuery({
+    queryFn: () => getCurrentAccess(supabase),
+    queryKey: ['current-access', session?.user.id],
+    refetchInterval: (query) => query.state.data?.status === 'approved' ? false : 30_000,
+    retry: false,
+  })
+  const returnLocation = peekReturnLocation()
   const applicants = useQuery({
     enabled: access.data?.isAdministrator === true,
     queryKey: ['access-applicants'],
@@ -54,7 +61,7 @@ export function AccessStatusScreen({ administratorOnly = false }: Readonly<{ adm
           <p className="mt-5 text-sm font-semibold text-sidebar-muted">HomeTeam private preview</p>
           <h1 className="mt-1 text-2xl font-bold capitalize">Your access is {access.data.status}</h1>
           <p className="mt-2 max-w-xl text-sm text-sidebar-muted">{access.data.status === 'approved' ? 'You’re ready to join your household and get things done together.' : 'An administrator will review your account. You can return here to check the latest status.'}</p>
-          {access.data.status === 'approved' && <Link className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-control bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" to="/today">Continue to HomeTeam <Icon name="chevron-right" size={17} /></Link>}
+          {access.data.status === 'approved' && <Link className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-control bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover" onClick={() => consumeReturnLocation()} to={returnLocation}>Continue to HomeTeam <Icon name="chevron-right" size={17} /></Link>}
           {signOutError && <p className="mt-3 text-sm text-white" role="alert">{signOutError}</p>}
         </section>
         {access.data.isAdministrator && (

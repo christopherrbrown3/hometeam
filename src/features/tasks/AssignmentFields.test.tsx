@@ -12,7 +12,7 @@ describe('AssignmentFields', () => {
   it('lets a full member create and reorder an accessible round-robin roster', async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
-    render(<AssignmentFields members={members} onChange={onChange} values={{ assignmentMode: 'round_robin', fixedAssigneeId: '', rotationMemberIds: [members[0]!.userId, members[1]!.userId] }} />)
+    render(<AssignmentFields currentUserId={members[0]!.userId} members={members} onChange={onChange} values={{ assignmentMode: 'round_robin', fixedAssigneeId: '', rotationMemberIds: [members[0]!.userId, members[1]!.userId] }} />)
 
     expect(screen.getByRole('list', { name: 'Rotation order' })).toHaveTextContent('1. Alex')
     await user.click(screen.getByRole('button', { name: 'Move Grandma earlier' }))

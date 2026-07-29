@@ -12,6 +12,7 @@ export type HouseholdMember = Readonly<{
 }>
 
 export type HouseholdInvitation = Database['public']['Functions']['list_household_invitations']['Returns'][number]
+export type HouseholdJoinLinkStatus = Database['public']['Functions']['get_household_join_link_status']['Returns'][number]
 
 export async function listHouseholdMembers(client: HomeTeamClient, householdId: string): Promise<HouseholdMember[]> {
   const { data: memberships, error: membershipError } = await client
@@ -56,5 +57,25 @@ export async function createInvitation(
 
 export async function revokeInvitation(client: HomeTeamClient, invitationId: string) {
   const { error } = await client.rpc('revoke_household_invitation', { input_invitation_id: invitationId })
+  if (error) throw error
+}
+
+export async function getHouseholdJoinLinkStatus(client: HomeTeamClient, householdId: string) {
+  const { data, error } = await client.rpc('get_household_join_link_status', { input_household_id: householdId })
+  if (error) throw error
+  return data[0] ?? null
+}
+
+export async function createHouseholdJoinLink(client: HomeTeamClient, householdId: string, role: MemberRole) {
+  const { data, error } = await client.rpc('create_household_join_link', {
+    input_household_id: householdId,
+    input_role: role,
+  })
+  if (error || !data[0]) throw error ?? new Error('The join link could not be created.')
+  return data[0]
+}
+
+export async function revokeHouseholdJoinLink(client: HomeTeamClient, joinLinkId: string) {
+  const { error } = await client.rpc('revoke_household_join_link', { input_join_link_id: joinLinkId })
   if (error) throw error
 }

@@ -1,11 +1,14 @@
 import type { Database } from '../../types/database'
+import type { IsoDate } from '../recurrence/types'
 import { occurrenceDueState, type DisplayDueState } from './dueState'
 
 type Occurrence = Database['public']['Tables']['task_occurrences']['Row']
 
 export type OccurrenceFilters = Readonly<{
   assigneeId?: string
+  date?: IsoDate
   householdId?: string
+  householdTimeZone?: string
   mine?: boolean
   status?: DisplayDueState | 'all'
   unassigned?: boolean

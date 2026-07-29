@@ -1,15 +1,17 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { Navigate, Outlet } from 'react-router'
+import { Navigate, Outlet, useLocation } from 'react-router'
 import { clearSessionData } from '../../app/sessionCleanup'
 import { supabase } from '../../lib/supabase'
 import { useSession } from '../auth/useSession'
 import { getCurrentAccess } from './accessService'
 import { FullPageState } from '../../components/ui/FullPageState'
 import { HomeMark } from '../../components/ui/HomeMark'
+import { consumeReturnLocation, saveReturnLocation } from '../auth/returnLocation'
 
 export function AccessGate() {
   const { session } = useSession()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const access = useQuery({
     enabled: Boolean(session),
@@ -20,7 +22,9 @@ export function AccessGate() {
   })
 
   useEffect(() => {
-    if (access.data && access.data.status !== 'approved') {
+    if (access.data?.status === 'approved') {
+      consumeReturnLocation()
+    } else if (access.data) {
       clearSessionData(queryClient)
     }
   }, [access.data, queryClient])
@@ -37,5 +41,6 @@ export function AccessGate() {
     return <Outlet />
   }
 
+  saveReturnLocation(location.pathname, location.search)
   return <Navigate replace to="/access" />
 }

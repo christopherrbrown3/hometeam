@@ -57,3 +57,10 @@ export function formatInHouseholdTime(instant: Date | string, timeZone: string) 
 export function householdDateAt(instant: Date | string, timeZone: string): IsoDate {
   return localParts(new Date(instant), timeZone).date
 }
+
+export function nextIsoDate(date: IsoDate): IsoDate {
+  const value = new Date(`${date}T00:00:00Z`)
+  if (Number.isNaN(value.getTime())) throw new Error('Invalid household date.')
+  value.setUTCDate(value.getUTCDate() + 1)
+  return value.toISOString().slice(0, 10) as IsoDate
+}

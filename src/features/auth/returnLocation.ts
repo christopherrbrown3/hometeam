@@ -7,10 +7,12 @@ function isAllowedIntendedRoute(route: string) {
     route === '/today' ||
     route === '/upcoming' ||
     route === '/tasks' ||
+    route === '/tasks?new=1' ||
     route === '/history' ||
     route === '/more' ||
     route.startsWith('/more/') ||
-    /^\/invite\/[^/?#]+$/.test(route)
+    /^\/invite\/[^/?#]+$/.test(route) ||
+    /^\/join\/[^/?#]+$/.test(route)
   )
 }
 
@@ -34,5 +36,11 @@ export function consumeReturnLocation() {
   const route = window.sessionStorage.getItem(intendedRouteStorageKey)
   window.sessionStorage.removeItem(intendedRouteStorageKey)
 
+  return route && isAllowedIntendedRoute(route) ? route : defaultAuthenticatedRoute
+}
+
+export function peekReturnLocation() {
+  if (!canUseSessionStorage()) return defaultAuthenticatedRoute
+  const route = window.sessionStorage.getItem(intendedRouteStorageKey)
   return route && isAllowedIntendedRoute(route) ? route : defaultAuthenticatedRoute
 }
