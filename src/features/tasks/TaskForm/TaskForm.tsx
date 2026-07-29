@@ -13,8 +13,10 @@ import { householdDateAt } from '../../../lib/householdTime'
 export type TaskFormProps = Readonly<{
   categories: readonly Readonly<{ id: string; name: string }>[]
   currentUserId?: string
+  formTitle?: string
   initialValue?: Partial<TaskFormValues>
   members: readonly HouseholdMember[]
+  onCancel?: () => void
   onSave: (values: TaskFormValues) => Promise<void>
   timeZone: string
 }>
@@ -28,11 +30,18 @@ function defaultValues(initial: Partial<TaskFormValues> | undefined, currentUser
   } as TaskFormValues
 }
 
-export function TaskForm({ categories, currentUserId, initialValue, members, onSave, timeZone }: TaskFormProps) {
+export function TaskForm({ categories, currentUserId, formTitle = 'New household task', initialValue, members, onCancel, onSave, timeZone }: TaskFormProps) {
   const [values, setValues] = useState<TaskFormValues>(() => defaultValues(initialValue, currentUserId, timeZone))
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   function update(next: Partial<TaskFormValues>) { setValues((current) => ({ ...current, ...next }) as TaskFormValues) }
+  function updateEffectiveFrom(effectiveFrom: string) {
+    const dayOfMonth = new Date(`${effectiveFrom}T12:00:00`).getDate()
+    const recurrenceConfig = values.recurrenceType === 'calendar' && values.recurrenceConfig.frequency === 'monthly'
+      ? { ...values.recurrenceConfig, dayOfMonth }
+      : values.recurrenceConfig
+    update({ effectiveFrom, recurrenceConfig } as Partial<TaskFormValues>)
+  }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(null)
     const parsed = taskFormSchema.safeParse(values)
@@ -44,7 +53,7 @@ export function TaskForm({ categories, currentUserId, initialValue, members, onS
   return (
     <form className="space-y-5 rounded-panel border border-border bg-surface p-5 sm:p-6" onSubmit={(event) => void submit(event)}>
       <div>
-        <p className="text-sm font-semibold text-brand">New household task</p>
+        <p className="text-sm font-semibold text-brand">{formTitle}</p>
         <h2 className="mt-1 text-xl font-bold">What needs doing?</h2>
       </div>
 
@@ -69,10 +78,10 @@ export function TaskForm({ categories, currentUserId, initialValue, members, onS
           </label>
           <label className="block text-sm font-semibold">
             {values.recurrenceType === 'one_time' ? 'Due date' : 'Starts on'}
-            <input className="mt-1.5 min-h-11 w-full rounded-control border px-3" onInput={(event) => update({ effectiveFrom: event.currentTarget.value })} required type="date" value={values.effectiveFrom} />
+            <input className="mt-1.5 min-h-11 w-full rounded-control border px-3" onInput={(event) => updateEffectiveFrom(event.currentTarget.value)} required type="date" value={values.effectiveFrom} />
           </label>
         </div>
-        <ScheduleFields onChange={(recurrenceConfig) => update({ recurrenceConfig } as Partial<TaskFormValues>)} recurrenceType={values.recurrenceType} value={values.recurrenceConfig} />
+        <ScheduleFields defaultMonthDay={new Date(`${values.effectiveFrom}T12:00:00`).getDate()} defaultWeekday={new Date(`${values.effectiveFrom}T12:00:00`).getDay()} onChange={(recurrenceConfig) => update({ recurrenceConfig } as Partial<TaskFormValues>)} recurrenceType={values.recurrenceType} value={values.recurrenceConfig} />
         <fieldset className="space-y-3">
           <legend className="text-sm font-semibold">When is it due?</legend>
           {values.slots.map((currentSlot, index) => (
@@ -105,20 +114,22 @@ export function TaskForm({ categories, currentUserId, initialValue, members, onS
         <AssignmentFields currentUserId={currentUserId} members={members} onChange={update} values={values} />
       </section>
 
+      <section className="space-y-4 rounded-panel bg-canvas p-4" aria-labelledby="task-details-section-title">
+        <div><h3 className="font-semibold" id="task-details-section-title">Task details</h3><p className="mt-0.5 text-sm text-muted">Add context so everyone knows what to do.</p></div>
+        <label className="block text-sm font-semibold">Category<select className="mt-1.5 min-h-11 w-full rounded-control border px-3" onChange={(event) => update({ categoryId: event.target.value })} value={values.categoryId}><option value="">Uncategorized</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+        <label className="block text-sm font-semibold">Description <span className="font-normal text-muted">(optional)</span><textarea className="mt-1.5 min-h-20 w-full rounded-control border px-3 py-2" onChange={(event) => update({ description: event.target.value })} value={values.description} /></label>
+        <label className="flex min-h-11 items-center gap-2 text-sm font-semibold"><input checked={values.confirmationRequired} onChange={(event) => update({ confirmationRequired: event.target.checked })} type="checkbox" />Ask for confirmation before completing</label>
+      </section>
+
       <details className="group rounded-panel border border-border">
-        <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 font-semibold">
-          More options
-          <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
-        </summary>
+        <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 font-semibold">More scheduling options<Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} /></summary>
         <div className="space-y-4 border-t border-border p-4">
-          <label className="block text-sm font-semibold">Description <span className="font-normal text-muted">(optional)</span><textarea className="mt-1.5 min-h-20 w-full rounded-control border px-3 py-2" onChange={(event) => update({ description: event.target.value })} value={values.description} /></label>
-          <label className="block text-sm font-semibold">Category<select className="mt-1.5 min-h-11 w-full rounded-control border px-3" onChange={(event) => update({ categoryId: event.target.value })} value={values.categoryId}><option value="">Uncategorized</option>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-          <label className="flex min-h-11 items-center gap-2 text-sm font-semibold"><input checked={values.confirmationRequired} onChange={(event) => update({ confirmationRequired: event.target.checked })} type="checkbox" />Ask for confirmation before completing</label>
+          <label className="block text-sm font-semibold">If this task is missed<select className="mt-1.5 min-h-11 w-full rounded-control border px-3" onChange={(event) => update({ missedPolicy: event.target.value as TaskFormValues['missedPolicy'] })} value={values.missedPolicy}><option value="keep_overdue">Keep it visible until someone handles it</option><option value="skip_when_next_occurrence_begins">Skip it when the next one starts</option><option value="keep_newest">Keep only the newest open one</option></select></label>
         </div>
       </details>
 
       {error && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{error}</p>}
-      <Button className="w-full sm:w-auto" disabled={saving} type="submit">{saving ? 'Saving…' : 'Save task'}</Button>
+      <div className="flex flex-wrap gap-3"><Button className="w-full sm:w-auto" disabled={saving} type="submit">{saving ? 'Saving…' : formTitle === 'Edit task' ? 'Save changes' : 'Save task'}</Button>{onCancel && <Button disabled={saving} onClick={onCancel} type="button" variant="secondary">Cancel</Button>}</div>
     </form>
   )
 }

@@ -22,7 +22,7 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
   if (householdsError) throw householdsError
   const timeZones = new Map(households.map((household) => [household.id, household.timezone]))
 
-  let request = client.from('task_occurrences').select('*').in('lifecycle_state', ['open', 'completed']).order('original_due_start').limit(200)
+  let request = client.from('task_occurrences').select('*').in('lifecycle_state', ['open', 'completed']).order('original_due_start')
   if (filters.householdId) request = request.eq('household_id', filters.householdId)
   if (filters.date && timeZones.size) {
     const selectedDate = filters.date

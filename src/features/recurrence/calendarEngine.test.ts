@@ -21,4 +21,13 @@ describe('calendar recurrence engine', () => {
     expect(() => buildCalendarOccurrenceSeeds({ frequency: 'weekly', version: 1 }, [{ isAllDay: true }], '2026-03-02', '2026-03-03')).toThrow('Choose at least one weekday')
     expect(occurrenceKey('2026-03-02', { isAllDay: true }, 0)).toBe('2026-03-02|all-day|0|0')
   })
+
+  it('uses the last day when a monthly date does not exist', () => {
+    const seeds = buildCalendarOccurrenceSeeds(
+      { dayOfMonth: 31, frequency: 'monthly', version: 1 },
+      [{ isAllDay: true }],
+      '2026-02-01', '2026-04-30',
+    )
+    expect(seeds.map((seed) => seed.localDate)).toEqual(['2026-02-28', '2026-03-31', '2026-04-30'])
+  })
 })

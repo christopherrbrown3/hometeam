@@ -19,14 +19,9 @@ select ok(
   'weekly recurrence contract rejects an empty weekday set'
 );
 
-select throws_ok(
-  $$
-    insert into public.task_series (household_id, title, series_type, recurrence_type, recurrence_config, effective_from, created_by)
-    values ('00000000-0000-0000-0000-000000000201', 'Invalid recurrence', 'recurring', 'calendar', '{"version":1,"frequency":"monthly"}', '2026-01-01', '00000000-0000-0000-0000-000000000101')
-  $$,
-  '23514',
-  'new row for relation "task_series" violates check constraint "task_series_recurrence_contract_valid"',
-  'invalid recurrence JSON cannot enter the database'
+select ok(
+  public.validate_recurrence_config('{"version":1,"frequency":"monthly","dayOfMonth":31}'::jsonb, 'calendar', 'recurring'),
+  'monthly recurrence accepts a valid day of the month'
 );
 
 select throws_ok(

@@ -9,7 +9,8 @@ export type ScheduleSlot = Readonly<{
 }>
 
 export type CalendarRecurrence = Readonly<{
-  frequency: 'daily' | 'weekly'
+  dayOfMonth?: number
+  frequency: 'daily' | 'weekly' | 'monthly'
   version: 1
   weekdays?: readonly number[]
 }>

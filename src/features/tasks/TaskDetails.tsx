@@ -1,8 +1,9 @@
 import type { Database } from '../../types/database'
+import { Button } from '../../components/ui/Button'
 import { Icon } from '../../components/ui/Icon'
 import { SeriesActions } from './SeriesActions'
 
-export function TaskDetails({ series, onChanged }: Readonly<{ series: Database['public']['Tables']['task_series']['Row']; onChanged: () => void }>) {
+export function TaskDetails({ series, onChanged, onEdit }: Readonly<{ series: Database['public']['Tables']['task_series']['Row']; onChanged: () => void; onEdit: () => void }>) {
   return (
     <details className="settings-panel group">
       <summary className="settings-panel-header">
@@ -19,7 +20,7 @@ export function TaskDetails({ series, onChanged }: Readonly<{ series: Database['
           <div><dt className="text-muted">Assignment</dt><dd className="mt-0.5 font-medium capitalize">{series.assignment_mode.replaceAll('_', ' ')}</dd></div>
           <div><dt className="text-muted">Missed tasks</dt><dd className="mt-0.5 font-medium capitalize">{series.missed_policy.replaceAll('_', ' ')}</dd></div>
         </dl>
-        <div className="mt-4"><SeriesActions onChanged={onChanged} seriesId={series.id} status={series.series_status} /></div>
+        <div className="mt-4 space-y-3">{series.series_status !== 'deleted' && <Button onClick={onEdit} variant="secondary">Edit task</Button>}<SeriesActions onChanged={onChanged} seriesId={series.id} status={series.series_status} /></div>
       </div>
     </details>
   )
