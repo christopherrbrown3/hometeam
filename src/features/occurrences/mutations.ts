@@ -17,10 +17,9 @@ function useOccurrenceMutation<T extends { occurrenceId: string }>(mutationFn: (
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn,
-    onSuccess: async (result, input) => {
+    onSettled: async (_result, _error, input) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.occurrence(input.occurrenceId) })
       await queryClient.invalidateQueries({ queryKey: ['occurrences'] })
-      if (!result.ok) await queryClient.invalidateQueries({ queryKey: queryKeys.occurrence(input.occurrenceId) })
     },
   })
 }

@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { AuthProvider } from '../features/auth/AuthProvider'
+import { RemoteChangeProvider } from '../features/realtime/RemoteChangeNotice'
 import { createQueryClient } from '../lib/queryClient'
 
 type AppProvidersProps = Readonly<{
@@ -12,7 +13,7 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider><RemoteChangeProvider>{children}</RemoteChangeProvider></AuthProvider>
     </QueryClientProvider>
   )
 }

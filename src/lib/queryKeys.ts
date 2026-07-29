@@ -21,6 +21,10 @@ export type HistoryFilters = Readonly<{
 }>
 
 export const queryKeys = {
+  currentAccess: (userId: string) => ['current-access', userId] as const,
+  households: () => ['households'] as const,
+  members: (householdId: string) => ['members', householdId] as const,
+  upcoming: (householdId?: string) => ['upcoming', householdId] as const,
   profile: (userId: string) => ['profile', userId] as const,
   memberships: (userId: string) => ['memberships', userId] as const,
   household: (householdId: string) => ['household', householdId] as const,

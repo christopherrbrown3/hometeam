@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
+import { purgeProtectedCache } from './protectedCache'
 
 export function clearSessionData(queryClient: QueryClient) {
-  queryClient.clear()
+  void purgeProtectedCache(queryClient)
 }
