@@ -1015,6 +1015,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_occurrence: {
+        Args: { input_expected_version: number; input_occurrence_id: string; input_reason?: string | null }
+        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
+        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
+      }
+      complete_occurrence: {
+        Args: { input_expected_version: number; input_keep_original_rotation?: boolean; input_occurrence_id: string }
+        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
+        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
+      }
       create_category: {
         Args: {
           input_color?: string
@@ -1069,9 +1079,24 @@ export type Database = {
           token: string
         }[]
       }
+      delete_task_series: {
+        Args: { input_series_id: string }
+        Returns: Database["public"]["Tables"]["task_series"]["Row"]
+        SetofOptions: { from: "*"; to: "task_series"; isOneToOne: true; isSetofReturn: false }
+      }
+      edit_task_series: {
+        Args: { input_effective_from?: string; input_patch: Json; input_scope?: string; input_series_id: string }
+        Returns: Database["public"]["Tables"]["task_series"]["Row"]
+        SetofOptions: { from: "*"; to: "task_series"; isOneToOne: true; isSetofReturn: false }
+      }
       generate_calendar_occurrences: {
         Args: { input_from: string; input_through: string }
         Returns: number
+      }
+      reopen_occurrence: {
+        Args: { input_expected_version: number; input_occurrence_id: string }
+        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
+        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
       }
       get_current_access: {
         Args: never
@@ -1094,6 +1119,21 @@ export type Database = {
       next_interval_successor: {
         Args: { input_anchor: string; input_series_id: string }
         Returns: string
+      }
+      skip_occurrence: {
+        Args: { input_expected_version: number; input_occurrence_id: string; input_reason?: string | null }
+        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
+        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
+      }
+      snooze_occurrence: {
+        Args: { input_expected_version: number; input_occurrence_id: string; input_snoozed_until: string }
+        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
+        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
+      }
+      undo_completion: {
+        Args: { input_expected_version: number; input_occurrence_id: string }
+        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
+        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
       }
       pause_task_series: {
         Args: { input_series_id: string }
