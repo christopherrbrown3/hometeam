@@ -4,6 +4,8 @@ import { Button } from '../../components/ui/Button'
 import { supabase } from '../../lib/supabase'
 import { InvitationsScreen } from './InvitationsScreen'
 import { MembersScreen } from './MembersScreen'
+import { Icon } from '../../components/ui/Icon'
+import { LoadingState } from '../../components/ui/LoadingState'
 
 function browserTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
@@ -41,13 +43,38 @@ export function HouseholdSettingsScreen() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl space-y-6">
-      <section><p className="text-sm font-semibold text-brand">Your households</p><h1 className="text-2xl font-bold">Household settings</h1></section>
-      {households.isPending && <p>Loading households…</p>}
-      {households.isError && <p className="text-danger" role="alert">{households.error.message}</p>}
-      {households.data && households.data.length > 0 && <section className="rounded-panel border border-border p-5"><label className="block text-sm font-semibold" htmlFor="household">Current household</label><select className="mt-2 min-h-11 w-full rounded-control border border-border bg-canvas px-3" id="household" onChange={(event) => selectHousehold(event.target.value)} value={selectedHousehold?.id ?? ''}>{households.data.map((household) => <option key={household.id} value={household.id}>{household.name} · {household.timezone}</option>)}</select>{selectedHousehold && <HouseholdManagement householdId={selectedHousehold.id} />}</section>}
-      <form className="space-y-3 rounded-panel border border-border p-5" onSubmit={(event) => void createHousehold(event)}><h2 className="text-xl font-bold">Create a household</h2><label className="block text-sm font-semibold">Name<input className="mt-1 min-h-11 w-full rounded-control border border-border px-3" name="name" required /></label><label className="block text-sm font-semibold">Timezone<input className="mt-1 min-h-11 w-full rounded-control border border-border px-3" defaultValue={browserTimezone()} name="timezone" required /></label>{error && <p className="text-danger" role="alert">{error}</p>}<Button type="submit">Create household</Button></form>
-    </main>
+    <>
+      {households.isPending && <LoadingState label="Loading households…" rows={1} />}
+      {households.isError && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{households.error.message}</p>}
+      {households.data && households.data.length > 0 && (
+        <>
+          <section className="settings-panel">
+            <div className="p-4">
+              <div className="mb-3 flex items-center gap-3">
+                <span className="settings-panel-icon"><Icon name="home" size={19} /></span>
+                <div><h2 className="settings-panel-title">Household</h2><p className="settings-panel-description">Choose the home you’re managing</p></div>
+              </div>
+              <label className="sr-only" htmlFor="household">Current household</label>
+              <select className="min-h-11 w-full rounded-control border px-3" id="household" onChange={(event) => selectHousehold(event.target.value)} value={selectedHousehold?.id ?? ''}>{households.data.map((household) => <option key={household.id} value={household.id}>{household.name} · {household.timezone}</option>)}</select>
+            </div>
+          </section>
+          {selectedHousehold && <HouseholdManagement householdId={selectedHousehold.id} />}
+        </>
+      )}
+      <details className="settings-panel group" open={households.data?.length === 0}>
+        <summary className="settings-panel-header">
+          <span className="settings-panel-icon"><Icon name="plus" size={19} /></span>
+          <span className="min-w-0 flex-1"><span className="settings-panel-title">Create another household</span><span className="settings-panel-description block">Start a separate home task list</span></span>
+          <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
+        </summary>
+        <form className="settings-panel-content space-y-3 border-t border-border pt-4" onSubmit={(event) => void createHousehold(event)}>
+          <label className="block text-sm font-semibold">Name<input className="mt-1 min-h-11 w-full rounded-control border px-3" name="name" placeholder="e.g. Maple Home" required /></label>
+          <label className="block text-sm font-semibold">Timezone<input className="mt-1 min-h-11 w-full rounded-control border px-3" defaultValue={browserTimezone()} name="timezone" required /></label>
+          {error && <p className="text-sm text-danger" role="alert">{error}</p>}
+          <Button type="submit">Create household</Button>
+        </form>
+      </details>
+    </>
   )
 }
 
@@ -64,5 +91,36 @@ function HouseholdManagement({ householdId }: Readonly<{ householdId: string }>)
     event.currentTarget.reset()
   }
 
-  return <div className="mt-6 space-y-6"><MembersScreen householdId={householdId} /><InvitationsScreen householdId={householdId} /><section><h2 className="text-lg font-bold">Categories</h2><form className="mt-2 flex gap-2" onSubmit={(event) => void createCategory(event)}><input className="min-h-11 flex-1 rounded-control border border-border px-3" name="category" placeholder="e.g. Pets" required/><Button type="submit">Add</Button></form><div className="mt-2 flex flex-wrap gap-2">{categories.data?.map((category) => <span className="rounded-full bg-surface-strong px-3 py-1 text-sm" key={category.id}>{category.name}</span>)}</div></section>{error && <p className="text-danger" role="alert">{error}</p>}</div>
+  return (
+    <>
+      <details className="settings-panel group">
+        <summary className="settings-panel-header">
+          <span className="settings-panel-icon"><Icon name="users" size={19} /></span>
+          <span className="min-w-0 flex-1"><span className="settings-panel-title">Members</span><span className="settings-panel-description block">People who share this household</span></span>
+          <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
+        </summary>
+        <div className="settings-panel-content border-t border-border pt-4"><MembersScreen householdId={householdId} /></div>
+      </details>
+      <details className="settings-panel group">
+        <summary className="settings-panel-header">
+          <span className="settings-panel-icon"><Icon name="inbox" size={19} /></span>
+          <span className="min-w-0 flex-1"><span className="settings-panel-title">Invitations</span><span className="settings-panel-description block">Invite someone with a private link</span></span>
+          <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
+        </summary>
+        <div className="settings-panel-content border-t border-border pt-4"><InvitationsScreen householdId={householdId} /></div>
+      </details>
+      <details className="settings-panel group">
+        <summary className="settings-panel-header">
+          <span className="settings-panel-icon"><Icon name="list" size={19} /></span>
+          <span className="min-w-0 flex-1"><span className="settings-panel-title">Categories</span><span className="settings-panel-description block">Organize tasks into simple groups</span></span>
+          <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
+        </summary>
+        <section className="settings-panel-content border-t border-border pt-4">
+          <form className="flex gap-2" onSubmit={(event) => void createCategory(event)}><input aria-label="New category" className="min-h-11 min-w-0 flex-1 rounded-control border px-3" name="category" placeholder="e.g. Pets" required /><Button type="submit">Add</Button></form>
+          <div className="mt-3 flex flex-wrap gap-2">{categories.data?.map((category) => <span className="rounded-full bg-surface-strong px-3 py-1 text-sm font-medium text-muted" key={category.id}>{category.name}</span>)}</div>
+          {error && <p className="mt-3 text-sm text-danger" role="alert">{error}</p>}
+        </section>
+      </details>
+    </>
+  )
 }

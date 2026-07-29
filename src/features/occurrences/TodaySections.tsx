@@ -6,5 +6,5 @@ const labels: Record<DisplayDueState, string> = { overdue: 'Needs attention', du
 
 export function TodaySections({ occurrences, onOpen }: Readonly<{ occurrences: OccurrenceWithTitle[]; onOpen: (occurrence: OccurrenceWithTitle) => void }>) {
   const groups = (Object.keys(labels) as DisplayDueState[]).map((state) => [state, occurrences.filter((occurrence) => occurrenceDueState(occurrence) === state)] as const).filter(([, items]) => items.length)
-  return <div className="space-y-6">{groups.map(([state, items]) => <section key={state}><h2 className="mb-2 text-sm font-bold uppercase tracking-wide text-muted">{labels[state]} · {items.length}</h2><div className="space-y-2">{items.map((occurrence) => <TaskCard key={occurrence.id} occurrence={occurrence} onOpen={() => onOpen(occurrence)} />)}</div></section>)}</div>
+  return <div className="space-y-7">{groups.map(([state, items]) => <section key={state}><div className="section-heading"><h2>{labels[state]}</h2><span className="section-count">{items.length}</span></div><div className="list-surface">{items.map((occurrence) => <TaskCard key={occurrence.id} occurrence={occurrence} onOpen={() => onOpen(occurrence)} />)}</div></section>)}</div>
 }
