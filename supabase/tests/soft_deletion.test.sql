@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(11);
+select plan(12);
 
 select has_function('public', 'edit_task_series', array['uuid', 'jsonb', 'text', 'timestamptz'], 'edit series scope RPC is present');
 select has_function('public', 'delete_task_series', array['uuid'], 'soft delete RPC is present');
@@ -21,6 +21,7 @@ select lives_ok($$ select public.delete_task_series('00000000-0000-0000-0000-000
 reset role;
 select is((select series_status::text from public.task_series where id = '00000000-0000-0000-0000-000000000401'), 'deleted', 'the series remains as a deleted record');
 select is((select lifecycle_state::text from public.task_occurrences where id = '00000000-0000-0000-0000-000000000799'), 'deleted', 'future open occurrences are soft deleted');
+select is((select lifecycle_state::text from public.task_occurrences where id = '00000000-0000-0000-0000-000000000701'), 'deleted', 'already-due open occurrences are also removed from active task views');
 select is((select lifecycle_state::text from public.task_occurrences where id = '00000000-0000-0000-0000-000000000704'), 'completed', 'completed history is retained');
 select ok(exists (select 1 from public.task_events where series_id = '00000000-0000-0000-0000-000000000401' and event_type = 'series_deleted'), 'soft deletion appends an audit event');
 
