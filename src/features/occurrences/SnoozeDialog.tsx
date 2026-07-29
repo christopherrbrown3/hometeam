@@ -1,0 +1,2 @@
+import { Button } from '../../components/ui/Button'
+export function SnoozeDialog({ onConfirm }: Readonly<{ onConfirm: (minutes: number) => void }>) { return <section aria-label="Snooze task" className="rounded-panel border border-border p-4"><h2 className="font-bold">Snooze</h2><div className="mt-3 flex flex-wrap gap-2">{[10, 30, 60].map((minutes) => <Button key={minutes} onClick={() => onConfirm(minutes)} variant="secondary">{minutes} min</Button>)}</div></section> }

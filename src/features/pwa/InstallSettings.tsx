@@ -1,0 +1,1 @@
+export function InstallSettings() { return <section className="rounded-panel border border-border p-5"><h2 className="text-lg font-bold">Install HomeTeam</h2><p className="mt-1 text-sm text-muted">Use your browser menu and choose “Add to Home Screen” for quick access.</p></section> }

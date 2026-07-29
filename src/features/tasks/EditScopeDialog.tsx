@@ -1,0 +1,3 @@
+import { Button } from '../../components/ui/Button'
+export type EditScope = 'only_this' | 'this_and_future' | 'entire_series'
+export function EditScopeDialog({ onConfirm }: Readonly<{ onConfirm: (scope: EditScope) => void }>) { return <fieldset className="rounded-panel border border-border p-4"><legend className="font-semibold">Apply this change to</legend><div className="mt-2 flex flex-wrap gap-2">{(['only_this', 'this_and_future', 'entire_series'] as const).map((scope) => <Button key={scope} onClick={() => onConfirm(scope)} type="button" variant="secondary">{scope.replaceAll('_', ' ')}</Button>)}</div></fieldset> }

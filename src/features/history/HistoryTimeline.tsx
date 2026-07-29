@@ -1,0 +1,2 @@
+import type { Database } from '../../types/database'
+export function HistoryTimeline({ events }: Readonly<{ events: Database['public']['Tables']['task_events']['Row'][] }>) { return <ol className="space-y-3">{events.map((event) => <li className="rounded-panel border border-border p-4" key={event.id}><p className="font-semibold">{event.event_type.replaceAll('_', ' ')}</p><p className="text-sm text-muted">{new Date(event.created_at).toLocaleString()}</p></li>)}</ol> }

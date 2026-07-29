@@ -1,0 +1,2 @@
+import type { MutationErrorCode } from './mutationContracts'
+export function ConflictNotice({ code }: Readonly<{ code: MutationErrorCode }>) { const message = code === 'stale_version' ? 'This task changed elsewhere. Refreshing the latest state.' : 'This action is not available for the latest task state.'; return <p className="rounded-control bg-warning/12 p-3 text-sm text-warning" role="alert">{message}</p> }
