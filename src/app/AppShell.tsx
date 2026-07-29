@@ -5,6 +5,8 @@ import { getCurrentAccess } from '../features/access/accessService'
 import { signOut } from '../features/auth/authService'
 import { useSession } from '../features/auth/useSession'
 import { supabase } from '../lib/supabase'
+import { useRemoteChangeNotifier } from '../features/realtime/useRemoteChangeNotifier'
+import { useRealtimeSync } from '../features/realtime/useRealtimeSync'
 
 type AppShellProps = Readonly<{
   children: ReactNode
@@ -20,6 +22,8 @@ const navigation = [
 
 export function AppShell({ children }: AppShellProps) {
   const { session } = useSession()
+  const noteOccurrenceChange = useRemoteChangeNotifier()
+  useRealtimeSync(noteOccurrenceChange)
   const [signOutError, setSignOutError] = useState<string | null>(null)
   const access = useQuery({
     enabled: Boolean(session),

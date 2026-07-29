@@ -7,7 +7,7 @@ export function translateOccurrenceRpcError(error: RpcError): MutationResult<nev
   const normalized = message.toLowerCase()
   let code: MutationErrorCode = 'invalid_state'
 
-  if (error.code === '40001') code = 'stale_version'
+  if (error.code === '40001' || normalized.includes('stale')) code = 'stale_version'
   else if (normalized.includes('already completed')) code = 'already_completed'
   else if (normalized.includes('already skipped')) code = 'already_skipped'
   else if (normalized.includes('undo window')) code = 'undo_window_expired'

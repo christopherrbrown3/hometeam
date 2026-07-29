@@ -1,9 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { AuthContext } from '../features/auth/useSession'
 import { AppShell } from './AppShell'
+import { RemoteChangeProvider } from '../features/realtime/RemoteChangeNotice'
+
+vi.mock('../features/realtime/useRealtimeSync', () => ({ useRealtimeSync: vi.fn() }))
 
 function renderShell(isAdministrator = false) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -13,11 +16,9 @@ function renderShell(isAdministrator = false) {
   return render(
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={{ isLoading: false, session: { user: { id: userId } } as never }}>
-        <MemoryRouter initialEntries={['/today']}>
-          <AppShell>
-            <h1>Today</h1>
-          </AppShell>
-        </MemoryRouter>
+        <RemoteChangeProvider><MemoryRouter initialEntries={['/today']}>
+          <AppShell><h1>Today</h1></AppShell>
+        </MemoryRouter></RemoteChangeProvider>
       </AuthContext.Provider>
     </QueryClientProvider>,
   )
