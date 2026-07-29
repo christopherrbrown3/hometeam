@@ -8,6 +8,7 @@ import { signInWithUsernamePassword } from './authService'
 import { AuthPageHeading } from './components/AuthPageHeading'
 import { consumeReturnLocation } from './returnLocation'
 import { loginSchema, type LoginValues } from './schemas'
+import { AuthFrame } from './components/AuthFrame'
 
 export function PasswordLoginScreen() {
   const navigate = useNavigate()
@@ -28,24 +29,24 @@ export function PasswordLoginScreen() {
   }
 
   return (
-    <section aria-labelledby="auth-page-title" className="mx-auto max-w-md py-10">
+    <AuthFrame>
       <AuthPageHeading title="Sign in">Use your HomeTeam username and password.</AuthPageHeading>
       <form aria-labelledby="auth-page-title" className="mt-8 space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label className="block text-sm font-semibold" htmlFor="username">Username</label>
-          <input aria-describedby={errors.username ? 'username-error' : undefined} aria-invalid={Boolean(errors.username)} autoCapitalize="none" autoComplete="username" className="mt-2 min-h-11 w-full rounded-control border border-border bg-canvas px-3 text-ink" id="username" {...register('username')} />
+          <input aria-describedby={errors.username ? 'username-error' : undefined} aria-invalid={Boolean(errors.username)} autoCapitalize="none" autoComplete="username" className="mt-2 min-h-12 w-full rounded-control border px-3.5 text-ink" id="username" placeholder="Your username" {...register('username')} />
           {errors.username && <p className="mt-2 text-sm text-danger" id="username-error">{errors.username.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-semibold" htmlFor="password">Password</label>
-          <input aria-describedby={errors.password ? 'password-error' : undefined} aria-invalid={Boolean(errors.password)} autoComplete="current-password" className="mt-2 min-h-11 w-full rounded-control border border-border bg-canvas px-3 text-ink" id="password" type="password" {...register('password')} />
+          <input aria-describedby={errors.password ? 'password-error' : undefined} aria-invalid={Boolean(errors.password)} autoComplete="current-password" className="mt-2 min-h-12 w-full rounded-control border px-3.5 text-ink" id="password" placeholder="Your password" type="password" {...register('password')} />
           {errors.password && <p className="mt-2 text-sm text-danger" id="password-error">{errors.password.message}</p>}
         </div>
         {signInError && <p className="text-sm text-danger" role="alert">{signInError}</p>}
         <Button className="w-full" disabled={isSubmitting} type="submit">{isSubmitting ? 'Signing in…' : 'Sign in'}</Button>
       </form>
-      <p className="mt-6 text-sm text-muted">Need an account? <Link className="font-semibold text-brand underline" to="/register">Create one</Link>.</p>
-      <p className="mt-3 text-sm text-muted">HomeTeam is an approved-preview service. Signing in does not by itself grant access to household information.</p>
-    </section>
+      <p className="mt-6 text-center text-sm text-muted">Need an account? <Link className="font-semibold text-brand underline underline-offset-2" to="/register">Create one</Link>.</p>
+      <p className="mt-5 rounded-control bg-surface-strong px-3 py-2.5 text-xs leading-relaxed text-muted">HomeTeam is currently in private preview. Account access is approved separately from sign-in.</p>
+    </AuthFrame>
   )
 }

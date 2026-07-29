@@ -8,6 +8,7 @@ import { signUpWithUsernamePassword } from './authService'
 import { AuthPageHeading } from './components/AuthPageHeading'
 import { consumeReturnLocation } from './returnLocation'
 import { signupSchema, type SignUpValues } from './schemas'
+import { AuthFrame } from './components/AuthFrame'
 
 export function SignUpScreen() {
   const navigate = useNavigate()
@@ -28,29 +29,29 @@ export function SignUpScreen() {
   }
 
   return (
-    <section aria-labelledby="auth-page-title" className="mx-auto max-w-md py-10">
+    <AuthFrame>
       <AuthPageHeading title="Create your account">Choose a username and a password. You can request access after signing in.</AuthPageHeading>
       <form aria-labelledby="auth-page-title" className="mt-8 space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label className="block text-sm font-semibold" htmlFor="username">Username</label>
-          <input aria-describedby={errors.username ? 'username-error' : undefined} aria-invalid={Boolean(errors.username)} autoCapitalize="none" autoComplete="username" className="mt-2 min-h-11 w-full rounded-control border border-border bg-canvas px-3 text-ink" id="username" {...register('username')} />
+          <input aria-describedby={errors.username ? 'username-error' : undefined} aria-invalid={Boolean(errors.username)} autoCapitalize="none" autoComplete="username" className="mt-2 min-h-12 w-full rounded-control border px-3.5 text-ink" id="username" placeholder="Choose a username" {...register('username')} />
           <p className="mt-2 text-sm text-muted">3–32 lowercase letters, numbers, hyphens, or underscores.</p>
           {errors.username && <p className="mt-2 text-sm text-danger" id="username-error">{errors.username.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-semibold" htmlFor="password">Password</label>
-          <input aria-describedby={errors.password ? 'password-error' : undefined} aria-invalid={Boolean(errors.password)} autoComplete="new-password" className="mt-2 min-h-11 w-full rounded-control border border-border bg-canvas px-3 text-ink" id="password" type="password" {...register('password')} />
+          <input aria-describedby={errors.password ? 'password-error' : undefined} aria-invalid={Boolean(errors.password)} autoComplete="new-password" className="mt-2 min-h-12 w-full rounded-control border px-3.5 text-ink" id="password" placeholder="Create a password" type="password" {...register('password')} />
           {errors.password && <p className="mt-2 text-sm text-danger" id="password-error">{errors.password.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-semibold" htmlFor="confirm-password">Confirm password</label>
-          <input aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined} aria-invalid={Boolean(errors.confirmPassword)} autoComplete="new-password" className="mt-2 min-h-11 w-full rounded-control border border-border bg-canvas px-3 text-ink" id="confirm-password" type="password" {...register('confirmPassword')} />
+          <input aria-describedby={errors.confirmPassword ? 'confirm-password-error' : undefined} aria-invalid={Boolean(errors.confirmPassword)} autoComplete="new-password" className="mt-2 min-h-12 w-full rounded-control border px-3.5 text-ink" id="confirm-password" placeholder="Repeat your password" type="password" {...register('confirmPassword')} />
           {errors.confirmPassword && <p className="mt-2 text-sm text-danger" id="confirm-password-error">{errors.confirmPassword.message}</p>}
         </div>
         {signupError && <p className="text-sm text-danger" role="alert">{signupError}</p>}
         <Button className="w-full" disabled={isSubmitting} type="submit">{isSubmitting ? 'Creating account…' : 'Create account'}</Button>
       </form>
-      <p className="mt-6 text-sm text-muted">Already have an account? <Link className="font-semibold text-brand underline" to="/login">Sign in</Link>.</p>
-    </section>
+      <p className="mt-6 text-center text-sm text-muted">Already have an account? <Link className="font-semibold text-brand underline underline-offset-2" to="/login">Sign in</Link>.</p>
+    </AuthFrame>
   )
 }

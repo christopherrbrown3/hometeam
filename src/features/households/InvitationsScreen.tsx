@@ -44,10 +44,10 @@ export function InvitationsScreen({ householdId }: Readonly<{ householdId: strin
 
   return (
     <section>
-      <h2 className="text-lg font-bold">Invite someone</h2>
-      <form className="mt-2 flex flex-wrap gap-2" onSubmit={(event) => void invite(event)}>
-        <input aria-label="Invitation username" autoCapitalize="none" className="min-h-11 flex-1 rounded-control border border-border px-3" name="username" placeholder="username" required />
-        <select aria-label="Member role" className="min-h-11 rounded-control border border-border px-3" defaultValue="full_member" name="role"><option value="full_member">Full member</option><option value="guest">Guest</option></select>
+      <h2 className="sr-only">Invite someone</h2>
+      <form className="grid gap-2 sm:grid-cols-[1fr_auto_auto]" onSubmit={(event) => void invite(event)}>
+        <input aria-label="Invitation username" autoCapitalize="none" className="min-h-11 min-w-0 rounded-control border px-3" name="username" placeholder="Username" required />
+        <select aria-label="Member role" className="min-h-11 rounded-control border px-3" defaultValue="full_member" name="role"><option value="full_member">Full member</option><option value="guest">Guest</option></select>
         <Button type="submit">Create link</Button>
       </form>
       {message && <p className="mt-2 text-sm text-success" role="status">{message}</p>}
@@ -55,7 +55,7 @@ export function InvitationsScreen({ householdId }: Readonly<{ householdId: strin
       {invitations.isPending && <p className="mt-2 text-sm text-muted">Loading invitations…</p>}
       <ul className="mt-3 space-y-2" aria-label="Household invitations">
         {invitations.data?.map((invitation) => (
-          <li className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-surface-strong px-3 py-2 text-sm" key={invitation.id}>
+          <li className="flex flex-wrap items-center justify-between gap-2 rounded-control bg-canvas px-3 py-2.5 text-sm" key={invitation.id}>
             <span>@{invitation.invited_username} · {invitation.role.replace('_', ' ')} · {invitation.status}</span>
             {invitation.status === 'active' && <span className="flex gap-2"><Button onClick={() => void copyNewInvitation(invitation.invited_username, invitation.role)} variant="secondary">Copy new link</Button><Button onClick={() => void revoke(invitation.id)} variant="danger">Revoke</Button></span>}
           </li>

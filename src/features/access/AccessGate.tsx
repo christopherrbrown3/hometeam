@@ -5,6 +5,8 @@ import { clearSessionData } from '../../app/sessionCleanup'
 import { supabase } from '../../lib/supabase'
 import { useSession } from '../auth/useSession'
 import { getCurrentAccess } from './accessService'
+import { FullPageState } from '../../components/ui/FullPageState'
+import { HomeMark } from '../../components/ui/HomeMark'
 
 export function AccessGate() {
   const { session } = useSession()
@@ -24,11 +26,11 @@ export function AccessGate() {
   }, [access.data, queryClient])
 
   if (access.isPending) {
-    return <p aria-live="polite">Checking your HomeTeam access…</p>
+    return <FullPageState message="Checking your HomeTeam access…" />
   }
 
   if (access.isError) {
-    return <main><h1>We could not check access</h1><p>{access.error.message}</p></main>
+    return <main className="flex min-h-dvh items-center justify-center bg-canvas p-6"><section className="max-w-md rounded-panel bg-surface p-6 text-center"><HomeMark className="mx-auto text-brand" size={48} /><h1 className="mt-4 text-xl font-bold">We could not check access</h1><p className="mt-2 text-sm text-muted">{access.error.message}</p></section></main>
   }
 
   if (access.data.status === 'approved') {
