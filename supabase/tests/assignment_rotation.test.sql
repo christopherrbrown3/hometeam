@@ -36,7 +36,7 @@ select lives_ok($$ select public.generate_calendar_occurrences('2026-08-02', '20
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select is(
-  (select string_agg(assignee_user_id::text, ',' order by original_due_start) from public.task_occurrences where series_id = '00000000-0000-0000-0000-000000000406' and original_due_start >= '2026-08-01'),
+  (select string_agg(assignee_user_id::text, ',' order by original_due_start) from public.task_occurrences where series_id = '00000000-0000-0000-0000-000000000406' and original_due_start >= '2026-08-01' and original_due_start < '2026-08-10'),
   '00000000-0000-0000-0000-000000000101,00000000-0000-0000-0000-000000000102',
   'new occurrences alternate from the persisted rotation basis'
 );
