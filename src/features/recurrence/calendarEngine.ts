@@ -13,7 +13,10 @@ function formatDate(date: Date): IsoDate {
 }
 
 function includesDate(recurrence: CalendarRecurrence, date: Date) {
-  return recurrence.frequency === 'daily' || recurrence.weekdays?.includes(date.getUTCDay()) === true
+  if (recurrence.frequency === 'daily') return true
+  if (recurrence.frequency === 'weekly') return recurrence.weekdays?.includes(date.getUTCDay()) === true
+  const finalDayOfMonth = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate()
+  return date.getUTCDate() === Math.min(recurrence.dayOfMonth!, finalDayOfMonth)
 }
 
 /** Produces local household dates; timezone resolution happens at the database/client boundary. */
