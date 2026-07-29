@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { addDefaultEndTime, changeSlotEnd, changeSlotStart } from './taskTime'
+import { addDefaultEndTime, changeSlotEnd, changeSlotStart, normalizeDatabaseTime } from './taskTime'
 
 describe('task time helpers', () => {
+  it('normalizes PostgreSQL time values before placing them in the task form', () => {
+    expect(normalizeDatabaseTime('08:30:00')).toBe('08:30')
+    expect(normalizeDatabaseTime('18:05:42')).toBe('18:05')
+    expect(normalizeDatabaseTime(null)).toBeUndefined()
+  })
+
   it('moves the end time by the same offset when the start changes', () => {
     expect(changeSlotStart(
       { endDayOffset: 0, endTime: '10:30', isAllDay: false, startTime: '09:00' },

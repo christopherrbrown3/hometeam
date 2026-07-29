@@ -13,6 +13,7 @@ import { listHouseholdMembers } from '../households/membershipService'
 import { assignOccurrence, claimOccurrence, replaceRotationRoster, setOccurrenceAssignmentLock } from '../occurrences/assignmentService'
 import { OccurrenceAssignmentControls } from '../occurrences/OccurrenceAssignmentControls'
 import type { TaskFormValues } from './taskFormSchema'
+import { normalizeDatabaseTime } from './taskTime'
 import { TaskForm } from './TaskForm/TaskForm'
 import { TaskDetails } from './TaskDetails'
 import { saveTaskSeries } from './taskService'
@@ -39,9 +40,9 @@ function initialTaskValues(series: Series, slots: readonly Slot[], rotationMembe
     seriesType: series.series_type,
     slots: [...slots].sort((left, right) => left.sort_order - right.sort_order).map((slot) => ({
       endDayOffset: slot.end_day_offset as 0 | 1,
-      endTime: slot.local_end_time ?? undefined,
+      endTime: normalizeDatabaseTime(slot.local_end_time),
       isAllDay: slot.is_all_day,
-      startTime: slot.local_start_time ?? undefined,
+      startTime: normalizeDatabaseTime(slot.local_start_time),
     })),
     title: series.title,
   } as unknown as Partial<TaskFormValues>

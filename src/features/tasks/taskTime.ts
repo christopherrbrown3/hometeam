@@ -1,6 +1,12 @@
 import type { ScheduleSlotInput } from '../recurrence/contracts'
 import type { LocalTime } from '../recurrence/types'
 
+export function normalizeDatabaseTime(value: string | null): LocalTime | undefined {
+  if (!value) return undefined
+  const match = /^(\d{2}:\d{2})/.exec(value)
+  return match?.[1] as LocalTime | undefined
+}
+
 function toMinutes(time: string) {
   const [hours, minutes] = time.split(':').map(Number)
   return hours * 60 + minutes
