@@ -257,7 +257,7 @@ sequenceDiagram
     end
 ```
 
-Claim, assign, reassign, complete, undo, reopen, skip, snooze, cancel, and delete all take `expected_version`. The first valid transaction commits; later contenders receive the current record and a typed conflict. Retries are safe only after refetching and explicit user intent.
+Claim, assign, reassign, complete, undo, reopen, skip, snooze, cancel, and delete all take `expected_version`. The first valid transaction commits; later contenders receive the current record and a typed conflict. Retries are safe only after refetching and explicit user intent. The concrete input, authorization, side-effect, and error mapping contract is maintained in `supabase/docs/lifecycle-rpc-contracts.md`; the generated-client boundary validates it in `src/features/occurrences/mutationContracts.ts`.
 
 ## 11. Append-only history
 
