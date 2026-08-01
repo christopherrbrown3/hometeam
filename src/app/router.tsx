@@ -35,6 +35,17 @@ function NotFoundRoute() {
   return <PlannedRoute title="Page not found" />
 }
 
+function routeShareInvite() {
+  if (typeof window === 'undefined' || window.location.hash) return
+
+  const token = new URLSearchParams(window.location.search).get('invite')
+  if (!token) return
+
+  window.history.replaceState(null, '', `${window.location.pathname}#/join/${encodeURIComponent(token)}`)
+}
+
+routeShareInvite()
+
 export const router = createHashRouter([
   {
     Component: PublicOnly,
