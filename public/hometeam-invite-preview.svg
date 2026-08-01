@@ -13,8 +13,8 @@
   </g>
 
   <text x="292" y="165" fill="#00753a" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">HomeTeam</text>
-  <text x="116" y="300" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Join our household</text>
-  <text x="116" y="350" fill="#4f665b" font-family="Arial, Helvetica, sans-serif" font-size="25">Shared tasks, clearer days, less back-and-forth.</text>
+  <text x="116" y="350" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Join our household</text>
+  <text x="116" y="400" fill="#4f665b" font-family="Arial, Helvetica, sans-serif" font-size="25">Shared tasks, clearer days, less back-and-forth.</text>
   <text x="116" y="501" fill="#00753a" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Tasks. Together. Done right.</text>
 
   <rect x="770" y="122" width="290" height="350" rx="24" fill="#cbf2d5"/>
