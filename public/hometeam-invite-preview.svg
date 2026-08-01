@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#082415"/>
+  <circle cx="1080" cy="-10" r="240" fill="#0e4d31"/>
+  <circle cx="1170" cy="570" r="170" fill="#0b3826"/>
+
+  <rect x="58" y="56" width="1084" height="518" rx="30" fill="#f4f9f5"/>
+
+  <g transform="translate(116 112) scale(.31)">
+    <rect width="512" height="512" rx="116" fill="#00753a"/>
+    <path d="M113 246 256 132l143 114" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="34"/>
+    <path d="M147 238v145c0 13 10 23 23 23h172c13 0 23-10 23-23V238" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="34"/>
+    <path d="m188 306 39 39 94-101" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="34"/>
+  </g>
+
+  <text x="292" y="165" fill="#00753a" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700">HomeTeam</text>
+  <text x="116" y="300" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Join our household</text>
+  <text x="116" y="350" fill="#4f665b" font-family="Arial, Helvetica, sans-serif" font-size="25">Shared tasks, clearer days, less back-and-forth.</text>
+  <text x="116" y="501" fill="#00753a" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">Tasks. Together. Done right.</text>
+
+  <rect x="770" y="122" width="290" height="350" rx="24" fill="#cbf2d5"/>
+  <text x="808" y="177" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700">TODAY</text>
+  <path d="M808 207h214" stroke="#9bc9aa" stroke-width="2"/>
+  <circle cx="823" cy="251" r="12" fill="#00753a"/>
+  <path d="m817 251 5 5 9-10" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <text x="850" y="258" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700">Morning reset</text>
+  <circle cx="823" cy="315" r="12" fill="#00753a"/>
+  <path d="m817 315 5 5 9-10" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <text x="850" y="322" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700">Dinner routine</text>
+  <circle cx="823" cy="379" r="12" fill="#fff" stroke="#00753a" stroke-width="3"/>
+  <text x="850" y="386" fill="#12352a" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="700">Bins</text>
+</svg>

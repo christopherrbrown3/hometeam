@@ -6,7 +6,7 @@ import { createHouseholdJoinLink, getHouseholdJoinLinkStatus, revokeHouseholdJoi
 import { Icon } from '../../components/ui/Icon'
 
 function invitationLink(token: string) {
-  return `${window.location.origin}${window.location.pathname}#/join/${token}`
+  return `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(token)}`
 }
 
 export function InvitationsScreen({ householdId }: Readonly<{ householdId: string }>) {
@@ -30,7 +30,11 @@ export function InvitationsScreen({ householdId }: Readonly<{ householdId: strin
 
   async function shareLink(url: string) {
     try {
-      await navigator.share({ title: 'Join my HomeTeam household', url })
+      await navigator.share({
+        title: 'Join my household on HomeTeam',
+        text: 'Join our household on HomeTeam to coordinate tasks together.',
+        url,
+      })
     } catch (cause) {
       if (!(cause instanceof DOMException && cause.name === 'AbortError')) {
         setError('Sharing is unavailable right now. Copy the link instead.')
@@ -85,11 +89,17 @@ export function InvitationsScreen({ householdId }: Readonly<{ householdId: strin
       <p className="mt-2 text-xs leading-relaxed text-muted">For safety, links expire after 7 days, can be used up to 12 times, and can be turned off at any time. Replacing a link disables the old one.</p>
       {shareUrl && (
         <div className="mt-4 rounded-control bg-canvas p-3">
-          <p className="text-xs font-semibold text-muted">Ready to share</p>
+          <div className="flex items-center gap-2">
+            <img alt="" className="h-8 w-8 rounded-control" src="favicon.svg" />
+            <div>
+              <p className="text-xs font-semibold text-ink">Ready to share</p>
+              <p className="text-xs text-muted">Invite someone to join this household.</p>
+            </div>
+          </div>
           <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
             <input className="min-h-11 min-w-0 flex-1 rounded-control border bg-surface px-3 text-sm" onFocus={(event) => event.currentTarget.select()} readOnly value={shareUrl} />
             <Button onClick={() => void copyLink(shareUrl)} variant="secondary">Copy</Button>
-            {'share' in navigator && <Button onClick={() => void shareLink(shareUrl)} variant="secondary">Share</Button>}
+            {typeof navigator.share === 'function' && <Button onClick={() => void shareLink(shareUrl)} variant="secondary">Share</Button>}
           </div>
         </div>
       )}
