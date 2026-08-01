@@ -324,12 +324,74 @@
   .sheet-panel {
     width: min(100%, 36rem);
     max-height: min(85dvh, 46rem);
-    padding: 1.25rem;
+    padding: 0 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
     overflow-y: auto;
     border-radius: 1rem 1rem 0 0;
     background: var(--color-surface);
     box-shadow: 0 -4px 8px oklch(0.16 0.025 155 / 0.14);
     animation: sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sheet-handle {
+    width: 2.75rem;
+    height: 0.25rem;
+    margin: 0.75rem auto 1rem;
+    border-radius: 999px;
+    background: var(--color-border);
+  }
+
+  .sheet-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .sheet-header-copy {
+    min-width: 0;
+  }
+
+  .sheet-header-copy h2 {
+    overflow-wrap: anywhere;
+  }
+
+  .sheet-close {
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    margin: -0.25rem -0.5rem 0 0;
+    border-radius: 999px;
+    color: var(--color-muted);
+    transition: background-color 180ms cubic-bezier(0.22, 1, 0.36, 1), color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .sheet-close:hover {
+    background: var(--color-surface-strong);
+    color: var(--color-ink);
+  }
+
+  .sheet-content {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .sheet-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .sheet-actions > button {
+    width: 100%;
+  }
+
+  .sheet-action-primary {
+    grid-column: 1 / -1;
   }
 
   .auth-page {
@@ -367,6 +429,19 @@
   .sheet-panel {
     border-radius: 1rem;
     animation-name: dialog-in;
+    padding-top: 1.25rem;
+  }
+
+  .sheet-handle {
+    display: none;
+  }
+
+  .sheet-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sheet-action-primary {
+    grid-column: auto;
   }
 
   .auth-page {
