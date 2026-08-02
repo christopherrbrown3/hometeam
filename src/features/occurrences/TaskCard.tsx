@@ -1,5 +1,6 @@
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { Icon } from '../../components/ui/Icon'
+import { CategoryIcon } from '../categories/CategoryIcon'
 import type { OccurrenceWithTitle } from './todayQuery'
 import { occurrenceDueState } from './dueState'
 
@@ -12,7 +13,7 @@ export function TaskCard({ occurrence, onOpen }: Readonly<{ occurrence: Occurren
   return (
     <button className="group flex w-full items-center gap-3 bg-surface p-4 text-left transition-colors duration-200 hover:bg-brand-soft/25" onClick={onOpen} type="button">
       <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-105 ${state === 'completed' ? 'bg-brand text-white' : state === 'overdue' ? 'bg-danger/10 text-danger' : 'bg-brand-soft text-brand'}`}>
-        <Icon name={state === 'completed' ? 'check' : state === 'overdue' ? 'clock' : 'home'} size={19} />
+        <CategoryIcon categoryName={occurrence.categoryName} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">

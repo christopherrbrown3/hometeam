@@ -1,13 +1,14 @@
 import type { Database } from '../../types/database'
 import { Button } from '../../components/ui/Button'
 import { Icon } from '../../components/ui/Icon'
+import { CategoryIcon } from '../categories/CategoryIcon'
 import { SeriesActions } from './SeriesActions'
 
-export function TaskDetails({ series, onChanged, onEdit }: Readonly<{ series: Database['public']['Tables']['task_series']['Row']; onChanged: () => void; onEdit: () => void }>) {
+export function TaskDetails({ categoryName, series, onChanged, onEdit }: Readonly<{ categoryName?: string | null; series: Database['public']['Tables']['task_series']['Row']; onChanged: () => void; onEdit: () => void }>) {
   return (
     <details className="settings-panel group">
       <summary className="settings-panel-header">
-        <span className="settings-panel-icon"><Icon name="check" size={18} /></span>
+        <span className="settings-panel-icon"><CategoryIcon categoryName={categoryName} size={18} /></span>
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{series.title}</span>
           <span className="mt-0.5 block text-xs capitalize text-muted">{series.recurrence_type.replaceAll('_', ' ')} · {series.series_status}</span>
