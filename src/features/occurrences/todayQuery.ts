@@ -7,6 +7,7 @@ import { filterOccurrences, type OccurrenceFilters } from './filters'
 type Client = SupabaseClient<Database>
 export type OccurrenceWithTitle = Database['public']['Tables']['task_occurrences']['Row'] & Readonly<{
   assigneeName: string | null
+  categoryName: string | null
   householdTimeZone: string
   title: string
 }>
@@ -40,7 +41,7 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
   const assigneeIds = [...new Set(data.flatMap((occurrence) => occurrence.assignee_user_id ? [occurrence.assignee_user_id] : []))]
   const [{ data: series, error: seriesError }, { data: profiles, error: profilesError }] = await Promise.all([
     seriesIds.length
-      ? client.from('task_series').select('id, title').in('id', seriesIds)
+      ? client.from('task_series').select('id, title, category_id').in('id', seriesIds)
       : Promise.resolve({ data: [], error: null }),
     assigneeIds.length
       ? client.from('profiles').select('user_id, display_name').in('user_id', assigneeIds)
@@ -48,7 +49,16 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
   ])
   if (seriesError) throw seriesError
   if (profilesError) throw profilesError
+  const categoryIds = [...new Set(series.flatMap((item) => item.category_id ? [item.category_id] : []))]
+  let categories: Array<{ id: string; name: string }> = []
+  if (categoryIds.length) {
+    const { data, error: categoriesError } = await client.from('categories').select('id, name').in('id', categoryIds)
+    if (categoriesError) throw categoriesError
+    categories = data
+  }
   const titles = new Map(series.map((item) => [item.id, item.title]))
+  const seriesById = new Map(series.map((item) => [item.id, item]))
+  const categoryNames = new Map(categories.map((item) => [item.id, item.name]))
   const names = new Map(profiles.map((profile) => [profile.user_id, profile.display_name]))
   const now = new Date()
   return filterOccurrences(data, filters)
@@ -60,6 +70,7 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
     .map((occurrence) => ({
       ...occurrence,
       assigneeName: occurrence.assignee_user_id ? names.get(occurrence.assignee_user_id) ?? 'Household member' : null,
+      categoryName: categoryNames.get(seriesById.get(occurrence.series_id)?.category_id ?? '') ?? null,
       householdTimeZone: timeZones.get(occurrence.household_id) ?? filters.householdTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
       title: titles.get(occurrence.series_id) ?? 'Household task',
     }))

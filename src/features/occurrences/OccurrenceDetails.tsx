@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useCompleteOccurrence, useSkipOccurrence, useSnoozeOccurrence, useUndoCompletion } from './mutations'
 import type { OccurrenceWithTitle } from './todayQuery'
 import { RemoteChangeNotice } from '../realtime/RemoteChangeNotice'
+import { CategoryIcon } from '../categories/CategoryIcon'
 
 export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence: OccurrenceWithTitle; onClose: () => void }>) {
   const [notice, setNotice] = useState<string | null>(null)
@@ -42,10 +43,13 @@ export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence
       <section className="sheet-panel">
         <div aria-hidden="true" className="sheet-handle" />
         <header className="sheet-header">
-          <div className="sheet-header-copy">
-            <p className="text-sm font-semibold text-brand">Task details</p>
-            <h2 className="mt-1 text-xl font-bold" id="occurrence-details-title">{occurrence.title}</h2>
-            <p className="mt-1 text-sm text-muted">Due {new Date(current.original_due_start).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>
+          <div className="sheet-header-copy flex items-start gap-3">
+            <span className="settings-panel-icon mt-0.5 h-10 w-10 rounded-xl"><CategoryIcon categoryName={occurrence.categoryName} size={18} /></span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-brand">Task details</p>
+              <h2 className="mt-1 text-xl font-bold" id="occurrence-details-title">{occurrence.title}</h2>
+              <p className="mt-1 text-sm text-muted">Due {new Date(current.original_due_start).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>
+            </div>
           </div>
           <button aria-label="Close task details" className="sheet-close" onClick={onClose} type="button">
             <Icon name="x" size={20} />

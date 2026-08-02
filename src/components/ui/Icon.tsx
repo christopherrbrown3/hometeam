@@ -8,6 +8,13 @@ export type IconName =
   | 'clock'
   | 'home'
   | 'inbox'
+  | 'shopping-bag'
+  | 'utensils'
+  | 'paw'
+  | 'leaf'
+  | 'trash'
+  | 'briefcase'
+  | 'heart'
   | 'list'
   | 'lock'
   | 'more'
@@ -31,6 +38,13 @@ const paths: Record<IconName, React.ReactNode> = {
   clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
   home: <><path d="m3 11 9-7 9 7" /><path d="M5.5 10v9.5h13V10M9.5 19.5v-6h5v6" /></>,
   inbox: <><path d="M4 5h16l1 10H16l-2 3h-4l-2-3H3L4 5Z" /><path d="M3.5 12H8l2 3h4l2-3h4.5" /></>,
+  'shopping-bag': <><path d="M5 8h14l1 12H4L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></>,
+  utensils: <><path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11M16 3v18M16 3c2 1.5 3 3.5 3 6v2h-3" /></>,
+  paw: <><path d="M8.3 13c-1.6-.2-2.8 1.2-2.3 2.7.4 1.4 1.9 2.1 3.2 1.6l1-.4a5 5 0 0 1 3.6 0l1 .4c1.3.5 2.8-.2 3.2-1.6.5-1.5-.7-2.9-2.3-2.7a3 3 0 0 1-2.8-1.4l-.3-.5a1.9 1.9 0 0 0-3.2 0l-.3.5A3 3 0 0 1 8.3 13Z" /><circle cx="6.5" cy="8" r="1.5" /><circle cx="10" cy="5.5" r="1.5" /><circle cx="14" cy="5.5" r="1.5" /><circle cx="17.5" cy="8" r="1.5" /></>,
+  leaf: <><path d="M20 4C10 4 4 9 4 16c0 2.2 1.8 4 4 4 7 0 12-6 12-16Z" /><path d="M4 20c2-4 5-7 10-9" /></>,
+  trash: <><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></>,
+  briefcase: <><rect height="13" rx="2" width="18" x="3" y="7" /><path d="M9 7V5h6v2M3 12h18M10 12v2h4v-2" /></>,
+  heart: <><path d="M20.8 8.8c0 5.5-8.8 10-8.8 10s-8.8-4.5-8.8-10A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z" /></>,
   list: <><path d="M9 6h11M9 12h11M9 18h11" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>,
   lock: <><rect height="11" rx="2" width="16" x="4" y="10" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
   more: <><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /></>,
