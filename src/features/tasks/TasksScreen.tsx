@@ -10,9 +10,10 @@ import { PageHeader } from '../../components/ui/PageHeader'
 import { supabase } from '../../lib/supabase'
 import { useSession } from '../auth/useSession'
 import { listHouseholdMembers } from '../households/membershipService'
-import { CategoryIcon } from '../categories/CategoryIcon'
+import { TaskIcon } from '../categories/TaskIcon'
 import { assignOccurrence, claimOccurrence, replaceRotationRoster, setOccurrenceAssignmentLock } from '../occurrences/assignmentService'
 import { OccurrenceAssignmentControls } from '../occurrences/OccurrenceAssignmentControls'
+import { assigneeColorFor } from '../profiles/profileColors'
 import type { TaskFormValues } from './taskFormSchema'
 import { normalizeDatabaseTime } from './taskTime'
 import { TaskForm } from './TaskForm/TaskForm'
@@ -150,6 +151,16 @@ export function TasksScreen() {
   if (!householdId) return <section className="page-stack"><PageHeader description="Set up a household before creating shared tasks." eyebrow="Task library" title="Tasks" /><EmptyState description="Create a household from More, then come back to build your shared task list." icon="home" title="A household comes first" /></section>
   const canManageAssignments = members.data?.some((member) => member.userId === session?.user.id && member.role === 'full_member') ?? false
   const categoryNames = new Map((categories.data ?? []).map((category) => [category.id, category.name]))
+  const people = members.data ?? []
+  function taskAssignee(task: Series) {
+    const nextOccurrence = occurrences.data?.find((occurrence) => occurrence.series_id === task.id)
+    const assigneeId = nextOccurrence ? nextOccurrence.assignee_user_id : task.fixed_assignee_id
+    const person = people.find((member) => member.userId === assigneeId)
+    return {
+      color: assigneeColorFor(assigneeId, people),
+      label: person?.displayName ?? (assigneeId ? 'Household member' : task.assignment_mode === 'round_robin' ? 'Round robin' : 'Unassigned'),
+    }
+  }
 
   return (
     <section className="page-stack">
@@ -184,7 +195,10 @@ export function TasksScreen() {
       {series.isPending && <LoadingState label="Loading tasks…" />}
       {series.isError && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{series.error.message}</p>}
       {!showForm && series.data?.length === 0 && <EmptyState action={<Button onClick={openNewTask}><Icon name="plus" size={18} /> Add first task</Button>} description="Add a one-time chore or a repeating household routine." icon="list" title="Build your shared list" />}
-      <div className="space-y-2">{series.data?.map((task) => <TaskDetails categoryName={categoryNames.get(task.category_id ?? '')} key={task.id} onChanged={() => void refreshTaskViews()} onEdit={() => openEditTask(task.id)} series={task} />)}</div>
+      <div className="space-y-2">{series.data?.map((task) => {
+        const assignee = taskAssignee(task)
+        return <TaskDetails assigneeColor={assignee.color} assigneeLabel={assignee.label} categoryName={categoryNames.get(task.category_id ?? '')} key={task.id} onChanged={() => void refreshTaskViews()} onEdit={() => openEditTask(task.id)} series={task} />
+      })}</div>
 
       <details className="settings-panel group mt-8">
         <summary className="settings-panel-header">
@@ -197,7 +211,7 @@ export function TasksScreen() {
           {occurrences.isError && <p className="text-sm text-danger" role="alert">{occurrences.error.message}</p>}
           {occurrences.data?.length === 0 && <p className="text-sm text-muted">No open assignments right now.</p>}
           <ul className="space-y-3">
-            {occurrences.data?.map((occurrence) => <li className="rounded-panel bg-canvas p-4" key={occurrence.id}><div className="flex items-start gap-3"><CategoryIcon categoryName={categoryNames.get(series.data?.find((task) => task.id === occurrence.series_id)?.category_id ?? '')} /><div className="min-w-0 flex-1"><h3 className="font-semibold">{series.data?.find((task) => task.id === occurrence.series_id)?.title ?? 'Task occurrence'}</h3><p className="mt-1 text-sm text-muted">Due {new Date(occurrence.original_due_start).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p></div></div><div className="mt-3"><OccurrenceAssignmentControls canManage={canManageAssignments} members={members.data ?? []} occurrence={occurrence} onAssign={async (assigneeUserId, lock) => { await assignOccurrence(supabase, occurrence.id, assigneeUserId, occurrence.version, lock); await refreshAssignments() }} onClaim={async () => { await claimOccurrence(supabase, occurrence.id, occurrence.version); await refreshAssignments() }} onToggleLock={async (locked) => { await setOccurrenceAssignmentLock(supabase, occurrence.id, occurrence.version, locked); await refreshAssignments() }} /></div></li>)}
+            {occurrences.data?.map((occurrence) => <li className="rounded-panel bg-canvas p-4" key={occurrence.id}><div className="flex items-start gap-3"><TaskIcon assigneeColor={assigneeColorFor(occurrence.assignee_user_id, people)} categoryName={categoryNames.get(series.data?.find((task) => task.id === occurrence.series_id)?.category_id ?? '')} /><div className="min-w-0 flex-1"><h3 className="font-semibold">{series.data?.find((task) => task.id === occurrence.series_id)?.title ?? 'Task occurrence'}</h3><p className="mt-1 text-sm text-muted">Due {new Date(occurrence.original_due_start).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p></div></div><div className="mt-3"><OccurrenceAssignmentControls canManage={canManageAssignments} members={members.data ?? []} occurrence={occurrence} onAssign={async (assigneeUserId, lock) => { await assignOccurrence(supabase, occurrence.id, assigneeUserId, occurrence.version, lock); await refreshAssignments() }} onClaim={async () => { await claimOccurrence(supabase, occurrence.id, occurrence.version); await refreshAssignments() }} onToggleLock={async (locked) => { await setOccurrenceAssignmentLock(supabase, occurrence.id, occurrence.version, locked); await refreshAssignments() }} /></div></li>)}
           </ul>
         </div>
       </details>

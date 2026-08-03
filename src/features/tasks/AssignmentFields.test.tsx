@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { AssignmentFields } from './AssignmentFields'
 
 const members = [
-  { displayName: 'Alex', username: 'alex', role: 'full_member' as const, userId: '00000000-0000-0000-0000-000000000101' },
-  { displayName: 'Grandma', username: 'grandma', role: 'guest' as const, userId: '00000000-0000-0000-0000-000000000103' },
+  { displayName: 'Alex', profileColor: 'blue' as const, username: 'alex', role: 'full_member' as const, userId: '00000000-0000-0000-0000-000000000101' },
+  { displayName: 'Grandma', profileColor: 'green' as const, username: 'grandma', role: 'guest' as const, userId: '00000000-0000-0000-0000-000000000103' },
 ]
 
 describe('AssignmentFields', () => {

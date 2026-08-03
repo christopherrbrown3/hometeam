@@ -5,8 +5,8 @@ import type { Database } from '../../types/database'
 import { OccurrenceAssignmentControls } from './OccurrenceAssignmentControls'
 
 const members = [
-  { displayName: 'Alex', username: 'alex', role: 'full_member' as const, userId: '00000000-0000-0000-0000-000000000101' },
-  { displayName: 'Sam', username: 'sam', role: 'full_member' as const, userId: '00000000-0000-0000-0000-000000000102' },
+  { displayName: 'Alex', profileColor: 'blue' as const, username: 'alex', role: 'full_member' as const, userId: '00000000-0000-0000-0000-000000000101' },
+  { displayName: 'Sam', profileColor: 'pink' as const, username: 'sam', role: 'full_member' as const, userId: '00000000-0000-0000-0000-000000000102' },
 ]
 
 function occurrence(overrides: Partial<Database['public']['Tables']['task_occurrences']['Row']> = {}): Database['public']['Tables']['task_occurrences']['Row'] {

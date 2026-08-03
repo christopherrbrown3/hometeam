@@ -1,17 +1,18 @@
 import type { Database } from '../../types/database'
 import { Button } from '../../components/ui/Button'
 import { Icon } from '../../components/ui/Icon'
-import { CategoryIcon } from '../categories/CategoryIcon'
+import { TaskIcon } from '../categories/TaskIcon'
+import type { AssigneeColor } from '../profiles/profileColors'
 import { SeriesActions } from './SeriesActions'
 
-export function TaskDetails({ categoryName, series, onChanged, onEdit }: Readonly<{ categoryName?: string | null; series: Database['public']['Tables']['task_series']['Row']; onChanged: () => void; onEdit: () => void }>) {
+export function TaskDetails({ assigneeColor, assigneeLabel, categoryName, series, onChanged, onEdit }: Readonly<{ assigneeColor: AssigneeColor; assigneeLabel: string; categoryName?: string | null; series: Database['public']['Tables']['task_series']['Row']; onChanged: () => void; onEdit: () => void }>) {
   return (
     <details className="settings-panel group">
       <summary className="settings-panel-header">
-        <CategoryIcon categoryName={categoryName} />
+        <TaskIcon assigneeColor={assigneeColor} categoryName={categoryName} />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{series.title}</span>
-          <span className="mt-0.5 block text-xs capitalize text-muted">{series.recurrence_type.replaceAll('_', ' ')} · {series.series_status}</span>
+          <span className="mt-0.5 block text-xs text-muted"><span className="capitalize">{series.recurrence_type.replaceAll('_', ' ')}</span> · {assigneeLabel}</span>
         </span>
         <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
       </summary>

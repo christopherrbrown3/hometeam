@@ -545,6 +545,7 @@ export type Database = {
           created_at: string
           detected_timezone: string | null
           display_name: string
+          profile_color: Database["public"]["Enums"]["profile_color"]
           updated_at: string
           user_id: string
           username: string
@@ -553,6 +554,7 @@ export type Database = {
           created_at?: string
           detected_timezone?: string | null
           display_name: string
+          profile_color?: Database["public"]["Enums"]["profile_color"]
           updated_at?: string
           user_id: string
           username: string
@@ -561,6 +563,7 @@ export type Database = {
           created_at?: string
           detected_timezone?: string | null
           display_name?: string
+          profile_color?: Database["public"]["Enums"]["profile_color"]
           updated_at?: string
           user_id?: string
           username?: string
@@ -1437,6 +1440,7 @@ export type Database = {
         | "new_task"
         | "membership_changed"
       platform_access_status: "pending" | "approved" | "rejected" | "suspended"
+      profile_color: "blue" | "pink" | "green" | "orange"
       task_assignment_mode: "fixed" | "unassigned" | "round_robin"
       task_assignment_source:
         | "fixed"
@@ -1628,6 +1632,7 @@ export const Constants = {
         "membership_changed",
       ],
       platform_access_status: ["pending", "approved", "rejected", "suspended"],
+      profile_color: ["blue", "pink", "green", "orange"],
       task_assignment_mode: ["fixed", "unassigned", "round_robin"],
       task_assignment_source: [
         "fixed",

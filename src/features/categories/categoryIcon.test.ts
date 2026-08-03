@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { categoryIconName, categoryIconVisual } from './categoryIconName'
+import { categoryIconName } from './categoryIconName'
 
 describe('categoryIconName', () => {
   it.each([
@@ -27,11 +27,10 @@ describe('categoryIconName', () => {
   it('uses a neutral task icon when no category is assigned', () => {
     expect(categoryIconName(null)).toBe('clipboard')
     expect(categoryIconName('')).toBe('clipboard')
-    expect(categoryIconVisual(undefined).tone).toBe('uncategorized')
+    expect(categoryIconName(undefined)).toBe('clipboard')
   })
 
   it('uses a tag for an unmatched user-created category', () => {
     expect(categoryIconName('Weekend projects')).toBe('tag')
-    expect(categoryIconVisual('Weekend projects').tone).toBe('custom')
   })
 })

@@ -1,11 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '../../types/database'
+import type { ProfileColor } from '../profiles/profileColors'
 
 type HomeTeamClient = SupabaseClient<Database>
 type MemberRole = Database['public']['Enums']['household_member_role']
 
 export type HouseholdMember = Readonly<{
   displayName: string
+  profileColor: ProfileColor
   username: string
   role: MemberRole
   userId: string
@@ -24,13 +26,13 @@ export async function listHouseholdMembers(client: HomeTeamClient, householdId: 
 
   const { data: profiles, error: profileError } = await client
     .from('profiles')
-    .select('user_id, display_name, username')
+    .select('user_id, display_name, username, profile_color')
 
   if (profileError) throw profileError
 
   return memberships.flatMap((membership) => {
     const profile = profiles.find((candidate) => candidate.user_id === membership.user_id)
-    return profile ? [{ displayName: profile.display_name, username: profile.username, role: membership.role, userId: membership.user_id }] : []
+    return profile ? [{ displayName: profile.display_name, profileColor: profile.profile_color, username: profile.username, role: membership.role, userId: membership.user_id }] : []
   })
 }
 
