@@ -17,7 +17,7 @@ export function MembersScreen({ householdId }: Readonly<{ householdId: string }>
       <ul className="space-y-2" aria-label="Household members">
         {members.data.map((member) => (
           <li className="flex items-center justify-between gap-3 rounded-control bg-canvas px-3 py-2.5" key={member.userId}>
-            <span><span className="block font-semibold">{member.displayName}</span><span className="text-sm text-muted">@{member.username}</span></span>
+            <span className="flex min-w-0 items-center gap-2.5"><span aria-hidden="true" className="profile-color-swatch" data-profile-color={member.profileColor} /><span><span className="block font-semibold">{member.displayName}</span><span className="text-sm text-muted">@{member.username}</span></span></span>
             <span className="rounded-full bg-surface-strong px-2.5 py-1 text-xs font-semibold capitalize text-muted">{member.role.replace('_', ' ')}</span>
           </li>
         ))}

@@ -3,12 +3,14 @@ import type { Database } from '../../types/database'
 import { householdDateAt, nextIsoDate, resolveHouseholdDateTime } from '../../lib/householdTime'
 import { dueStateOrder, occurrenceDueState } from './dueState'
 import { filterOccurrences, type OccurrenceFilters } from './filters'
+import { assigneeColorFor, type AssigneeColor } from '../profiles/profileColors'
 
 type Client = SupabaseClient<Database>
 type SeriesCategory = Readonly<{ category_id: string | null; id: string }>
 type Category = Readonly<{ id: string; name: string }>
 
 export type OccurrenceWithTitle = Database['public']['Tables']['task_occurrences']['Row'] & Readonly<{
+  assigneeColor: AssigneeColor
   assigneeName: string | null
   categoryName: string | null
   householdTimeZone: string
@@ -52,7 +54,7 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
       ? client.from('task_series').select('id, title, category_id').in('id', seriesIds)
       : Promise.resolve({ data: [], error: null }),
     assigneeIds.length
-      ? client.from('profiles').select('user_id, display_name').in('user_id', assigneeIds)
+      ? client.from('profiles').select('user_id, display_name, profile_color').in('user_id', assigneeIds)
       : Promise.resolve({ data: [], error: null }),
   ])
   if (seriesError) throw seriesError
@@ -67,6 +69,7 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
   const titles = new Map(series.map((item) => [item.id, item.title]))
   const categoryNames = categoryNamesBySeries(series, categories)
   const names = new Map(profiles.map((profile) => [profile.user_id, profile.display_name]))
+  const people = profiles.map((profile) => ({ profileColor: profile.profile_color, userId: profile.user_id }))
   const now = new Date()
   return filterOccurrences(data, filters)
     .filter((occurrence) => !filters.date || occurrenceFallsOnDate(
@@ -76,6 +79,7 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
     ))
     .map((occurrence) => ({
       ...occurrence,
+      assigneeColor: assigneeColorFor(occurrence.assignee_user_id, people),
       assigneeName: occurrence.assignee_user_id ? names.get(occurrence.assignee_user_id) ?? 'Household member' : null,
       categoryName: categoryNames.get(occurrence.series_id) ?? null,
       householdTimeZone: timeZones.get(occurrence.household_id) ?? filters.householdTimeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,

@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useCompleteOccurrence, useSkipOccurrence, useSnoozeOccurrence, useUndoCompletion } from './mutations'
 import type { OccurrenceWithTitle } from './todayQuery'
 import { RemoteChangeNotice } from '../realtime/RemoteChangeNotice'
-import { CategoryIcon } from '../categories/CategoryIcon'
+import { TaskIcon } from '../categories/TaskIcon'
 
 export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence: OccurrenceWithTitle; onClose: () => void }>) {
   const [notice, setNotice] = useState<string | null>(null)
@@ -44,11 +44,12 @@ export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence
         <div aria-hidden="true" className="sheet-handle" />
         <header className="sheet-header">
           <div className="sheet-header-copy flex items-start gap-3">
-            <CategoryIcon categoryName={occurrence.categoryName} className="mt-0.5" size="lg" />
+            <TaskIcon assigneeColor={occurrence.assigneeColor} categoryName={occurrence.categoryName} className="mt-0.5" size="lg" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-brand">Task details</p>
               <h2 className="mt-1 text-xl font-bold" id="occurrence-details-title">{occurrence.title}</h2>
               <p className="mt-1 text-sm text-muted">Due {new Date(current.original_due_start).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>
+              <p className="mt-1 inline-flex items-center gap-1 text-sm text-muted"><Icon name="user" size={15} weight="duotone" /> {occurrence.assigneeName ?? 'Unassigned'}</p>
             </div>
           </div>
           <button aria-label="Close task details" className="sheet-close" onClick={onClose} type="button">

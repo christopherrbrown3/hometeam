@@ -1,5 +1,5 @@
 import { Icon } from '../../components/ui/Icon'
-import { CategoryIcon } from '../categories/CategoryIcon'
+import { TaskIcon } from '../categories/TaskIcon'
 import type { HistoryEvent } from './historyService'
 
 const labels: Record<HistoryEvent['event_type'], string> = {
@@ -45,10 +45,11 @@ export function HistoryTimeline({ events }: Readonly<{ events: HistoryEvent[] }>
             <span className="absolute -left-4 top-0 inline-flex h-8 w-8 items-center justify-center rounded-full border-4 border-canvas bg-brand-soft text-brand"><Icon name={event.event_type === 'completed' ? 'check' : 'activity'} size={15} /></span>
             <div className="rounded-panel bg-surface px-4 py-3">
               <div className="flex items-start gap-3">
-                <CategoryIcon categoryName={event.categoryName} size="sm" />
+                <TaskIcon assigneeColor={event.assigneeColor} categoryName={event.categoryName} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-ink">{labels[event.event_type]}</p>
                   <p className="mt-1 text-sm font-medium text-ink">{event.seriesTitle}</p>
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-sm text-muted"><Icon name="user" size={14} weight="duotone" /> {event.assigneeName ?? 'Unassigned'}</p>
                   {event.occurrenceDueStart && <p className="mt-0.5 text-sm text-muted">Scheduled for {new Date(event.occurrenceDueStart).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>}
                   {detail && <p className="mt-0.5 text-sm text-muted">{detail}</p>}
                   <p className="mt-2 text-xs text-muted">{new Date(event.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}</p>

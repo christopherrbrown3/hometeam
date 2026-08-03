@@ -10,6 +10,7 @@ import { useSession } from '../features/auth/useSession'
 import { HouseholdSettingsScreen } from '../features/households/HouseholdSettingsScreen'
 import { NotificationSettings } from '../features/notifications/NotificationSettings'
 import { InstallSettings } from '../features/pwa/InstallSettings'
+import { ProfileSettings } from '../features/profiles/ProfileSettings'
 import { supabase } from '../lib/supabase'
 
 export function MoreRoute() {
@@ -32,6 +33,7 @@ export function MoreRoute() {
     <section className="page-stack">
       <PageHeader description="Household, app, and account preferences." eyebrow="Settings" title="More" />
       <div className="space-y-3">
+        <ProfileSettings />
         <HouseholdSettingsScreen />
         <NotificationSettings />
         <InstallSettings />

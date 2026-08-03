@@ -14,6 +14,11 @@ set display_name = case user_id
   when '00000000-0000-0000-0000-000000000102' then 'Sam'
   when '00000000-0000-0000-0000-000000000103' then 'Grandma'
 end,
+profile_color = case user_id
+  when '00000000-0000-0000-0000-000000000101' then 'blue'::public.profile_color
+  when '00000000-0000-0000-0000-000000000102' then 'pink'::public.profile_color
+  when '00000000-0000-0000-0000-000000000103' then 'green'::public.profile_color
+end,
 detected_timezone = case user_id
   when '00000000-0000-0000-0000-000000000101' then 'America/New_York'
   when '00000000-0000-0000-0000-000000000102' then 'America/New_York'

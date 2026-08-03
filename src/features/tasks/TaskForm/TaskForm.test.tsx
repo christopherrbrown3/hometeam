@@ -10,7 +10,7 @@ describe('TaskForm defaults', () => {
       <TaskForm
         categories={[]}
         currentUserId={creatorId}
-        members={[{ displayName: 'Alex', role: 'full_member', userId: creatorId, username: 'alex' }]}
+        members={[{ displayName: 'Alex', profileColor: 'blue', role: 'full_member', userId: creatorId, username: 'alex' }]}
         onSave={vi.fn()}
         timeZone="America/New_York"
       />,
@@ -30,7 +30,7 @@ describe('TaskForm defaults', () => {
       <TaskForm
         categories={[]}
         currentUserId={creatorId}
-        members={[{ displayName: 'Alex', role: 'full_member', userId: creatorId, username: 'alex' }]}
+        members={[{ displayName: 'Alex', profileColor: 'blue', role: 'full_member', userId: creatorId, username: 'alex' }]}
         onSave={vi.fn()}
         timeZone="America/New_York"
       />,
