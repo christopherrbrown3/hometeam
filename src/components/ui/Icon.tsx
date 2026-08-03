@@ -1,76 +1,143 @@
-import type { SVGProps } from 'react'
+import type {
+  Icon as PhosphorIcon,
+  IconProps as PhosphorIconProps,
+  IconWeight,
+} from '@phosphor-icons/react'
+import { BasketIcon } from '@phosphor-icons/react/dist/csr/Basket'
+import { BriefcaseIcon } from '@phosphor-icons/react/dist/csr/Briefcase'
+import { BroomIcon } from '@phosphor-icons/react/dist/csr/Broom'
+import { CalendarBlankIcon } from '@phosphor-icons/react/dist/csr/CalendarBlank'
+import { CarIcon } from '@phosphor-icons/react/dist/csr/Car'
+import { CaretRightIcon } from '@phosphor-icons/react/dist/csr/CaretRight'
+import { CheckIcon } from '@phosphor-icons/react/dist/csr/Check'
+import { ClipboardTextIcon } from '@phosphor-icons/react/dist/csr/ClipboardText'
+import { ClockIcon } from '@phosphor-icons/react/dist/csr/Clock'
+import { ConfettiIcon } from '@phosphor-icons/react/dist/csr/Confetti'
+import { CookingPotIcon } from '@phosphor-icons/react/dist/csr/CookingPot'
+import { DotsThreeIcon } from '@phosphor-icons/react/dist/csr/DotsThree'
+import { ForkKnifeIcon } from '@phosphor-icons/react/dist/csr/ForkKnife'
+import { HeartIcon } from '@phosphor-icons/react/dist/csr/Heart'
+import { HouseLineIcon } from '@phosphor-icons/react/dist/csr/HouseLine'
+import { LeafIcon } from '@phosphor-icons/react/dist/csr/Leaf'
+import { ListChecksIcon } from '@phosphor-icons/react/dist/csr/ListChecks'
+import { LockSimpleIcon } from '@phosphor-icons/react/dist/csr/LockSimple'
+import { MapTrifoldIcon } from '@phosphor-icons/react/dist/csr/MapTrifold'
+import { PawPrintIcon } from '@phosphor-icons/react/dist/csr/PawPrint'
+import { PillIcon } from '@phosphor-icons/react/dist/csr/Pill'
+import { PlantIcon } from '@phosphor-icons/react/dist/csr/Plant'
+import { PlusIcon } from '@phosphor-icons/react/dist/csr/Plus'
+import { PulseIcon } from '@phosphor-icons/react/dist/csr/Pulse'
+import { ReceiptIcon } from '@phosphor-icons/react/dist/csr/Receipt'
+import { ShapesIcon } from '@phosphor-icons/react/dist/csr/Shapes'
+import { ShoppingBagOpenIcon } from '@phosphor-icons/react/dist/csr/ShoppingBagOpen'
+import { SlidersHorizontalIcon } from '@phosphor-icons/react/dist/csr/SlidersHorizontal'
+import { SparkleIcon } from '@phosphor-icons/react/dist/csr/Sparkle'
+import { TagIcon } from '@phosphor-icons/react/dist/csr/Tag'
+import { TrashIcon } from '@phosphor-icons/react/dist/csr/Trash'
+import { TrayIcon } from '@phosphor-icons/react/dist/csr/Tray'
+import { UserIcon } from '@phosphor-icons/react/dist/csr/User'
+import { UsersThreeIcon } from '@phosphor-icons/react/dist/csr/UsersThree'
+import { WashingMachineIcon } from '@phosphor-icons/react/dist/csr/WashingMachine'
+import { WrenchIcon } from '@phosphor-icons/react/dist/csr/Wrench'
+import { XIcon } from '@phosphor-icons/react/dist/csr/X'
 
 export type IconName =
   | 'activity'
+  | 'basket'
+  | 'briefcase'
+  | 'broom'
   | 'calendar'
+  | 'car'
   | 'check'
   | 'chevron-right'
+  | 'clipboard'
   | 'clock'
+  | 'confetti'
+  | 'cooking-pot'
+  | 'heart'
   | 'home'
   | 'inbox'
-  | 'shopping-bag'
-  | 'utensils'
-  | 'paw'
   | 'leaf'
-  | 'trash'
-  | 'briefcase'
-  | 'heart'
   | 'list'
   | 'lock'
+  | 'map'
   | 'more'
+  | 'paw'
+  | 'pill'
+  | 'plant'
   | 'plus'
-  | 'x'
+  | 'receipt'
   | 'settings'
+  | 'shapes'
+  | 'shopping-bag'
   | 'spark'
+  | 'tag'
+  | 'trash'
   | 'user'
   | 'users'
+  | 'utensils'
+  | 'washing-machine'
+  | 'wrench'
+  | 'x'
 
-type IconProps = SVGProps<SVGSVGElement> & {
+type IconProps = Omit<PhosphorIconProps, 'size' | 'weight'> & {
   name: IconName
-  size?: number
+  size?: number | string
+  weight?: IconWeight
 }
 
-const paths: Record<IconName, React.ReactNode> = {
-  activity: <><path d="M4 12h3l2-5 4 10 2-5h5" /></>,
-  calendar: <><rect height="16" rx="2" width="18" x="3" y="5" /><path d="M8 3v4M16 3v4M3 10h18" /></>,
-  check: <><path d="m5 12 4 4L19 6" /></>,
-  'chevron-right': <><path d="m9 18 6-6-6-6" /></>,
-  clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-  home: <><path d="m3 11 9-7 9 7" /><path d="M5.5 10v9.5h13V10M9.5 19.5v-6h5v6" /></>,
-  inbox: <><path d="M4 5h16l1 10H16l-2 3h-4l-2-3H3L4 5Z" /><path d="M3.5 12H8l2 3h4l2-3h4.5" /></>,
-  'shopping-bag': <><path d="M5 8h14l1 12H4L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></>,
-  utensils: <><path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M7 10v11M16 3v18M16 3c2 1.5 3 3.5 3 6v2h-3" /></>,
-  paw: <><path d="M8.3 13c-1.6-.2-2.8 1.2-2.3 2.7.4 1.4 1.9 2.1 3.2 1.6l1-.4a5 5 0 0 1 3.6 0l1 .4c1.3.5 2.8-.2 3.2-1.6.5-1.5-.7-2.9-2.3-2.7a3 3 0 0 1-2.8-1.4l-.3-.5a1.9 1.9 0 0 0-3.2 0l-.3.5A3 3 0 0 1 8.3 13Z" /><circle cx="6.5" cy="8" r="1.5" /><circle cx="10" cy="5.5" r="1.5" /><circle cx="14" cy="5.5" r="1.5" /><circle cx="17.5" cy="8" r="1.5" /></>,
-  leaf: <><path d="M20 4C10 4 4 9 4 16c0 2.2 1.8 4 4 4 7 0 12-6 12-16Z" /><path d="M4 20c2-4 5-7 10-9" /></>,
-  trash: <><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></>,
-  briefcase: <><rect height="13" rx="2" width="18" x="3" y="7" /><path d="M9 7V5h6v2M3 12h18M10 12v2h4v-2" /></>,
-  heart: <><path d="M20.8 8.8c0 5.5-8.8 10-8.8 10s-8.8-4.5-8.8-10A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z" /></>,
-  list: <><path d="M9 6h11M9 12h11M9 18h11" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>,
-  lock: <><rect height="11" rx="2" width="16" x="4" y="10" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></>,
-  more: <><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /></>,
-  plus: <><path d="M12 5v14M5 12h14" /></>,
-  x: <><path d="m6 6 12 12M18 6 6 18" /></>,
-  settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.37a1.7 1.7 0 0 0-1 .63 1.7 1.7 0 0 0-.37 1.06V21h-4v-.08A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.23 15a1.7 1.7 0 0 0-.63-1 1.7 1.7 0 0 0-1.06-.37H2.5v-4h.08A1.7 1.7 0 0 0 4.1 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8.5 4.23a1.7 1.7 0 0 0 1-.63 1.7 1.7 0 0 0 .37-1.06V2.5h4v.08A1.7 1.7 0 0 0 15 4.1a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 8c.38.27.63.63.63 1.06v.08h1.5v4h-.08A1.7 1.7 0 0 0 19.4 15Z" /></>,
-  spark: <><path d="m12 3 1.2 4.1L17 9l-3.8 1.9L12 15l-1.2-4.1L7 9l3.8-1.9L12 3Z" /><path d="m19 15 .6 2.1L22 18l-2.4.9L19 21l-.6-2.1L16 18l2.4-.9L19 15Z" /></>,
-  user: <><circle cx="12" cy="8" r="4" /><path d="M4.5 21a7.5 7.5 0 0 1 15 0" /></>,
-  users: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>,
+const icons: Record<IconName, PhosphorIcon> = {
+  activity: PulseIcon,
+  basket: BasketIcon,
+  briefcase: BriefcaseIcon,
+  broom: BroomIcon,
+  calendar: CalendarBlankIcon,
+  car: CarIcon,
+  check: CheckIcon,
+  'chevron-right': CaretRightIcon,
+  clipboard: ClipboardTextIcon,
+  clock: ClockIcon,
+  confetti: ConfettiIcon,
+  'cooking-pot': CookingPotIcon,
+  heart: HeartIcon,
+  home: HouseLineIcon,
+  inbox: TrayIcon,
+  leaf: LeafIcon,
+  list: ListChecksIcon,
+  lock: LockSimpleIcon,
+  map: MapTrifoldIcon,
+  more: DotsThreeIcon,
+  paw: PawPrintIcon,
+  pill: PillIcon,
+  plant: PlantIcon,
+  plus: PlusIcon,
+  receipt: ReceiptIcon,
+  settings: SlidersHorizontalIcon,
+  shapes: ShapesIcon,
+  'shopping-bag': ShoppingBagOpenIcon,
+  spark: SparkleIcon,
+  tag: TagIcon,
+  trash: TrashIcon,
+  user: UserIcon,
+  users: UsersThreeIcon,
+  utensils: ForkKnifeIcon,
+  'washing-machine': WashingMachineIcon,
+  wrench: WrenchIcon,
+  x: XIcon,
 }
 
-export function Icon({ name, size = 20, ...props }: IconProps) {
+export function Icon({ name, size = 20, weight = 'regular', ...props }: IconProps) {
+  const Glyph = icons[name]
+  const isLabelled = Boolean(props['aria-label'] ?? props.alt)
+
   return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      height={size}
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="1.8"
-      viewBox="0 0 24 24"
-      width={size}
+    <Glyph
+      aria-hidden={isLabelled ? undefined : 'true'}
+      color="currentColor"
+      focusable="false"
+      size={size}
+      weight={weight}
       {...props}
-    >
-      {paths[name]}
-    </svg>
+    />
   )
 }

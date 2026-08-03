@@ -8,7 +8,7 @@ export function TaskDetails({ categoryName, series, onChanged, onEdit }: Readonl
   return (
     <details className="settings-panel group">
       <summary className="settings-panel-header">
-        <span className="settings-panel-icon"><CategoryIcon categoryName={categoryName} size={18} /></span>
+        <CategoryIcon categoryName={categoryName} />
         <span className="min-w-0 flex-1">
           <span className="block truncate font-semibold">{series.title}</span>
           <span className="mt-0.5 block text-xs capitalize text-muted">{series.recurrence_type.replaceAll('_', ' ')} · {series.series_status}</span>
