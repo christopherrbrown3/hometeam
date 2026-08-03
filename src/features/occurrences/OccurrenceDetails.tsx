@@ -44,7 +44,7 @@ export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence
         <div aria-hidden="true" className="sheet-handle" />
         <header className="sheet-header">
           <div className="sheet-header-copy flex items-start gap-3">
-            <span className="settings-panel-icon mt-0.5 h-10 w-10 rounded-xl"><CategoryIcon categoryName={occurrence.categoryName} size={18} /></span>
+            <CategoryIcon categoryName={occurrence.categoryName} className="mt-0.5" size="lg" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-brand">Task details</p>
               <h2 className="mt-1 text-xl font-bold" id="occurrence-details-title">{occurrence.title}</h2>
@@ -64,7 +64,7 @@ export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence
           {open && authoritativeOccurrence.data !== null && (
             <>
               <Button className="sheet-action-primary" disabled={complete.isPending} onClick={() => void run(() => complete.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id, keepOriginalRotation: false }))}>
-                <Icon name="check" size={18} /> Complete
+                <Icon name="check" size={18} weight="bold" /> Complete
               </Button>
               <Button className="sheet-action-secondary" disabled={snooze.isPending} onClick={() => void run(() => snooze.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id, snoozedUntil: new Date(Date.now() + 30 * 60_000).toISOString() }))} variant="secondary">
                 <Icon name="clock" size={17} /> Snooze 30 min

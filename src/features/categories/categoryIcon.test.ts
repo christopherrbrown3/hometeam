@@ -1,22 +1,37 @@
 import { describe, expect, it } from 'vitest'
-import { categoryIconName } from './categoryIconName'
+import { categoryIconName, categoryIconVisual } from './categoryIconName'
 
 describe('categoryIconName', () => {
   it.each([
-    ['Cleaning', 'spark'],
-    ['Errands', 'shopping-bag'],
-    ['Meals', 'utensils'],
+    ['Home', 'home'],
+    ['Cleaning', 'broom'],
+    ['Laundry', 'washing-machine'],
+    ['Dishwasher', 'utensils'],
+    ['Errands', 'map'],
+    ['Grocery shopping', 'basket'],
+    ['Meals', 'cooking-pot'],
     ['Pets', 'paw'],
-    ['Health & medicine', 'heart'],
-    ['Garden', 'leaf'],
+    ['Kids', 'shapes'],
+    ['Health & medicine', 'pill'],
+    ['Appointments', 'calendar'],
+    ['Events', 'confetti'],
+    ['Garden', 'plant'],
     ['Bring in bins', 'trash'],
-  ] as const)('maps %s to %s', (categoryName, iconName) => {
+    ['Home maintenance', 'wrench'],
+    ['Household admin', 'receipt'],
+    ['Car care', 'car'],
+  ] as const)('maps %s to a meaningful %s icon', (categoryName, iconName) => {
     expect(categoryIconName(categoryName)).toBe(iconName)
   })
 
-  it('uses Home for uncategorized and unknown categories', () => {
-    expect(categoryIconName(null)).toBe('home')
-    expect(categoryIconName('')).toBe('home')
-    expect(categoryIconName('Household admin')).toBe('home')
+  it('uses a neutral task icon when no category is assigned', () => {
+    expect(categoryIconName(null)).toBe('clipboard')
+    expect(categoryIconName('')).toBe('clipboard')
+    expect(categoryIconVisual(undefined).tone).toBe('uncategorized')
+  })
+
+  it('uses a tag for an unmatched user-created category', () => {
+    expect(categoryIconName('Weekend projects')).toBe('tag')
+    expect(categoryIconVisual('Weekend projects').tone).toBe('custom')
   })
 })

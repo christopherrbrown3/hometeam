@@ -45,7 +45,7 @@ export function HistoryTimeline({ events }: Readonly<{ events: HistoryEvent[] }>
             <span className="absolute -left-4 top-0 inline-flex h-8 w-8 items-center justify-center rounded-full border-4 border-canvas bg-brand-soft text-brand"><Icon name={event.event_type === 'completed' ? 'check' : 'activity'} size={15} /></span>
             <div className="rounded-panel bg-surface px-4 py-3">
               <div className="flex items-start gap-3">
-                <span className="settings-panel-icon h-8 w-8 rounded-lg"><CategoryIcon categoryName={event.categoryName} size={16} /></span>
+                <CategoryIcon categoryName={event.categoryName} size="sm" />
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-ink">{labels[event.event_type]}</p>
                   <p className="mt-1 text-sm font-medium text-ink">{event.seriesTitle}</p>
