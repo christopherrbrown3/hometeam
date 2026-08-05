@@ -43,7 +43,6 @@ export function TodayRoute() {
         eyebrow="Your household"
         title="Today"
       />
-      <p className="mb-4 rounded-control bg-surface-strong px-3 py-2 text-sm text-muted"><strong className="text-ink">Overdue</strong> means its scheduled time has passed. <strong className="text-ink">Due now</strong> is currently within its scheduled time. <strong className="text-ink">Later today</strong> has not started yet.</p>
       <div className="mb-6"><TodayFilters onStatus={setStatus} status={status} /></div>
       {query.isPending && <LoadingState label="Loading today’s tasks…" />}
       {query.isError && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{query.error.message}</p>}
