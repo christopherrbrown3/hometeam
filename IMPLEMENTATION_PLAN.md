@@ -1,8 +1,10 @@
 # HomeTeam Implementation Plan
 
+> **Planning record:** This is the original milestone and issue decomposition used to build HomeTeam. It is intentionally preserved for traceability, but it is not a live status report. Follow-up work added after the baseline is tracked in GitHub issues and pull requests.
+
 ## 1. Planning rules
 
-This plan decomposes HomeTeam version 1 into 12 ordered milestones, 14 epics, and 80 atomic issues. Issue numbers are reserved in creation order in this document. Every atomic issue is intended for one focused branch and pull request.
+The baseline decomposes HomeTeam version 1 into 12 ordered milestones, 14 epics, and 80 atomic issues. Later follow-up issues may appear in the traceability tables without being part of the original catalog. Every implementation issue is intended for one focused branch and pull request.
 
 Model tiers:
 
@@ -184,9 +186,9 @@ Model tiers:
 
 No version 1 requirement is intentionally unmapped. Version 1 non-goals remain out of scope for every atomic issue unless a later approved decision changes the product specification.
 
-## 5. Ready queue
+## 5. Historical ready-queue rule
 
-Project status is dynamic as implementation issues close. New preview-access issue #97 remains Blocked until #9 and #15 are complete; #98 and #99 remain Blocked on their explicit prerequisites. Do not mark an item Ready merely because its milestone has begun.
+During the original build, an item moved to Ready only after all explicit dependencies were closed. Consult GitHub for current issue and pull-request state rather than inferring status from this plan.
 
 ## 6. Definition of done for every atomic issue
 
