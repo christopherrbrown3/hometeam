@@ -6,7 +6,7 @@ HomeTeam is a shared household task app for keeping routines visible, ownership 
 
 [Open HomeTeam](https://hometeam.christopherbrown.ai/) · [Product specification](PRODUCT_SPEC.md) · [Architecture](ARCHITECTURE.md)
 
-![HomeTeam household invite preview](public/hometeam-invite-preview.png)
+![HomeTeam Today view shown on desktop and mobile](public/hometeam-product-preview.png)
 
 ## What you can do
 
