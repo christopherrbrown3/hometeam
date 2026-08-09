@@ -1141,7 +1141,6 @@
 
   .login-story,
   .login-ownership-section,
-  .login-build-section,
   .login-footer {
     width: min(calc(100% - 2.5rem), 80rem);
     margin-inline: auto;
@@ -1157,8 +1156,7 @@
   }
 
   .login-story-heading h2,
-  .login-section-copy h2,
-  .login-build-heading h2 {
+  .login-section-copy h2 {
     font-family: ui-rounded, "Avenir Next", "Segoe UI", sans-serif;
     font-size: clamp(2.15rem, 7vw, 4rem);
     font-weight: 750;
@@ -1167,8 +1165,7 @@
   }
 
   .login-story-heading > p:last-child,
-  .login-section-copy > p:last-of-type,
-  .login-build-heading > p:last-child {
+  .login-section-copy > p:last-of-type {
     color: var(--color-muted);
     font-size: 1rem;
     line-height: 1.65;
@@ -1478,81 +1475,11 @@
     font-size: 0.64rem;
   }
 
-  .login-build-section {
-    display: grid;
-    gap: 2.5rem;
-    padding-block: clamp(5rem, 10vw, 8rem) 3rem;
-  }
-
-  .login-build-heading {
-    max-width: 40rem;
-  }
-
-  .login-build-heading h2 {
-    margin-top: 0.9rem;
-  }
-
-  .login-build-heading > p:last-child {
-    margin-top: 1.25rem;
-  }
-
-  .login-build-list {
-    border-top: 1px solid var(--color-border);
-    list-style: none;
-  }
-
-  .login-build-list li {
-    display: grid;
-    grid-template-columns: 2rem minmax(0, 1fr);
-    gap: 0.75rem;
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .login-build-list li > svg {
-    color: var(--color-brand);
-  }
-
-  .login-build-list span {
-    display: grid;
-  }
-
-  .login-build-list strong {
-    font-size: 0.8rem;
-  }
-
-  .login-build-list small {
-    margin-top: 0.25rem;
-    color: var(--color-muted);
-    font-size: 0.7rem;
-    line-height: 1.45;
-  }
-
-  .login-source-link {
-    display: inline-flex;
-    width: fit-content;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--color-brand);
-    font-size: 0.8rem;
-    font-weight: 750;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.3rem;
-  }
-
-  .login-source-link svg {
-    transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .login-source-link:hover svg {
-    transform: translateX(0.2rem);
-  }
-
   .login-footer {
     display: grid;
     justify-items: center;
     gap: 0.8rem;
+    margin-top: clamp(4rem, 8vw, 6rem);
     padding-block: 1.5rem 2.5rem;
     border-top: 1px solid var(--color-border);
     color: var(--color-muted);
@@ -1711,20 +1638,4 @@
     justify-self: end;
   }
 
-  .login-build-section {
-    grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
-    column-gap: clamp(4rem, 9vw, 8rem);
-    align-items: start;
-  }
-
-  .login-source-link {
-    grid-column: 1;
-    grid-row: 2;
-    margin-top: -1rem;
-  }
-
-  .login-build-list {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-  }
 }

@@ -15,9 +15,9 @@ describe('App', () => {
     expect(screen.getByText('Nobody has to keep the whole house in their head.')).toBeVisible()
     expect(screen.getByRole('figure', { name: /Product preview · Example household/i })).toBeVisible()
     expect(screen.getByRole('heading', { level: 2, name: 'Everyone can see whose turn it is.' })).toBeVisible()
-    expect(screen.getByRole('link', { name: 'View the source on GitHub' })).toHaveAttribute(
-      'href',
-      'https://github.com/christopherrbrown3/hometeam',
-    )
+    expect(screen.getAllByText('Kim')).toHaveLength(3)
+    expect(screen.queryAllByText(/inkimidator/i)).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: 'Under the hood' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Built like a real product')).not.toBeInTheDocument()
   })
 })

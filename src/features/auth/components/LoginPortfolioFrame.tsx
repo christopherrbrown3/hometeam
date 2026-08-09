@@ -51,7 +51,7 @@ function ProductPreview() {
           </span>
           <span aria-hidden="true" className="login-preview-people">
             <span data-profile-color="blue">C</span>
-            <span data-profile-color="pink">I</span>
+            <span data-profile-color="pink">K</span>
           </span>
         </div>
 
@@ -68,7 +68,7 @@ function ProductPreview() {
             <span>Due now</span>
             <span>1</span>
           </div>
-          <PreviewTask assignee="inkimidator" assigneeColor="pink" categoryName="Pets" time="Now · every day" title="Give Milo dinner" />
+          <PreviewTask assignee="Kim" assigneeColor="pink" categoryName="Pets" time="Now · every day" title="Give Milo dinner" />
           <div aria-label="Available actions: Complete, Snooze, or Skip" className="login-preview-actions">
             <span className="login-preview-action login-preview-action--primary"><Icon name="check" size={15} weight="bold" /> Complete</span>
             <span className="login-preview-action"><Icon name="clock" size={15} /> Snooze</span>
@@ -106,8 +106,8 @@ function AssignmentPreview() {
         </div>
         <Icon className="login-assignment-arrow" name="chevron-right" size={20} />
         <div className="login-assignment-person login-assignment-person--next" data-profile-color="pink">
-          <span>I</span>
-          <strong>inkimidator</strong>
+          <span>K</span>
+          <strong>Kim</strong>
           <small>Up next</small>
         </div>
         <Icon className="login-assignment-arrow" name="chevron-right" size={20} />
@@ -139,11 +139,11 @@ function HistoryPreview() {
         </li>
         <li>
           <span className="login-history-mark"><Icon name="clock" size={14} /></span>
-          <span><strong>inkimidator snoozed Give Milo dinner</strong><small>Today at 5:42 PM · for 30 minutes</small></span>
+          <span><strong>Kim snoozed Give Milo dinner</strong><small>Today at 5:42 PM · for 30 minutes</small></span>
         </li>
         <li>
           <span className="login-history-mark"><Icon name="users" size={14} /></span>
-          <span><strong>Kitchen reset rotated to inkimidator</strong><small>Yesterday at 9:03 PM</small></span>
+          <span><strong>Kitchen reset rotated to Kim</strong><small>Yesterday at 9:03 PM</small></span>
         </li>
       </ol>
     </div>
@@ -161,7 +161,6 @@ export function LoginPortfolioFrame({ children }: Readonly<{ children: ReactNode
           </Link>
           <nav aria-label="Public navigation" className="login-public-nav">
             <button onClick={() => scrollToSection('how-it-works')} type="button">How it works</button>
-            <button onClick={() => scrollToSection('built-with')} type="button">Under the hood</button>
             <Link aria-label="Create account" className="login-public-cta" to="/register"><span aria-hidden="true" className="login-public-cta-full">Create account</span><span aria-hidden="true" className="login-public-cta-short">Create</span><Icon name="chevron-right" size={16} weight="bold" /></Link>
           </nav>
         </header>
@@ -214,7 +213,7 @@ export function LoginPortfolioFrame({ children }: Readonly<{ children: ReactNode
           <p>Personal colors make assignments legible at a glance. Fixed tasks stay fixed, open tasks can be claimed, and round robin moves recurring work forward automatically.</p>
           <div className="login-inline-proof">
             <span data-profile-color="blue"><i aria-hidden="true" /> Chris</span>
-            <span data-profile-color="pink"><i aria-hidden="true" /> inkimidator</span>
+            <span data-profile-color="pink"><i aria-hidden="true" /> Kim</span>
             <span data-profile-color="unassigned"><i aria-hidden="true" /> Unassigned</span>
           </div>
         </div>
@@ -228,20 +227,6 @@ export function LoginPortfolioFrame({ children }: Readonly<{ children: ReactNode
           <h2>A shared record, not a blame game.</h2>
           <p>Realtime updates keep every device in sync, while completion, snoozes, skips, reassignment, and undo remain visible in one trustworthy timeline.</p>
         </div>
-      </section>
-
-      <section className="login-build-section" id="built-with">
-        <div className="login-build-heading">
-          <p className="login-section-kicker">Built like a real product</p>
-          <h2>Small footprint. Production-minded foundations.</h2>
-          <p>A mobile-first React and TypeScript PWA backed by Supabase, transactional workflows, realtime sync, and row-level security.</p>
-        </div>
-        <ul className="login-build-list">
-          <li><Icon name="spark" size={20} weight="duotone" /><span><strong>Installable PWA</strong><small>Fast, focused, and at home on any screen.</small></span></li>
-          <li><Icon name="activity" size={20} weight="duotone" /><span><strong>Realtime by default</strong><small>One authoritative occurrence across devices.</small></span></li>
-          <li><Icon name="lock" size={20} weight="duotone" /><span><strong>Household boundaries</strong><small>Roles, revocable invites, and row-level security.</small></span></li>
-        </ul>
-        <a className="login-source-link" href="https://github.com/christopherrbrown3/hometeam" rel="noreferrer" target="_blank">View the source on GitHub <Icon name="chevron-right" size={17} weight="bold" /></a>
       </section>
 
       <footer className="login-footer">
