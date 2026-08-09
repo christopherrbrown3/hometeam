@@ -1,5 +1,7 @@
 # HomeTeam Security Model
 
+> **Document status:** The authentication, platform-access, household, task, and Realtime boundaries describe the current preview. Push-delivery and scheduled-notification controls describe the required boundary for that work when it is enabled.
+
 ## 1. Protected assets and security goals
 
 Protected assets include platform access decisions, administrator identity, household identity, membership, invitations, task definitions, occurrences, descriptions, assignees, audit history, notification preferences, Web Push subscriptions, secrets, and deployment credentials.
@@ -28,7 +30,7 @@ Security goals:
 
 ## 3. Authentication assumptions
 
-Supabase Auth validates passwordless email OTPs and issues JWTs. Authentication alone does not authorize product access. Authorization first requires an `approved` `platform_access` row for `auth.uid()`, then applies household role/target checks. Email comparison is used only inside invitation acceptance after canonical normalization and authenticated lookup. Sessions are cleared on sign-out; protected query caches and Realtime channels are cleared on identity change, suspension, or approval revocation.
+Supabase Auth validates passwords and issues JWTs. HomeTeam maps each normalized username to a non-routable internal identifier for Supabase's email/password provider; personal email is not part of the product identity. Authentication alone does not authorize product access. Authorization first requires an `approved` `platform_access` row for `auth.uid()`, then applies household role/target checks. Shareable join links are bearer tokens; legacy recipient-bound invitations compare the normalized username stored in the profile. Sessions are cleared on sign-out, and protected query caches and Realtime channels are cleared on identity change, suspension, or approval revocation.
 
 ## 4. Permission matrix
 
@@ -156,7 +158,7 @@ CI uses least-privilege `contents: read`, `pages: write`, and `id-token: write` 
 
 ## 14. Logging and privacy
 
-Operational logs default to IDs, result codes, counts, and correlation IDs. Do not log emails, invitation tokens, descriptions, task titles, household names, push endpoints/keys, OTPs, JWTs, or secret values. User-visible history is a product feature and follows authorization; it is not an unrestricted log sink.
+Operational logs default to IDs, result codes, counts, and correlation IDs. Do not log internal Auth identifiers, usernames, invitation tokens, descriptions, task titles, household names, push endpoints/keys, passwords, JWTs, or secret values. User-visible history is a product feature and follows authorization; it is not an unrestricted log sink.
 
 ## 15. Threats and mitigations
 
@@ -172,7 +174,7 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 | Double completion/race | Compare-and-swap under row lock; unique constraints; typed conflict |
 | Duplicate occurrence/notification | Deterministic occurrence and idempotency keys with unique constraints |
 | Event tampering | Revoke update/delete, append-only trigger, controlled inserts |
-| Invitation theft/replay | High-entropy token, hash-only storage, expiry, email binding, single-use/revocation |
+| Invitation theft/replay | High-entropy token, hash-only storage, expiry, usage cap, and immediate revocation/replacement |
 | Search-path hijack | Fixed safe `search_path`, schema-qualified SQL, reviewed ownership/grants |
 | Secret leakage in frontend/CI | Environment separation, bundle scan, log redaction, least privilege |
 | Offline replay changes shared state | No mutation queue/background sync; offline action guard |
@@ -194,20 +196,19 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 - stale-version and concurrent completion races;
 - duplicate occurrence and outbox insertion races;
 - event update/delete rejection;
-- invitation expiry, revocation, reuse, email mismatch, and concurrent acceptance;
+- join-link expiry, revocation, usage limits, and concurrent acceptance, plus username mismatch for legacy recipient-bound invitations;
 - subscription owner isolation and invalid-device disabling;
 - Realtime guest filtering and membership revocation;
 - repository/bundle secret scan;
 - soft-delete history visibility and normal-screen exclusion.
 
-Release is blocked until P0/P1 security tests pass and the High Intelligence security review issue is accepted.
+Release-sensitive changes remain blocked until applicable P0/P1 security tests pass and the security review is accepted.
 
-## 17. Milestone 3 implementation evidence
+## 17. Platform-access implementation evidence
 
 The initial preview-access and household boundary matrix is executable locally in
 `supabase/tests/milestone_3_rls.test.sql` and
 `supabase/tests/platform_access_rls.test.sql`. Browser access gates clear TanStack
 Query state when access is no longer approved; database RLS remains authoritative if
-a stale client tries another request. Realtime subscription revocation is a later
-dedicated implementation in Milestone 8, so no Milestone 3 client claims a
-subscription teardown it does not yet create.
+a stale client tries another request. The Realtime subscription manager also scopes
+channels to the approved user and active membership set.

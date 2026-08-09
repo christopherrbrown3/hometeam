@@ -1,6 +1,6 @@
 # Main branch protection
 
-The repository is now public, so GitHub supports branch protection for `main`. The target configuration is:
+The public repository protects `main` with the following configuration:
 
 - Require a pull request before merging.
 - Do not require a separate approval while Christopher is the only maintainer.
@@ -16,6 +16,6 @@ The repository is now public, so GitHub supports branch protection for `main`. T
 Implementation agents must continue to follow the repository workflow:
 
 - no direct implementation commits to `main`;
-- branch name `issue-<issue-number>-<short-description>`;
+- one focused, descriptive branch per change; include the issue number when the work is tied to an issue;
 - linked pull request with passing CI;
 - no merge without explicit instruction.

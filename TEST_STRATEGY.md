@@ -1,5 +1,7 @@
 # HomeTeam Test Strategy
 
+> **Document status:** This strategy includes current CI coverage and release-level target coverage. The current Playwright suite focuses on route protection, invite-link metadata, manifest assets, and unauthenticated multi-context boundaries; richer authenticated multi-user browser scenarios remain expansion targets.
+
 ## 1. Purpose
 
 Tests must demonstrate that shared task state, authorization, scheduling, rotation, notification work, and mobile behavior match `PRODUCT_SPEC.md`. Tests are delivered alongside each capability; the final quality milestone integrates and extends them rather than postponing all testing.
@@ -24,11 +26,11 @@ Run the real local database, Auth-compatible sessions, generated client types, a
 
 ### End-to-end tests
 
-Playwright uses separate browser contexts for a platform administrator, an unapproved applicant, two approved full members, and one approved guest. Email and Web Push delivery may be replaced with deterministic test adapters in CI, but approval, token validation, outbox creation, subscription code, and notification click routing remain real.
+Release-level Playwright coverage should use separate browser contexts for a platform administrator, an unapproved applicant, two approved full members, and one approved guest. External Web Push delivery may use deterministic adapters in CI, while approval, token validation, outbox creation, subscription code, and notification click routing should remain real once those flows are enabled.
 
 ### PWA and deployment tests
 
-Build under `/hometeam/` and `/`, inspect manifest/icon/service-worker paths and scope, verify hash-route refreshes, use Lighthouse/Playwright checks for installability, and assert no background mutation queue exists.
+Current Playwright coverage inspects the manifest, icon paths, invite metadata, and protected hash routes. Release-level coverage should also build under `/hometeam/` and `/`, verify service-worker scope and installability, and assert that no background mutation queue exists.
 
 ## 3. Fixture standards
 
@@ -53,12 +55,12 @@ Repeat for complete/complete, complete/skip, claim/claim, snooze/complete, undo/
 
 | Requirement | Primary automated coverage | Owning issues |
 |---|---|---|
-| OTP, persistent session, intended route | Component + Playwright | #15–#18, #84 |
+| Username/password, persistent session, intended route | Unit/component + Playwright | #15–#18, #84, #110 |
 | Public preview requires administrator approval | RLS + component + Playwright | #96–#99, #79, #85, #90 |
 | Administrator does not bypass household isolation | RLS + database negative tests | #97, #99, #79, #82 |
 | Suspension/revocation purges Realtime and caches | Integration + multi-context E2E | #98, #99, #65, #67–#68 |
 | Multiple households and switching | DB + component + E2E | #20, #21, #25, #84 |
-| Invitation expiry/email/reuse | DB function + E2E | #22, #23, #25 |
+| Join-link expiry/revocation/usage cap and legacy username binding | DB function + E2E | #22, #23, #25, #110 |
 | Guest assigned-only isolation | RLS + E2E | #26, #79, #84 |
 | Category soft deletion | DB + component | #24, #61 |
 | One-time and calendar recurrence | Unit + DB integration | #29–#33, #36 |
@@ -103,9 +105,9 @@ Each epic has explicit child ownership:
 
 ## 7. CI gates
 
-Every pull request runs formatting/checks, lint, strict typecheck, unit/component tests, relevant SQL tests, and production build. Database/RLS changes require local Supabase tests. UI changes require component tests and screenshots. Release candidates additionally run the full Playwright suite, PWA checks, migration replay from empty state, and secret scan.
+Every pull request runs lint, strict typecheck, unit/component tests, the production build, Playwright smoke tests, and the local Supabase database suite. UI changes should include relevant component coverage and visual evidence when layout materially changes. Release candidates should additionally include broader PWA, migration-replay, performance, accessibility, and secret-scan evidence.
 
-Flaky tests are failures to fix, not rerun policies. Time-dependent tests use deterministic clocks. External email/push delivery is clearly separated from CI-safe contract testing.
+Flaky tests are failures to fix, not rerun policies. Time-dependent tests use deterministic clocks. External push delivery is clearly separated from CI-safe contract testing.
 
 ## 8. Manual validation
 
@@ -113,7 +115,7 @@ Manual work supplements rather than replaces automation:
 
 - real iPhone Home Screen install, safe-area layout, permission prompt, push receipt/click;
 - VoiceOver and keyboard dialog/navigation pass;
-- Supabase production email template/link settings;
+- Supabase production password-provider settings, including disabled email confirmation;
 - initial platform administrator UUID bootstrap and approval workflow;
 - free-tier scheduled job timing and delivery monitoring;
 - GitHub Pages repository subpath and optional custom domain.
@@ -129,5 +131,5 @@ table-write denial, administrator non-bypass, household isolation, guest assigne
 occurrences, and approval-gated household/invitation RPCs. `AccessGate.test.tsx`
 asserts that an unapproved session cannot mount product routes and that protected
 query data is cleared. `e2e/households.spec.ts` verifies unauthenticated visitors
-cannot reach household management. The production administrator bootstrap and real
-email delivery remain manual, credential-bound validation steps.
+cannot reach household management. The production administrator bootstrap and
+hosted Auth configuration remain manual, credential-bound validation steps.

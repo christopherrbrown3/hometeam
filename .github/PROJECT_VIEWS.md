@@ -1,6 +1,6 @@
 # HomeTeam v1 Project views
 
-All 90 Project items are repository issues and all required fields are configured. GitHub does not expose Project view creation through the CLI or public GraphQL mutation used by this planning workflow. The available automated browser session was not authenticated for this private repository, so the following UI-only views remain to be created by a signed-in owner.
+This file records the intended GitHub Project views used during the version 1 build. It is a configuration reference, not a live count of issues or view state. Check the public repository's GitHub Project UI for current status.
 
 ## Board
 

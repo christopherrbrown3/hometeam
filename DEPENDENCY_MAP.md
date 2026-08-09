@@ -1,5 +1,7 @@
 # HomeTeam Dependency Map
 
+> **Planning record:** This file captures the original implementation dependency graph. It is useful architectural context, not a live project-status board; current work is tracked in GitHub issues and pull requests.
+
 ## 1. Milestone order
 
 1. Repository and Tooling
@@ -22,7 +24,7 @@ Tooling unlocks all code. Database identity/household structures and task schema
 ```mermaid
 flowchart TD
     E1["#1 Repository/tooling"] --> E7["#7 Database foundation"]
-    E7 --> E14["#14 Passwordless auth"]
+    E7 --> E14["#14 Username/password auth"]
     E14 --> E96["#96 Preview access administration"]
     E96 --> E19["#19 Households/invitations"]
     E7 --> E27["#27 Task/recurrence"]
@@ -86,7 +88,7 @@ After #2–#4:
 
 ## 6. Atomic dependency table
 
-Each atomic issue states `Blocked by #…` or `Blocked by external condition …`. The GitHub Project `Dependency Status` field must be `Blocked` until all listed issue dependencies are closed. The first Ready implementation issue is #2. The Project must not mark future issues Ready merely because their milestone exists.
+Each baseline issue states `Blocked by #…` or `Blocked by external condition …`. During the original build, the GitHub Project kept `Dependency Status` blocked until all listed prerequisites were closed; a milestone's existence alone never made an issue Ready.
 
 ## 7. External dependencies and Christopher-owned setup
 
@@ -94,7 +96,7 @@ Each atomic issue states `Blocked by #…` or `Blocked by external condition …
 |---|---|---|
 | Supabase organization/project and project reference | Database integration, production deployment | Local work can proceed; production deploy blocked |
 | Supabase CLI authentication/access token | Remote migrations/Functions | Local work can proceed |
-| OTP email provider/template configuration | Real email E2E | CI can use local/mock flow |
+| Hosted Supabase password-provider configuration | Production sign-up and sign-in | Local Auth tests and deterministic CI can proceed |
 | Christopher's Supabase Auth user UUID | Initial administrator bootstrap in #97/#88 | Product implementation can proceed; preview administration cannot be activated without it |
 | VAPID key pair and subject | Real Web Push | Compatibility and mocked tests can proceed |
 | iPhone/iOS Safari device | Install/push manual validation | Automated PWA checks can proceed |

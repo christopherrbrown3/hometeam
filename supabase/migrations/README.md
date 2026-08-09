@@ -13,25 +13,27 @@ shared `household_member_role` (`full_member` or `guest`) and
 timezone names and permits only one active membership for a user in a
 household.
 
-All three tables have forced RLS and no browser-role grants or policies at this
-stage. This deliberate default-deny baseline is not a client API: the
-platform-access and household authorization work in later issues will add only
-the narrowly authorized reads and controlled writes required by the product.
+All three tables begin from a forced-RLS, default-deny baseline. Later ordered
+migrations add platform-access approval, household authorization helpers,
+join links, username/password identity, and the narrowly authorized reads and
+controlled writes used by the client.
 
 The task-core migration, `20260728134450_task_core.sql`, adds the series,
 daily-slot, rotation-roster, occurrence, and event records. It locks an
 occurrence to the household of its series and makes `(series_id,
 occurrence_key)` unique, preventing duplicate generation. It deliberately
-stores only the versioned recurrence JSON container; the recurrence contract
-and semantic validator remain owned by the later recurrence issues.
+stores the versioned recurrence JSON container. Later migrations add the
+semantic recurrence validator, materialization functions, schedule
+improvements, lifecycle RPCs, rotation behavior, and supporting tests.
 
 The notification migration, `20260728135020_notifications.sql`, adds one
 preference record per user, device-specific push subscriptions, and a durable
 notification outbox. Push endpoints and encryption keys remain protected
 personal data: all three tables have forced RLS with no browser-role grants or
-policies until the corresponding authorization work lands. The outbox's unique
-idempotency key is the database-level duplicate-delivery defense; queue
-claiming and delivery are intentionally deferred to the notification worker.
+policies until the corresponding authorization migration grants owner-scoped
+access. The outbox's unique idempotency key is the database-level
+duplicate-delivery defense. End-to-end Web Push claiming and delivery are not
+enabled in the current preview.
 
 The index migration, `20260728135641_indexes.sql`, adds the lookup paths used
 by active memberships, open occurrences, assignee and series occurrence lists,
@@ -54,9 +56,6 @@ The status command prints local connection details. Copy only
 `API_URL` and the browser-safe `ANON_KEY`/publishable key into `.env.local` as
 `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Do not copy a database
 connection string, service-role key, or any private key into a Vite variable.
-The local email inbox is available at `http://127.0.0.1:54324` while the stack
-is running.
-
 `supabase/seed.sql` provides fixed, development-only fixture data for Alex,
 Sam, Grandma, two households, representative task states, recurring patterns,
 and history records. It deliberately contains no real email address, push
@@ -101,9 +100,9 @@ npx --yes supabase@2.110.0 migration list --local
 npm run test:db
 ```
 
-`db reset` runs migrations in timestamp order and, once issue #12 supplies it,
-loads `supabase/seed.sql`. `npm run test:db` runs the pgTAP migration replay,
-constraint/default-deny, and seed fixtures. Database/RLS test suites belong
-with the migration issue that introduces behavior. Generated TypeScript
-database types are refreshed after schema changes by issue #12 and later schema
-issues; do not hand-author them.
+`db reset` runs every migration in timestamp order and then loads
+`supabase/seed.sql`. `npm run test:db` runs the pgTAP migration, constraint,
+authorization, concurrency, recurrence, rotation, lifecycle, and seed suites.
+Database/RLS tests belong with the migration that introduces behavior.
+Refresh generated TypeScript database types after schema changes; do not
+hand-author them.

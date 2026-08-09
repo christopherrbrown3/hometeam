@@ -1,5 +1,7 @@
 # HomeTeam Architecture
 
+> **Document status:** Sections 1–12 and the GitHub Pages deployment describe the current application architecture. Sections 13–15 retain the intended version 1 notification, scheduler, and offline-safety design; the current preview has the notification schema and some outbox/generation foundations, but not end-to-end Web Push delivery or a comprehensive offline action guard.
+
 ## 1. Architecture goals
 
 HomeTeam is an online-only, mobile-first PWA backed by Supabase. PostgreSQL is the source of truth for authorization, task state, recurrence, rotation, audit history, and notification work. The frontend renders authoritative records and never becomes the arbiter of lifecycle transitions.
@@ -24,11 +26,11 @@ flowchart LR
     A --> DB["PostgreSQL + RLS"]
     DB --> RT["Realtime publication"]
     RT -->|Authorized changes| F
-    C["Supabase Cron"] --> SP["Scheduled processor Edge Function"]
+    C["Target: Supabase Cron"] --> SP["Target: scheduled processor"]
     SP -->|Service role; bounded jobs| DB
     DB --> O["Notification outbox"]
-    SP --> N["Notification delivery Edge Function"]
-    N --> WP["Web Push services"]
+    SP --> N["Target: notification delivery"]
+    N --> WP["Target: Web Push services"]
     WP --> SW["PWA service worker"]
     SW --> U
     GA["GitHub Actions"] -->|Static artifact| GP["GitHub Pages"]
@@ -223,9 +225,7 @@ type MutationResult<T> =
           | 'already_skipped'
           | 'invalid_state'
           | 'guest_action_forbidden'
-          | 'undo_window_expired'
-          | 'invitation_expired'
-          | 'invitation_email_mismatch';
+          | 'undo_window_expired';
         current?: unknown;
       };
     };
@@ -289,6 +289,8 @@ Channel managers are keyed by user and membership set. On sign-out or membership
 
 ## 13. Notification outbox and Web Push
 
+The following is the target delivery architecture. Web Push delivery is not enabled in the current preview.
+
 Mutation and scheduled transactions create `notification_outbox` rows with a unique semantic idempotency key. A once-per-minute scheduled processor claims due work using `FOR UPDATE SKIP LOCKED`, materializes recipients according to role and preferences, and invokes delivery in bounded batches.
 
 ```mermaid
@@ -310,6 +312,8 @@ The Web Push implementation must be validated against the current Supabase Deno 
 
 ## 14. Scheduled processing
 
+The repository currently contains scheduled occurrence-generation logic. The complete orchestration and notification-delivery pipeline below remains the target design.
+
 One idempotent Edge Function, invoked about once per minute, orchestrates:
 
 1. rolling calendar occurrence generation;
@@ -323,13 +327,13 @@ Jobs use advisory locks or claim tables plus deterministic keys. Each phase has 
 
 ## 15. PWA and offline behavior
 
-Use `vite-plugin-pwa`/Workbox to precache the app shell and safe static assets. Runtime caching may preserve recently fetched read screens, but authenticated API responses must be short-lived and cleared on identity/membership changes. Never register background sync for task mutations.
+`vite-plugin-pwa`/Workbox precaches the app shell and safe static assets. HomeTeam does not register background sync or queue task mutations for replay.
 
-An online-state guard disables complete, skip, snooze, claim, assign, edit, cancel, and delete controls while offline and explains why. Push permission is requested only from a user-initiated action, with iPhone installation guidance first when needed. Service worker updates prompt the user before activation when an active form or mutation could be disrupted.
+A comprehensive online-state guard and user-initiated push-subscription flow remain target behavior rather than current-preview capabilities.
 
 ## 16. GitHub Pages and configuration
 
-Vite base comes from validated `VITE_APP_BASE_PATH`; all manifest, icon, and service-worker URLs derive from it. Hash routing prevents server fallback requirements. GitHub Actions runs install, lint, typecheck, unit tests, and build before uploading a Pages artifact. Deployment uses GitHub’s Pages environment and no Supabase service-role secret.
+Vite normalizes `VITE_APP_BASE_PATH` (and accepts `VITE_BASE_PATH` as a workflow-compatible fallback); manifest, icon, and service-worker URLs derive from the result. Hash routing prevents server fallback requirements. One GitHub Actions workflow runs lint, typecheck, unit/component tests, database tests, browser checks, and a production build. A separate workflow builds and uploads the Pages artifact after changes reach `main`. Deployment uses GitHub’s Pages environment and no Supabase service-role secret.
 
 Frontend environment:
 
