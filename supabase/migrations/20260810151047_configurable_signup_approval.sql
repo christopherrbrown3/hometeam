@@ -1,15 +1,15 @@
 -- Keep signup policy in the database so administrators can change it without
--- redeploying the client. The singleton row defaults to automatic activation.
+-- redeploying the client. New signups require approval by default.
 create table public.platform_settings (
   singleton boolean primary key default true,
-  require_signup_approval boolean not null default false,
+  require_signup_approval boolean not null default true,
   updated_at timestamptz not null default pg_catalog.now(),
   updated_by uuid references public.profiles (user_id),
   constraint platform_settings_has_one_row check (singleton)
 );
 
 insert into public.platform_settings (singleton, require_signup_approval)
-values (true, false);
+values (true, true);
 
 create trigger platform_settings_set_updated_at
 before update on public.platform_settings
@@ -76,9 +76,8 @@ begin
 end;
 $$;
 
--- Fresh environments bootstrap their first administrator after that account is
--- already active. Preserve the one-time role setup without inventing a second
--- access transition for an account that is already approved.
+-- Fresh environments bootstrap their first administrator from an authenticated
+-- account. The operation also restores that account when it is not yet active.
 create or replace function private.bootstrap_platform_administrator(target_user_id uuid)
 returns void
 language plpgsql
@@ -184,25 +183,3 @@ revoke all on function public.get_signup_approval_setting() from public, anon, a
 revoke all on function public.set_signup_approval_setting(boolean) from public, anon, authenticated;
 grant execute on function public.get_signup_approval_setting() to authenticated;
 grant execute on function public.set_signup_approval_setting(boolean) to authenticated;
-
--- Accounts already waiting when this change is deployed should receive the
--- same immediate access as a fresh signup. Rejected and suspended accounts are
--- intentionally left unchanged.
-with activated_accounts as (
-  update public.platform_access
-  set
-    status = 'approved',
-    decided_at = pg_catalog.now(),
-    decided_by = null,
-    reason = 'Automatic signup approval enabled'
-  where status = 'pending'
-  returning user_id
-)
-insert into public.platform_access_events (
-  user_id,
-  actor_user_id,
-  previous_status,
-  next_status
-)
-select user_id, null, 'pending', 'approved'
-from activated_accounts;

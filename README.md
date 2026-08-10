@@ -91,7 +91,7 @@ e2e/                    Playwright browser checks
 
 HomeTeam is a working, access-controlled preview deployed on a public URL:
 
-- New accounts are activated automatically by default; a platform administrator can require approval for future signups.
+- New accounts require approval by default; a platform administrator can switch future signups to automatic activation.
 - Task mutations are online-only; the PWA does not queue changes for later replay.
 - The notification schema and preferences foundation exist, but the current preview does not yet deliver Web Push notifications.
 - HomeTeam is a coordination tool, not the sole medically reliable reminder system.
@@ -132,7 +132,7 @@ Map the local `API_URL` and browser-safe `ANON_KEY`/publishable key from `status
 
 In Supabase, keep **Authentication → Providers → Email → Confirm email** disabled. HomeTeam maps a normalized username to a non-routable internal Auth identifier, so it does not collect a personal email address.
 
-New signups receive an active platform-access record automatically by default. Pending accounts that existed when this setting was introduced are activated by the migration; explicitly rejected or suspended accounts remain blocked.
+New signups receive a pending platform-access record by default. A platform administrator can turn off **Require approval for new signups** to activate future accounts automatically. Changing the setting does not rewrite existing pending, approved, rejected, or suspended accounts.
 
 Bootstrap the first platform administrator once from the Supabase SQL editor using that account's UUID from `auth.users`:
 

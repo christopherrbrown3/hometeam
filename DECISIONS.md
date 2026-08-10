@@ -112,7 +112,7 @@ Completion interval:
 
 ## D-019 — Administrator-controlled signup approval and revocable platform access
 
-- **Decision:** A singleton database setting, `require_signup_approval`, determines whether a valid Supabase signup creates an `approved` or `pending` platform-access record. It defaults to `false`, so signup is automatic until an administrator enables approval.
+- **Decision:** A singleton database setting, `require_signup_approval`, determines whether a valid Supabase signup creates an `approved` or `pending` platform-access record. It defaults to `true`, so new accounts require administrator approval until an administrator enables automatic activation.
 - **Role separation:** Platform administrator is not a third household role. Household roles remain exactly `full_member` and `guest`; administrator status does not create membership or bypass household RLS.
 - **Policy scope:** Changing the setting affects future signups only. Existing approved, pending, rejected, and suspended accounts retain their state.
 - **Inactive states:** `pending`, `rejected`, and `suspended` users can read only their own minimal profile/access status and sign out.

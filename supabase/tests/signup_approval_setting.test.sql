@@ -2,14 +2,14 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(18);
+select plan(19);
 
 select has_table('public', 'platform_settings', 'platform signup policy is stored in the database');
 
 select is(
   (select require_signup_approval from public.platform_settings where singleton),
-  false,
-  'new accounts activate automatically by default'
+  true,
+  'new accounts require approval by default'
 );
 
 select ok(
@@ -51,13 +51,18 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select is(
   (select require_signup_approval from public.get_signup_approval_setting()),
+  true,
+  'the administrator reads the approval-required default'
+);
+select is(
+  public.set_signup_approval_setting(false),
   false,
-  'the administrator reads the automatic-activation default'
+  'the administrator can enable automatic activation for future signups'
 );
 select is(
   public.set_signup_approval_setting(true),
   true,
-  'the administrator can require approval for future signups'
+  'the administrator can restore required approval for future signups'
 );
 reset role;
 
@@ -69,8 +74,8 @@ select is(
 
 select is(
   (select status::text from public.platform_access where user_id = '00000000-0000-0000-0000-000000000102'),
-  'approved',
-  'enabling signup approval does not change an existing account'
+  'pending',
+  'changing signup policy does not rewrite an existing pending account'
 );
 
 insert into auth.users (id, email)

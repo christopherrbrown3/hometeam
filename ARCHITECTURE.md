@@ -73,7 +73,7 @@ Business rules belong in pure domain modules, database functions, or typed servi
 
 ### Routing
 
-Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public authentication routes are `/login` and `/register`; `/join/:token` and the legacy `/invite/:token` preserve their intended destination while authentication is completed. The retired `/verify` route safely redirects to `/login`. New accounts receive active platform access automatically by default; when an administrator enables signup approval, they start pending instead. Authenticated users whose access is pending, rejected, or suspended are restricted to `/access`; active users enter the product session gate, where `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
+Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public authentication routes are `/login` and `/register`; `/join/:token` and the legacy `/invite/:token` preserve their intended destination while authentication is completed. The retired `/verify` route safely redirects to `/login`. New accounts start pending by default; an administrator can disable signup approval to activate future accounts automatically. Authenticated users whose access is pending, rejected, or suspended are restricted to `/access`; active users enter the product session gate, where `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
 
 An intended location is serialized before authentication and restored only after validation. Invitation tokens must never be placed in logs or analytics; after acceptance, replace the route so the token is no longer visible.
 
@@ -107,8 +107,8 @@ The shell is mobile-first with safe-area-aware bottom navigation and a centered 
 2. Supabase creates or restores the password session; hosted Auth email confirmation must remain disabled because HomeTeam has no email-verification flow.
 3. A profile/access bootstrap trigger derives and persists the normalized username, reads the singleton signup policy, then idempotently creates either an `approved` or `pending` `platform_access` row and its initial event.
 4. The client fetches its authoritative platform access state.
-5. Approved users restore the validated intended route and proceed to household authorization; this is immediate under the default automatic-activation policy.
-6. When signup approval is enabled, pending users wait on the access-status route. Rejected or suspended users are restricted there as well; protected queries and Realtime channels do not start.
+5. Under the default policy, pending users wait on the access-status route until an administrator allows access. Rejected or suspended users are restricted there as well; protected queries and Realtime channels do not start.
+6. Approved users restore the validated intended route and proceed to household authorization; this is immediate for new accounts when an administrator disables signup approval.
 7. Platform administrators may use the separate account-management route and RPCs; they receive no implicit household membership.
 8. Session refresh is handled by Supabase; the app clears protected caches on sign-out, suspension, or access revocation.
 9. Invitation acceptance verifies active platform access and the authenticated username against a normalized invited username inside a transactional function.
@@ -117,9 +117,9 @@ Only publishable frontend credentials are loaded by Vite. The service-role key a
 
 ## 5. Platform access state model
 
-`platform_settings` contains the singleton `require_signup_approval` policy, which defaults to `false`. `platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. A signup starts as `approved` when the setting is off and `pending` when it is on. Changing the setting affects future signups only. `platform_administrators` contains the small set of user UUIDs permitted to manage the policy and account state. `platform_access_events` is append-only and records the initial signup state plus every later transition.
+`platform_settings` contains the singleton `require_signup_approval` policy, which defaults to `true`. `platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. A signup starts as `approved` when the setting is off and `pending` when it is on. Changing the setting affects future signups only. `platform_administrators` contains the small set of user UUIDs permitted to manage the policy and account state. `platform_access_events` is append-only and records the initial signup state plus every later transition.
 
-The initial administrator is inserted by UUID through a documented one-time SQL operation after their Supabase Auth user exists. Because the setting defaults to automatic activation, that first account is normally already active; the operation creates the administrator record without adding a duplicate access transition. If the selected account is inactive, it restores that account transactionally. No administrator username is hard-coded.
+The initial administrator is inserted by UUID through a documented one-time SQL operation after their Supabase Auth user exists. The operation creates the administrator record and restores that account transactionally when it is not already active. No administrator username is hard-coded.
 
 Stable authorization helpers:
 
@@ -384,7 +384,7 @@ Each migration includes a forward test. Destructive fixes require a new migratio
 
 ## 20. Security boundaries
 
-The browser is untrusted. Authentication is not household authorization: automatic activation is the default signup policy, but every household check still requires a valid membership and role. If signup approval is enabled, the same access boundary keeps pending accounts out; it also provides immediate suspension in either mode. Administrator status authorizes only signup-policy and account-state functions and never bypasses household RLS. Household IDs, roles, assignees, occurrence versions, and notification recipients supplied by a client are claims to validate, not authority. Direct writes are denied for lifecycle/event/outbox tables; controlled functions apply mutations. Privileged Edge Functions accept only cron/service authentication and never proxy arbitrary client input. See `SECURITY_MODEL.md`.
+The browser is untrusted. Authentication is not household authorization: signup approval is required by default, and every household check still requires a valid membership and role after platform access is granted. The same access boundary keeps pending accounts out and provides immediate suspension in either signup mode. Administrator status authorizes only signup-policy and account-state functions and never bypasses household RLS. Household IDs, roles, assignees, occurrence versions, and notification recipients supplied by a client are claims to validate, not authority. Direct writes are denied for lifecycle/event/outbox tables; controlled functions apply mutations. Privileged Edge Functions accept only cron/service authentication and never proxy arbitrary client input. See `SECURITY_MODEL.md`.
 
 ## 21. Version 2 extension points
 

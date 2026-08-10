@@ -25,8 +25,8 @@ select is(
 
 select is(
   (select status::text from public.platform_access where user_id = '00000000-0000-0000-0000-000000000104'),
-  'approved',
-  'the auth trigger activates a new account immediately'
+  'pending',
+  'the auth trigger requires approval for a new account by default'
 );
 
 select is(
@@ -35,10 +35,10 @@ select is(
     from public.platform_access_events
     where user_id = '00000000-0000-0000-0000-000000000104'
       and previous_status is null
-      and next_status = 'approved'
+      and next_status = 'pending'
   ),
   1,
-  'automatic account activation is recorded once'
+  'the initial pending access state is recorded once'
 );
 
 select lives_ok(

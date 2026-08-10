@@ -310,7 +310,7 @@ Never place the service-role key or VAPID private key in frontend files, GitHub 
 
 # 8A. Configurable signup access and platform administration
 
-The version 1 deployment is publicly reachable. A database-owned administrator setting named **Require approval for new signups** controls whether a valid new account starts Approved or Pending. The setting defaults to off, so new accounts are activated automatically until an administrator changes it.
+The version 1 deployment is publicly reachable. A database-owned administrator setting named **Require approval for new signups** controls whether a valid new account starts Approved or Pending. The setting defaults to on, so new accounts require administrator approval until an administrator changes it.
 
 Supabase password authentication creates a valid authenticated session for a new username. In the same signup flow, HomeTeam creates the profile and the platform-access record selected by the current policy. Household data remains protected by membership- and role-based authorization.
 

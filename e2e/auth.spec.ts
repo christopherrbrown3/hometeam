@@ -6,7 +6,7 @@ test('protects HomeTeam routes for unauthenticated visitors', async ({ page }) =
   await expect(
     page.getByRole('heading', { level: 1, name: 'Sign in' }),
   ).toBeVisible()
-  await expect(page.getByText('Create an account to get started with HomeTeam.')).toBeVisible()
+  await expect(page.getByText('Create an account to request access to HomeTeam.')).toBeVisible()
   await expect(page.getByText(/approved separately from sign-in/i)).toHaveCount(0)
 })
 
