@@ -18,7 +18,7 @@ Model tiers:
 |---|---|---|---|---|
 | 1. Repository and Tooling | Strict React/Vite foundation, routing, styles, tests, PWA/Pages workflow, contributor guardrails | clean install; lint/typecheck/unit/build workflows pass; subpath build works | None | Pages settings, version drift |
 | 2. Supabase and Database Foundation | Local Supabase, core tables/enums/indexes, seed, generated types | migrations replay from empty state; constraints/index tests pass; seed loads | M1 | schema churn, migration order |
-| 3. Authentication and Households | username/password authentication, administrator-approved preview access, profiles, multi-household memberships, invitations, categories, guest foundations | unapproved users are product-data isolated; administrator approval works without household bypass; two members and one guest authenticate/join; invitation and RLS tests pass | M2 | approval bypass, admin overreach, token handling, isolation |
+| 3. Authentication and Households | username/password authentication, configurable signup approval, revocable platform access, profiles, multi-household memberships, invitations, categories, guest foundations | both signup modes work; inactive users are product-data isolated; administrator controls do not bypass household access; two members and one guest authenticate/join; invitation and RLS tests pass | M2 | policy bypass, admin overreach, token handling, isolation |
 | 4. Task and Recurrence Engine | task definitions, slots, recurrence, timezone, generation, missed policies, forms | all supported v1 schedules generate unique correct occurrences across DST | M2–M3 | DST, duplicate generation |
 | 5. Assignment and Rotation | fixed/unassigned/claim/round-robin and future recalculation | rotation matrix and database tests pass without rewriting locked/history rows | M3–M4 | override/undo semantics |
 | 6. Task Lifecycle and Audit History | atomic lifecycle RPCs, version conflicts, events, soft deletion | race tests prove first update wins; every action appends correct immutable events | M4–M5 | transactional complexity |
@@ -123,20 +123,20 @@ Model tiers:
 | 88 | Document and validate production Supabase password authentication, secrets, Functions, and cron setup | 12 | Documentation | Mechanical | #75, #76, #81, #85 |
 | 89 | Finalize GitHub Pages, custom-domain, observability, privacy, and operations runbooks | 12 | Documentation/Implementation | Standard | #5, #71, #81, #86 |
 | 90 | Execute release validation, manual iPhone acceptance, and launch checklist | 12 | Test/Release | High Intelligence | #82, #84–#89, #99 |
-| 96 | Epic: Public-preview access approval and platform administration | 3 | Epic | High Intelligence | #14 |
-| 97 | Implement platform access schema, administrator bootstrap, RLS gate, and approval RPCs | 3 | Security/Implementation | High Intelligence | #9, #15 |
-| 98 | Build access-status gate and administrator approval dashboard | 3 | Implementation | Standard | #4, #17, #97 |
-| 99 | Prove preview approval isolation, administrator boundaries, and revocation behavior | 3 | Security/Test | High Intelligence | #18, #26, #97, #98 |
+| 96 | Epic: Platform access state and administration | 3 | Epic | High Intelligence | #14 |
+| 97 | Implement platform access schema, configurable signup policy, administrator bootstrap, RLS gate, and state RPCs | 3 | Security/Implementation | High Intelligence | #9, #15 |
+| 98 | Build access-status gate and administrator account-management dashboard | 3 | Implementation | Standard | #4, #17, #97 |
+| 99 | Prove both signup modes, inactive-state isolation, administrator boundaries, and revocation behavior | 3 | Security/Test | High Intelligence | #18, #26, #97, #98 |
 
 ## 4. Product requirement traceability
 
 | Product requirement | Issues |
 |---|---|
 | Username/password authentication and persistent session | #15–#18, #84, #110 |
-| Public deployment requires administrator approval before use | #96–#99, #79, #85, #90 |
+| Administrator setting controls automatic activation or required signup approval | #96–#99, #79, #85, #90 |
 | Pending/rejected/suspended users see only own access status | #97–#99, #79 |
-| Administrator approves access without household-data bypass | #97, #99, #79, #82 |
-| Invitation acceptance waits for platform approval | #23, #97–#99 |
+| Administrator manages account state without household-data bypass | #97, #99, #79, #82 |
+| Invitation acceptance resumes immediately after signup | #23, #97–#99 |
 | Suspension/revocation stops Realtime and clears caches | #65, #67–#68, #97–#99 |
 | Return to invitation/intended route | #17, #23, #84 |
 | Multiple households and household timezone | #20, #21, #31, #56 |

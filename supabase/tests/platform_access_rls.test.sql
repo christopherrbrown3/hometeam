@@ -1,11 +1,11 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(12);
 
 select lives_ok(
   $$ select private.bootstrap_platform_administrator('00000000-0000-0000-0000-000000000101') $$,
-  'the trusted bootstrap makes the first administrator approved'
+  'the trusted bootstrap creates an active first administrator'
 );
 
 update public.platform_access
@@ -27,17 +27,18 @@ select throws_ok(
 reset role;
 
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-000000000104', 'pending@example.test');
+
+select is(
+  (select status::text from public.platform_access where user_id = '00000000-0000-0000-0000-000000000104'),
+  'approved',
+  'new accounts receive platform access automatically'
+);
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000104', true);
-select throws_ok(
-  $$ select public.create_household('Pending household', 'America/New_York') $$,
-  '42501', 'approved platform access is required',
-  'pending users cannot create households'
-);
-select throws_ok(
-  $$ select public.accept_household_invitation('not-a-real-token') $$,
-  '42501', 'approved platform access is required',
-  'pending users cannot accept invitations even when they know a token'
+select lives_ok(
+  $$ select public.create_household('Automatic household', 'America/New_York') $$,
+  'a new account can use HomeTeam under the default automatic policy'
 );
 select ok(
   not has_table_privilege('authenticated', 'public.platform_access', 'update'),
@@ -52,14 +53,37 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select lives_ok(
+  $$ select public.set_platform_access_status('00000000-0000-0000-0000-000000000104', 'suspended') $$,
+  'a platform administrator can suspend an active account'
+);
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000104', true);
+select throws_ok(
+  $$ select public.create_household('Suspended household', 'America/New_York') $$,
+  '42501', 'approved platform access is required',
+  'a suspended account cannot create households'
+);
+select throws_ok(
+  $$ select public.accept_household_invitation('not-a-real-token') $$,
+  '42501', 'approved platform access is required',
+  'a suspended account cannot accept invitations even when it knows a token'
+);
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
+select lives_ok(
   $$ select public.set_platform_access_status('00000000-0000-0000-0000-000000000104', 'approved') $$,
-  'platform administrator can approve a pending account'
+  'a platform administrator can restore a suspended account'
 );
 reset role;
 
 select is(
-  (select count(*)::integer from public.platform_access_events where user_id = '00000000-0000-0000-0000-000000000104' and next_status = 'approved'), 1,
-  'one authoritative approval event is appended'
+  (select count(*)::integer from public.platform_access_events where user_id = '00000000-0000-0000-0000-000000000104'),
+  3,
+  'automatic activation, suspension, and restoration are all recorded'
 );
 
 select * from finish();

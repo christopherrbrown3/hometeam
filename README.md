@@ -91,7 +91,7 @@ e2e/                    Playwright browser checks
 
 HomeTeam is a working, access-controlled preview deployed on a public URL:
 
-- New accounts require administrator approval before any household data is available.
+- New accounts are activated automatically by default; a platform administrator can require approval for future signups.
 - Task mutations are online-only; the PWA does not queue changes for later replay.
 - The notification schema and preferences foundation exist, but the current preview does not yet deliver Web Push notifications.
 - HomeTeam is a coordination tool, not the sole medically reliable reminder system.
@@ -128,17 +128,19 @@ npx --yes supabase@2.110.0 db reset
 
 Map the local `API_URL` and browser-safe `ANON_KEY`/publishable key from `status` into `.env.local`. Supabase Studio is available at `http://127.0.0.1:54323`.
 
-### Preview access setup
+### Account access setup
 
 In Supabase, keep **Authentication → Providers → Email → Confirm email** disabled. HomeTeam maps a normalized username to a non-routable internal Auth identifier, so it does not collect a personal email address.
 
-The first production sign-in creates a pending access request. Bootstrap the first platform administrator once from the Supabase SQL editor, using that account's UUID from `auth.users`:
+New signups receive an active platform-access record automatically by default. Pending accounts that existed when this setting was introduced are activated by the migration; explicitly rejected or suspended accounts remain blocked.
+
+Bootstrap the first platform administrator once from the Supabase SQL editor using that account's UUID from `auth.users`:
 
 ```sql
 select private.bootstrap_platform_administrator('<authenticated-user-uuid>');
 ```
 
-The administrator can then approve other preview requests at `#/admin/access`. Administrator status is separate from household membership and never grants household data access.
+The administrator can then manage account access at `#/admin/access`, including the **Require approval for new signups** switch. The switch affects only accounts created after it changes; existing account states are preserved. Administrator status is separate from household membership and never grants household data access.
 
 ## ✅ Quality checks
 
@@ -156,7 +158,7 @@ HomeTeam treats the browser as untrusted:
 
 - PostgreSQL Row Level Security and controlled RPCs enforce household authorization.
 - Full members and guests have deliberately different read and mutation permissions.
-- Platform approval is separate from household membership; administrators cannot browse household data by virtue of that role.
+- Platform account state is separate from household membership; administrators cannot browse household data by virtue of that role.
 - Privileged keys stay out of the frontend bundle and committed files.
 - Task lifecycle changes are authoritative, versioned transactions, and history is append-only.
 

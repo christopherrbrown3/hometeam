@@ -540,6 +540,35 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          require_signup_approval: boolean
+          singleton: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          require_signup_approval?: boolean
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          require_signup_approval?: boolean
+          singleton?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1183,6 +1212,12 @@ export type Database = {
           status: Database["public"]["Enums"]["platform_access_status"]
         }[]
       }
+      get_signup_approval_setting: {
+        Args: never
+        Returns: {
+          require_signup_approval: boolean
+        }[]
+      }
       get_household_join_link_status: {
         Args: { input_household_id: string }
         Returns: {
@@ -1386,6 +1421,10 @@ export type Database = {
           target_user_id: string
         }
         Returns: undefined
+      }
+      set_signup_approval_setting: {
+        Args: { input_require_signup_approval: boolean }
+        Returns: boolean
       }
       update_category: {
         Args: {

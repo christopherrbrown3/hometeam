@@ -9,8 +9,9 @@ Protected assets include platform access decisions, administrator identity, hous
 Security goals:
 
 - outsiders receive no household task data;
-- authenticated but unapproved users receive no HomeTeam product data;
-- platform administrators can manage preview access without implicit household visibility;
+- new accounts follow the administrator-controlled signup policy and receive no household data without membership;
+- pending, rejected, or suspended users receive no HomeTeam product data;
+- platform administrators can manage account state without implicit household visibility;
 - guests receive only explicitly assigned occurrences and the minimum related data;
 - removed members lose access immediately;
 - lifecycle changes are authorized, atomic, and auditable;
@@ -30,7 +31,7 @@ Security goals:
 
 ## 3. Authentication assumptions
 
-Supabase Auth validates passwords and issues JWTs. HomeTeam maps each normalized username to a non-routable internal identifier for Supabase's email/password provider; personal email is not part of the product identity. Authentication alone does not authorize product access. Authorization first requires an `approved` `platform_access` row for `auth.uid()`, then applies household role/target checks. Shareable join links are bearer tokens; legacy recipient-bound invitations compare the normalized username stored in the profile. Sessions are cleared on sign-out, and protected query caches and Realtime channels are cleared on identity change, suspension, or approval revocation.
+Supabase Auth validates passwords and issues JWTs. HomeTeam maps each normalized username to a non-routable internal identifier for Supabase's email/password provider; personal email is not part of the product identity. The signup trigger reads the database-owned `require_signup_approval` policy and creates either an `approved` or `pending` `platform_access` row. Automatic activation is the default. Product authorization checks that revocable state before applying household role and target checks, so pending or suspended accounts remain isolated without weakening household rules. Shareable join links are bearer tokens; legacy recipient-bound invitations compare the normalized username stored in the profile. Sessions are cleared on sign-out, and protected query caches and Realtime channels are cleared on identity change, suspension, or access revocation.
 
 ## 4. Permission matrix
 
@@ -39,8 +40,9 @@ Supabase Auth validates passwords and issues JWTs. HomeTeam maps each normalized
 | Capability | Platform administrator | Approved user | Pending/rejected/suspended user |
 |---|---:|---:|---:|
 | Read own access state | Yes | Yes | Yes |
-| List pending access requests | Yes | No | No |
-| Approve/reject/suspend/restore access | Yes | No | No |
+| List account access states | Yes | No | No |
+| Change signup approval policy | Yes | No | No |
+| Reject/suspend/restore access | Yes | No | No |
 | Access household data without membership | No | No | No |
 | Proceed to household authorization | Only when also approved | Yes | No |
 
@@ -79,11 +81,11 @@ Helpers are non-user-overridable, explicitly schema-qualified, and do not accept
 
 ### Pending, rejected, and suspended users
 
-May read only their own minimal profile and current platform access state. They cannot read memberships or invitations, accept invitations, create households, subscribe to product Realtime channels, manage push subscriptions, or call product RPCs.
+May read only their own minimal profile and current platform access state. A pending state is assigned to new accounts when signup approval is enabled; rejected and suspended states remain available for account enforcement. Affected users cannot read memberships or invitations, accept invitations, create households, subscribe to product Realtime channels, manage push subscriptions, or call product RPCs.
 
 ### Platform administrators
 
-May list minimum applicant identity/access metadata and execute controlled access-decision RPCs. Administrator status does not satisfy household membership predicates. The privileged initial bootstrap atomically creates the administrator, approves that same UUID, and records a bootstrap event; there is no client-callable bootstrap. Later access decisions use target user IDs from stored rows, lock the row, validate state transitions, and append `platform_access_events`; client roles cannot update/delete those events.
+May read and change the signup policy, list minimum account identity/access metadata, and execute controlled access-state RPCs. Administrator status does not satisfy household membership predicates. The privileged initial bootstrap creates the administrator record for an authenticated account; there is no client-callable bootstrap. Later state changes use target user IDs from stored rows, lock the row, validate transitions, and append `platform_access_events`; client roles cannot update/delete those events. Browser roles have no direct privileges on the singleton platform-settings row.
 
 ### Full members
 
@@ -165,7 +167,7 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 | Threat | Mitigation |
 |---|---|
 | IDOR/cross-household row access | RLS on every table, target-derived household checks, two-household negative tests |
-| Public visitor authenticates and starts using preview | Approved platform-access predicate on all product reads, Realtime subscriptions, and RPCs |
+| Public visitor creates an account and probes household data | Signup policy controls initial platform state, while household-scoped RLS and RPC checks remain authoritative in either mode |
 | User forges administrator UI or RPC call | Administrator table checked from `auth.uid()` inside RLS/security-definer functions |
 | Administrator gains household visibility | Separate predicates; administrator status never satisfies household membership |
 | Suspended user keeps cached/live data | RLS revocation plus immediate Realtime teardown and protected cache purge |
@@ -185,8 +187,9 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 ## 16. Required security tests before release
 
 - full member, guest, removed member, and outsider matrix for every exposed table;
-- pending, rejected, suspended, approved, administrator, and non-administrator platform access matrix;
-- unapproved user denied household creation, invitation acceptance, product tables, Realtime, mutations, and push-subscription management;
+- both signup-policy modes plus pending, rejected, suspended, approved, administrator, and non-administrator platform access states;
+- non-administrator denied direct and RPC access to the signup-policy setting;
+- inactive user denied household creation, invitation acceptance, product tables, Realtime, mutations, and push-subscription management;
 - administrator decision transitions and append-only access events;
 - administrator without household membership denied household data;
 - suspension/revocation tears down Realtime and clears protected client caches;

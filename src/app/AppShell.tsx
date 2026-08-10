@@ -60,7 +60,7 @@ export function AppShell({ children }: AppShellProps) {
           {access.data?.isAdministrator && (
             <NavLink className="flex min-h-11 items-center gap-3 rounded-control px-3 text-sm font-semibold text-sidebar-muted transition-colors hover:bg-white/8 hover:text-white" to="/admin/access">
               <Icon name="lock" size={18} />
-              Access requests
+              Account access
             </NavLink>
           )}
           <button className="flex min-h-11 w-full items-center gap-3 rounded-control px-3 text-left text-sm font-semibold text-sidebar-muted transition-colors hover:bg-white/8 hover:text-white" onClick={() => void handleSignOut()} type="button">
@@ -76,7 +76,7 @@ export function AppShell({ children }: AppShellProps) {
             <span className="font-bold tracking-tight">HomeTeam</span>
           </NavLink>
           {access.data?.isAdministrator && (
-            <NavLink aria-label="Review preview accounts" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-strong hover:text-brand" to="/admin/access">
+            <NavLink aria-label="Manage account access" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-strong hover:text-brand" to="/admin/access">
               <Icon name="lock" size={19} />
             </NavLink>
           )}

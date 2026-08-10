@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(7);
+select plan(9);
 
 select has_column('public', 'profiles', 'username', 'profiles expose usernames');
 select hasnt_column('public', 'profiles', 'email', 'profiles do not retain email identities');
@@ -21,6 +21,24 @@ select is(
   (select username from public.profiles where user_id = '00000000-0000-0000-0000-000000000104'),
   'invitee',
   'the auth trigger derives the product username from the internal identifier'
+);
+
+select is(
+  (select status::text from public.platform_access where user_id = '00000000-0000-0000-0000-000000000104'),
+  'approved',
+  'the auth trigger activates a new account immediately'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.platform_access_events
+    where user_id = '00000000-0000-0000-0000-000000000104'
+      and previous_status is null
+      and next_status = 'approved'
+  ),
+  1,
+  'automatic account activation is recorded once'
 );
 
 select lives_ok(

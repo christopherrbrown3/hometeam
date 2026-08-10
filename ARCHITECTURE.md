@@ -73,7 +73,7 @@ Business rules belong in pure domain modules, database functions, or typed servi
 
 ### Routing
 
-Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public authentication routes are `/login` and `/register`; `/join/:token` and the legacy `/invite/:token` preserve their intended destination while authentication and approval are completed. The retired `/verify` route safely redirects to `/login`. Authenticated-but-unapproved users are restricted to `/access`. Approved users enter the product session gate; `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
+Use `createHashRouter` so routes survive GitHub Pages refreshes under both repository subpaths and custom domains. Public authentication routes are `/login` and `/register`; `/join/:token` and the legacy `/invite/:token` preserve their intended destination while authentication is completed. The retired `/verify` route safely redirects to `/login`. New accounts receive active platform access automatically by default; when an administrator enables signup approval, they start pending instead. Authenticated users whose access is pending, rejected, or suspended are restricted to `/access`; active users enter the product session gate, where `/today` is the default. Platform administrators additionally receive `/admin/access`, but administrator status alone does not unlock household routes. Bottom-navigation routes are `/today`, `/upcoming`, `/tasks`, `/history`, and `/more`. Household, members, categories, notifications, profile, and installation pages nest under `/more`.
 
 An intended location is serialized before authentication and restored only after validation. Invitation tokens must never be placed in logs or analytics; after acceptance, replace the route so the token is no longer visible.
 
@@ -105,21 +105,21 @@ The shell is mobile-first with safe-area-aware bottom navigation and a centered 
 
 1. Client validates a normalized username and password, then maps the username to a non-routable internal identifier for Supabase's password provider.
 2. Supabase creates or restores the password session; hosted Auth email confirmation must remain disabled because HomeTeam has no email-verification flow.
-3. A profile/access bootstrap trigger derives and persists the normalized username, then idempotently creates a `pending` `platform_access` row.
+3. A profile/access bootstrap trigger derives and persists the normalized username, reads the singleton signup policy, then idempotently creates either an `approved` or `pending` `platform_access` row and its initial event.
 4. The client fetches its authoritative platform access state.
-5. Pending, rejected, or suspended users are restricted to the access-status route and sign-out; protected queries and Realtime channels do not start.
-6. Approved users restore the validated intended route and may proceed to household authorization.
-7. Platform administrators may use the separate access-review route and RPCs; they receive no implicit household membership.
-8. Session refresh is handled by Supabase; the app clears protected caches on sign-out, suspension, or approval revocation.
-9. Invitation acceptance verifies both approved platform access and the authenticated username against a normalized invited username inside a transactional function.
+5. Approved users restore the validated intended route and proceed to household authorization; this is immediate under the default automatic-activation policy.
+6. When signup approval is enabled, pending users wait on the access-status route. Rejected or suspended users are restricted there as well; protected queries and Realtime channels do not start.
+7. Platform administrators may use the separate account-management route and RPCs; they receive no implicit household membership.
+8. Session refresh is handled by Supabase; the app clears protected caches on sign-out, suspension, or access revocation.
+9. Invitation acceptance verifies active platform access and the authenticated username against a normalized invited username inside a transactional function.
 
 Only publishable frontend credentials are loaded by Vite. The service-role key and VAPID private key exist only as Supabase secrets.
 
-## 5. Platform access approval model
+## 5. Platform access state model
 
-`platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. `platform_administrators` contains the small set of user UUIDs permitted to review access. `platform_access_events` is append-only and records every decision or restoration.
+`platform_settings` contains the singleton `require_signup_approval` policy, which defaults to `false`. `platform_access` has one row per authenticated user with state `pending`, `approved`, `rejected`, or `suspended`, request/decision timestamps, and the deciding administrator where applicable. A signup starts as `approved` when the setting is off and `pending` when it is on. Changing the setting affects future signups only. `platform_administrators` contains the small set of user UUIDs permitted to manage the policy and account state. `platform_access_events` is append-only and records the initial signup state plus every later transition.
 
-The initial administrator is inserted by UUID through a privileged migration parameter or documented one-time SQL operation after their Supabase Auth user exists. That operation atomically creates the administrator record, sets the same user to `approved`, and appends a bootstrap access event so there is no unapproved-administrator deadlock. No administrator username is hard-coded.
+The initial administrator is inserted by UUID through a documented one-time SQL operation after their Supabase Auth user exists. Because the setting defaults to automatic activation, that first account is normally already active; the operation creates the administrator record without adding a duplicate access transition. If the selected account is inactive, it restores that account transactionally. No administrator username is hard-coded.
 
 Stable authorization helpers:
 
@@ -128,18 +128,17 @@ private.is_approved_user(actor uuid)
 private.is_platform_administrator(actor uuid)
 ```
 
-Every household/product RLS predicate and security-definer RPC checks `private.is_approved_user(auth.uid())` before role- or target-specific authorization. Only the access-status projection remains readable to a non-approved authenticated user.
+Every household/product RLS predicate and security-definer RPC checks `private.is_approved_user(auth.uid())` before role- or target-specific authorization. This enforces both signup-policy modes and immediate suspension. Only the access-status projection remains readable to a non-approved authenticated user.
 
-Administrator RPCs are:
+Administrator RPCs expose the signup policy and account-state transitions:
 
 ```text
-approve_platform_access(target_user_id, note)
-reject_platform_access(target_user_id, note)
-suspend_platform_access(target_user_id, note)
-restore_platform_access(target_user_id, note)
+get_signup_approval_setting()
+set_signup_approval_setting(require_signup_approval)
+set_platform_access_status(target_user_id, approved | rejected | suspended, note)
 ```
 
-Each function derives the administrator from `auth.uid()`, locks the target access row, validates the transition, updates state, and appends a decision event in one transaction. Approval is idempotent only when the requested final state already matches; conflicting transitions return structured errors.
+Each function derives the administrator from `auth.uid()`. The setting RPC updates the singleton policy without rewriting existing accounts. The access-state RPC locks the target row, validates the transition, updates state, and appends an event in one transaction. Repeating the current state returns a structured error. Browser roles have no direct table privileges for platform settings or access state.
 
 ## 6. Household, membership, and category model
 
@@ -377,7 +376,7 @@ Migrations are immutable, timestamped, and ordered:
 4. task series, schedule slots, rotations, occurrences;
 5. events, notification preferences, subscriptions, outbox;
 6. indexes and constraints;
-7. platform approval and household RLS helper predicates and policies;
+7. platform access and household RLS helper predicates and policies;
 8. transactional functions and triggers;
 9. Realtime publication and scheduled-processing support.
 
@@ -385,7 +384,7 @@ Each migration includes a forward test. Destructive fixes require a new migratio
 
 ## 20. Security boundaries
 
-The browser is untrusted. Authentication is not product authorization: an approved platform access row is required before household checks. Administrator status authorizes only access-review functions and never bypasses household RLS. Household IDs, roles, assignees, occurrence versions, and notification recipients supplied by a client are claims to validate, not authority. Direct writes are denied for lifecycle/event/outbox tables; controlled functions apply mutations. Privileged Edge Functions accept only cron/service authentication and never proxy arbitrary client input. See `SECURITY_MODEL.md`.
+The browser is untrusted. Authentication is not household authorization: automatic activation is the default signup policy, but every household check still requires a valid membership and role. If signup approval is enabled, the same access boundary keeps pending accounts out; it also provides immediate suspension in either mode. Administrator status authorizes only signup-policy and account-state functions and never bypasses household RLS. Household IDs, roles, assignees, occurrence versions, and notification recipients supplied by a client are claims to validate, not authority. Direct writes are denied for lifecycle/event/outbox tables; controlled functions apply mutations. Privileged Edge Functions accept only cron/service authentication and never proxy arbitrary client input. See `SECURITY_MODEL.md`.
 
 ## 21. Version 2 extension points
 
@@ -400,8 +399,8 @@ flowchart TD
     I15["#15 Auth service"] --> I97["#97 Preview access RLS/RPCs"]
     I9 --> I97
     I97 --> I20
-    I97 --> I98["#98 Admin approval UI + access gate"]
-    I98 --> I99["#99 Approval security/E2E tests"]
+    I97 --> I98["#98 Account access UI + access gate"]
+    I98 --> I99["#99 Signup policy + access security tests"]
     I9 --> I20["#20 Household RLS/RPC"]
     I9 --> I29["#29 Task schema"]
     I28["#28 Recurrence contract"] --> I30["#30 Calendar engine"]

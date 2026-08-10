@@ -29,7 +29,7 @@ export function SignUpScreen() {
 
   return (
     <AuthFrame>
-      <AuthPageHeading title="Create your account">{joiningHousehold ? 'Create an account, then we’ll bring you back to join the household.' : 'Choose a username and a password. You can request access after signing in.'}</AuthPageHeading>
+      <AuthPageHeading title="Create your account">{joiningHousehold ? 'Create an account, then we’ll bring you back to join the household.' : 'Choose a username and password to get started.'}</AuthPageHeading>
       <form aria-labelledby="auth-page-title" className="mt-8 space-y-5" noValidate onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label className="block text-sm font-semibold" htmlFor="username">Username</label>
