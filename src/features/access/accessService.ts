@@ -18,7 +18,7 @@ export async function getCurrentAccess(client: HomeTeamClient): Promise<CurrentA
   const access = data[0]
 
   if (!access) {
-    throw new Error('Your access request is still being created. Please refresh in a moment.')
+    throw new Error('Your account access is still being initialized. Please refresh in a moment.')
   }
 
   return { isAdministrator: access.is_administrator, status: access.status }
@@ -32,6 +32,35 @@ export async function setAccessStatus(
   const { error } = await client.rpc('set_platform_access_status', {
     target_status: status,
     target_user_id: userId,
+  })
+
+  if (error) {
+    throw error
+  }
+}
+
+export async function getSignupApprovalSetting(client: HomeTeamClient): Promise<boolean> {
+  const { data, error } = await client.rpc('get_signup_approval_setting')
+
+  if (error) {
+    throw error
+  }
+
+  const setting = data[0]
+
+  if (!setting) {
+    throw new Error('The signup approval setting is unavailable.')
+  }
+
+  return setting.require_signup_approval
+}
+
+export async function setSignupApprovalSetting(
+  client: HomeTeamClient,
+  requireApproval: boolean,
+) {
+  const { error } = await client.rpc('set_signup_approval_setting', {
+    input_require_signup_approval: requireApproval,
   })
 
   if (error) {

@@ -57,7 +57,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000104', true);
 select is(
   (select count(*)::integer from public.platform_access), 4,
-  'platform administrator can review access requests'
+  'platform administrator can review account access states'
 );
 select is(
   (select count(*)::integer from public.households), 0,

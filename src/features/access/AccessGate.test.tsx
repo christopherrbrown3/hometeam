@@ -35,7 +35,7 @@ describe('AccessGate', () => {
     useSessionMock.mockReturnValue({ session: { user: { id: 'member-1' } } })
   })
 
-  it('preserves a join link while a new account waits for approval', async () => {
+  it('preserves a join link if account activation is incomplete', async () => {
     rpc.mockResolvedValue({ data: [{ is_administrator: false, status: 'pending' }], error: null })
 
     renderGate(new QueryClient(), '/join/secure-token')
@@ -44,7 +44,7 @@ describe('AccessGate', () => {
     expect(peekReturnLocation()).toBe('/join/secure-token')
   })
 
-  it('keeps a pending account out of product routes and clears protected cache data', async () => {
+  it('keeps an inactive account out of product routes and clears protected cache data', async () => {
     rpc.mockResolvedValue({ data: [{ is_administrator: false, status: 'pending' }], error: null })
     const queryClient = new QueryClient()
     queryClient.setQueryData(['protected'], 'household data')
@@ -56,7 +56,7 @@ describe('AccessGate', () => {
     expect(queryClient.getQueryData(['protected'])).toBeUndefined()
   })
 
-  it('mounts product routes only after authoritative approval', async () => {
+  it('mounts product routes once account access is active', async () => {
     rpc.mockResolvedValue({ data: [{ is_administrator: false, status: 'approved' }], error: null })
 
     renderGate(new QueryClient())

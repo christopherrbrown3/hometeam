@@ -110,17 +110,18 @@ Completion interval:
 
 - **Decision:** README and settings state that HomeTeam notifications are coordination aids, not the sole medically reliable reminder system.
 
-## D-019 — Public-preview access approval
+## D-019 — Administrator-controlled signup approval and revocable platform access
 
-- **Decision:** A Supabase-authenticated user is not authorized to use HomeTeam until a platform administrator changes their platform access state to `approved`.
+- **Decision:** A singleton database setting, `require_signup_approval`, determines whether a valid Supabase signup creates an `approved` or `pending` platform-access record. It defaults to `true`, so new accounts require administrator approval until an administrator enables automatic activation.
 - **Role separation:** Platform administrator is not a third household role. Household roles remain exactly `full_member` and `guest`; administrator status does not create membership or bypass household RLS.
-- **Unauthorised states:** `pending`, `rejected`, and `suspended` users can read only their own minimal profile/access status and sign out.
-- **Bootstrap:** The initial administrator is configured by authenticated user UUID through a privileged migration parameter or documented one-time SQL operation. The operation atomically creates the administrator, marks that user approved, and appends a bootstrap event. No administrator email is hard-coded.
-- **Invitation behavior:** An invitation preserves intended navigation but cannot be accepted until platform approval.
-- **Audit:** Approval, rejection, suspension, and restoration are transactional and append an immutable platform access event.
+- **Policy scope:** Changing the setting affects future signups only. Existing approved, pending, rejected, and suspended accounts retain their state.
+- **Inactive states:** `pending`, `rejected`, and `suspended` users can read only their own minimal profile/access status and sign out.
+- **Bootstrap:** The initial administrator is configured by authenticated user UUID through a documented one-time SQL operation. The operation creates the administrator role and restores the account only if it is inactive. No administrator username is hard-coded.
+- **Invitation behavior:** An invitation preserves intended navigation through account creation and any configured approval wait before continuing to token and household authorization.
+- **Audit:** Initial signup state, approval, rejection, suspension, and restoration are transactional and append immutable platform-access events.
 
 ## D-021 — Shareable household join links
 
 - **Decision:** The primary invitation flow uses a high-entropy household join link rather than requiring a recipient username.
 - **Safety boundary:** Only a SHA-256 hash is stored. A household has at most one current link; links expire after seven days, allow at most twelve successful joins, and can be revoked or replaced immediately.
-- **Signup continuity:** The intended join route is retained through account creation and private-preview approval. Approval remains mandatory and the bearer link does not reveal household data before acceptance.
+- **Signup continuity:** The intended join route is retained through account creation and any configured approval wait. The bearer link reveals no household data before acceptance.

@@ -6,6 +6,8 @@ test('protects HomeTeam routes for unauthenticated visitors', async ({ page }) =
   await expect(
     page.getByRole('heading', { level: 1, name: 'Sign in' }),
   ).toBeVisible()
+  await expect(page.getByText('Create an account to request access to HomeTeam.')).toBeVisible()
+  await expect(page.getByText(/approved separately from sign-in/i)).toHaveCount(0)
 })
 
 test('starts registration at the top after exploring the login page', async ({ page }) => {
@@ -17,5 +19,6 @@ test('starts registration at the top after exploring the login page', async ({ p
 
   await expect(page).toHaveURL(/#\/register$/)
   await expect(page.getByRole('heading', { level: 1, name: 'Create your account' })).toBeInViewport()
+  await expect(page.getByText('Choose a username and password to get started.')).toBeVisible()
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
 })

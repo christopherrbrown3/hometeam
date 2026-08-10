@@ -17,7 +17,7 @@ describe('intended route storage', () => {
     expect(consumeReturnLocation()).toBe('/today')
   })
 
-  it('keeps a household join route available through account approval', () => {
+  it('keeps a household join route available through account creation', () => {
     saveReturnLocation('/join/secure-token')
 
     expect(peekReturnLocation()).toBe('/join/secure-token')

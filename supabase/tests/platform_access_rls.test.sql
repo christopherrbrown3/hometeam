@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(10);
 
 select lives_ok(
   $$ select private.bootstrap_platform_administrator('00000000-0000-0000-0000-000000000101') $$,
@@ -27,6 +27,13 @@ select throws_ok(
 reset role;
 
 insert into auth.users (id, email) values ('00000000-0000-0000-0000-000000000104', 'pending@example.test');
+
+select is(
+  (select status::text from public.platform_access where user_id = '00000000-0000-0000-0000-000000000104'),
+  'pending',
+  'new accounts wait for approval by default'
+);
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000104', true);
 select throws_ok(

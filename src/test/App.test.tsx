@@ -17,6 +17,8 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Everyone can see whose turn it is.' })).toBeVisible()
     expect(screen.getAllByText('Kim')).toHaveLength(3)
     expect(screen.queryAllByText(/inkimidator/i)).toHaveLength(0)
+    expect(screen.getByText('Create an account to request access to HomeTeam.')).toBeVisible()
+    expect(screen.queryByText(/approved separately/i)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Under the hood' })).not.toBeInTheDocument()
     expect(screen.queryByText('Built like a real product')).not.toBeInTheDocument()
   })

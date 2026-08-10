@@ -308,11 +308,11 @@ Never place the service-role key or VAPID private key in frontend files, GitHub 
 
 ---
 
-# 8A. Public-preview access approval and platform administration
+# 8A. Configurable signup access and platform administration
 
-The version 1 deployment may be publicly reachable, but it must operate as an administrator-approved preview.
+The version 1 deployment is publicly reachable. A database-owned administrator setting named **Require approval for new signups** controls whether a valid new account starts Approved or Pending. The setting defaults to on, so new accounts require administrator approval until an administrator changes it.
 
-Supabase password authentication may create a valid authenticated session for a new username. Authentication alone must not grant access to HomeTeam product data or features.
+Supabase password authentication creates a valid authenticated session for a new username. In the same signup flow, HomeTeam creates the profile and the platform-access record selected by the current policy. Household data remains protected by membership- and role-based authorization.
 
 Every authenticated user has a platform access state:
 
@@ -333,22 +333,23 @@ A Pending, Rejected, or Suspended user may access only:
 
 * Their own minimum profile identity
 * Their own platform access status
-* A clear pending, rejected, or suspended access screen
+* A clear pending, rejected, or suspended account-status screen
 * Sign out
 
-Do not rely only on a frontend route guard. Enforce the Approved prerequisite in Row Level Security helpers and every product security-definer function.
+When the setting is off, signup creates the Approved state immediately. When it is on, signup creates Pending and the user remains on the account-status screen until an administrator allows access. Keep the state check in Row Level Security helpers and every product security-definer function so both modes and later suspension remain authoritative.
 
 ## Platform administrator
 
-Platform administrator is an application-wide preview-management role. It is separate from the household roles **Full Member** and **Guest**; version 1 still has exactly those two household roles.
+Platform administrator is an application-wide account-management role. It is separate from the household roles **Full Member** and **Guest**; version 1 still has exactly those two household roles.
 
 A platform administrator may:
 
-* View pending access requests with the minimum identity needed to decide
-* Approve a pending user
-* Reject a pending user
-* Suspend or restore an approved user
-* View the append-only history of platform access decisions
+* View account access states with the minimum identity needed to manage them
+* Turn **Require approval for new signups** on or off for future accounts
+* Allow a pending account
+* Reject or suspend an account
+* Restore an inactive account
+* View the append-only history of platform access transitions
 
 Platform administrator status must not automatically:
 
@@ -356,21 +357,21 @@ Platform administrator status must not automatically:
 * Grant access to household tasks, descriptions, occurrences, history, members, or push subscriptions
 * Bypass household Row Level Security
 
-The initial administrator must be bootstrapped using the authenticated user UUID through a privileged migration or documented one-time administrative operation. The bootstrap must atomically add the administrator, set that same user’s platform access state to Approved, and record a bootstrap access event so the preview cannot deadlock with no approved administrator. Do not hard-code or guess an administrator email address in client code, migrations, or repository configuration.
+The initial administrator must be bootstrapped using the authenticated user UUID through a documented one-time administrative operation. The account is normally already active; the bootstrap adds the administrator role without inventing a duplicate access transition. If the account is inactive, the operation restores it transactionally. Do not hard-code or guess an administrator username in client code, migrations, or repository configuration.
 
 Every access decision records:
 
 * Target user
 * Previous and new access state
-* Administrator actor
+* Administrator actor, or no actor for the initial signup state
 * Decision timestamp
 * Optional short administrative note
 
-Access decision history is append-only. Users may read their own current access state but not other applicants. Only platform administrators may list or decide access requests.
+Access-state history is append-only. Users may read their own current access state but not other accounts. Only platform administrators may list or change account states.
 
-When approval is revoked or suspended, the client must immediately stop Realtime subscriptions, clear protected query caches, and return to the access-status screen.
+When access is rejected or suspended, the client must immediately stop Realtime subscriptions, clear protected query caches, and return to the access-status screen.
 
-Household invitations do not bypass platform approval. An invited user may authenticate and retain the intended invitation route, but may accept the invitation only after a platform administrator approves them.
+An invited user may authenticate or create an account and retain the intended invitation route. With automatic activation they continue directly; when signup approval is required, they continue after an administrator allows access. The invitation still grants nothing until its token and household rules are validated.
 
 ---
 
@@ -478,7 +479,7 @@ Invitation flow:
 2. They create a time-limited, usage-capped join link.
 3. They share the link through a private channel.
 4. The recipient signs in or creates an account.
-5. A new account retains the link through platform-access approval.
+5. A new account retains the link through signup and, when enabled, the approval wait.
 6. The recipient accepts the invitation and becomes an active member.
 7. Expired, exhausted, or revoked links fail safely.
 
@@ -1870,12 +1871,14 @@ Test:
 
 Test:
 
+* A new signup receives Approved platform access when approval is not required
+* A new signup receives Pending platform access when approval is required
 * Pending user cannot read or mutate any HomeTeam product data
 * Rejected or suspended user cannot read or mutate any HomeTeam product data
 * Approved user can proceed to household authorization
-* Non-administrator cannot list or decide access requests
-* Administrator can approve, reject, suspend, and restore access
-* Administrator approval does not grant household data access
+* Non-administrator cannot list or change account access states
+* Administrator can change signup policy and allow, reject, suspend, or restore access
+* Administrator status does not grant household data access
 * Full member permissions
 * Guest can read assigned occurrence
 * Guest cannot read unassigned occurrence
@@ -2190,8 +2193,8 @@ HomeTeam version 1 is complete only when:
 30. Lint, type checking, tests, and production build pass.
 31. GitHub Pages deployment is configured.
 32. No privileged secret exists in client code or the repository.
-33. A new authenticated user cannot use HomeTeam until a platform administrator approves them.
-34. An administrator can approve, reject, suspend, and restore preview access without gaining implicit household access.
+33. A new authenticated user receives Approved or Pending platform access according to the current administrator setting.
+34. An administrator can change signup policy and allow, reject, suspend, or restore account access without gaining implicit household access.
 
 ---
 

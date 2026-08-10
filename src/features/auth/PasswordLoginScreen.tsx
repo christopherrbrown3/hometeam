@@ -46,7 +46,7 @@ export function PasswordLoginScreen() {
         <Button className="w-full" disabled={isSubmitting} type="submit">{isSubmitting ? 'Signing in…' : 'Sign in'}</Button>
       </form>
       <p className="mt-5 text-center text-sm text-muted">Need an account? <Link className="font-semibold text-brand underline underline-offset-2" to="/register">Create one</Link>.</p>
-      <p className="login-preview-notice"><Icon name="lock" size={16} weight="duotone" /> <span><strong>Private preview</strong> Account access is approved separately from sign-in.</span></p>
+      <p className="login-preview-notice"><Icon name="lock" size={16} weight="duotone" /> <span><strong>Private preview</strong> Create an account to request access to HomeTeam.</span></p>
     </LoginPortfolioFrame>
   )
 }

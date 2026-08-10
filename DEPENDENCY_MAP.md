@@ -55,7 +55,7 @@ The expected critical path is:
 
 `#2 → #8 → (#9 ∥ #15) → #97 → #20 → (#10 ∥ #28) → #29 → #30 → #31 → #33 → (#38 → #39 ∥ #46 → #47) → #48 → #65 → (#70 ∥ #73) → #75 → #76 → #99 → (#79 ∥ #80) → #85 → #86 → #90`
 
-Why: tooling and local Supabase precede identity/authentication; preview approval must gate household authorization; household authorization precedes task access; recurrence/rotation precede atomic completion; mutation events feed Realtime and notifications; platform/guest/RPC hardening precedes system E2E and final release validation.
+Why: tooling and local Supabase precede identity/authentication; revocable platform access and household authorization precede task access; recurrence/rotation precede atomic completion; mutation events feed Realtime and notifications; platform/guest/RPC hardening precedes system E2E and final release validation.
 
 ## 4. Parallel work
 
@@ -64,7 +64,7 @@ After #2–#4:
 - #5 Pages workflow and #6 documentation/tooling can proceed in parallel.
 - #10 task schema planning, #11 notification schema, and #12 seed/type generation can be prepared after #9.
 - Auth UI (#16) can proceed against the contract from #15 while household database work (#20, #22) proceeds.
-- Preview approval schema/RPC work (#97) can begin when #9 and #15 are complete; the administrator UI (#98) can then proceed while household feature work continues.
+- Platform access schema/RPC work (#97) can begin when #9 and #15 are complete; the administrator UI (#98) can then proceed while household feature work continues.
 - Recurrence contract (#28) and task schema (#29) can proceed in parallel, converging at #30/#33.
 - Rotation semantics (#38) may proceed alongside recurrence tests (#36).
 - Today presentation (#57) can use typed fixtures while backend query work (#56) proceeds.
@@ -76,14 +76,14 @@ After #2–#4:
 
 - #9 core schema precedes RLS helpers, task schema, and generated types.
 - #97 platform access predicates precede #20 household RLS and every later product-data policy.
-- #98 access-status/admin UI plus #99 approval isolation tests must pass before public-preview release.
+- #98 access-status/admin UI plus #99 signup-policy and inactive-state isolation tests must pass before public-preview release.
 - #28 recurrence contract plus #29 task schema precede calendar generation.
 - #38 semantics precede #39 engine; #39 precedes round-robin transaction integration.
 - #46 concurrency contract precedes every lifecycle RPC.
 - #48 completion precedes Undo/reopen and interval-successor integration acceptance.
 - #73 outbox and #70 compatibility decision precede #75 delivery.
 - #79 guest isolation and #80 definer-function audit precede release-grade database/E2E tests.
-- #99 focused preview-approval isolation tests precede #79's exhaustive authorization matrix.
+- #99 focused platform-access isolation tests precede #79's exhaustive authorization matrix.
 - #84–#86 must pass before #90 release validation.
 
 ## 6. Atomic dependency table
@@ -109,7 +109,7 @@ No privileged credentials should be placed in an issue body, repository file, Pr
 ## 8. Potential blockers and mitigation
 
 - **Private-repository Pages entitlement/settings:** document and validate account capability; repository build remains useful if production Pages requires a plan change.
-- **Public preview receives arbitrary sign-ins:** authentication is allowed, but every product policy/RPC requires explicit administrator approval.
+- **Public preview receives arbitrary sign-ins:** an administrator can require approval for future signups; in either mode, every household policy/RPC still requires an authorized membership and every product operation remains revocable through platform access.
 - **Initial administrator bootstrap:** document a UUID-based privileged operation; never hard-code an email or expose an open “become admin” path.
 - **Supabase free-tier cron/Edge limits:** use bounded idempotent batches and measure in staging.
 - **Deno Web Push incompatibility:** #70 resolves before implementation; use a minimal standards-compatible alternative if needed.

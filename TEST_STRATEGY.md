@@ -26,7 +26,7 @@ Run the real local database, Auth-compatible sessions, generated client types, a
 
 ### End-to-end tests
 
-Release-level Playwright coverage should use separate browser contexts for a platform administrator, an unapproved applicant, two approved full members, and one approved guest. External Web Push delivery may use deterministic adapters in CI, while approval, token validation, outbox creation, subscription code, and notification click routing should remain real once those flows are enabled.
+Release-level Playwright coverage should use separate browser contexts for fresh accounts created under each signup-policy mode, a platform administrator, a suspended account, two approved full members, and one approved guest. External Web Push delivery may use deterministic adapters in CI, while signup-policy enforcement, token validation, outbox creation, subscription code, and notification click routing should remain real once those flows are enabled.
 
 ### PWA and deployment tests
 
@@ -34,7 +34,7 @@ Current Playwright coverage inspects the manifest, icon paths, invite metadata, 
 
 ## 3. Fixture standards
 
-Canonical actors: Admin (platform administrator), Pending User, Suspended User, Alex and Sam (approved full members), Grandma (approved guest), and an outsider. Use two households. Include overdue medicine, due-now dog feeding, snoozed cleaning, completed bedtime, unassigned recycling, fixed recurring, round-robin, flexible-window, and completion-interval examples. Never use real personal emails or sensitive medicine data.
+Canonical actors: Admin (platform administrator), Automatic Signup, Pending Signup, Suspended User, Alex and Sam (approved full members), Grandma (approved guest), and an outsider. Use two households. Include overdue medicine, due-now dog feeding, snoozed cleaning, completed bedtime, unassigned recycling, fixed recurring, round-robin, flexible-window, and completion-interval examples. Never use real personal emails or sensitive medicine data.
 
 Timezone fixtures include `America/New_York`, `America/Los_Angeles`, `Europe/London`, and a non-DST zone. Every date test names the household timezone and UTC instant.
 
@@ -56,7 +56,7 @@ Repeat for complete/complete, complete/skip, claim/claim, snooze/complete, undo/
 | Requirement | Primary automated coverage | Owning issues |
 |---|---|---|
 | Username/password, persistent session, intended route | Unit/component + Playwright | #15–#18, #84, #110 |
-| Public preview requires administrator approval | RLS + component + Playwright | #96–#99, #79, #85, #90 |
+| Administrator-controlled signup policy selects Approved or Pending; inactive states remain isolated | RLS + component + Playwright | #96–#99, #79, #85, #90 |
 | Administrator does not bypass household isolation | RLS + database negative tests | #97, #99, #79, #82 |
 | Suspension/revocation purges Realtime and caches | Integration + multi-context E2E | #98, #99, #65, #67–#68 |
 | Multiple households and switching | DB + component + E2E | #20, #21, #25, #84 |
@@ -91,7 +91,7 @@ Each epic has explicit child ownership:
 - Repository/tooling: #4–#6
 - Database foundation: #13
 - Authentication: #18
-- Preview access administration: #99
+- Platform access administration: #99
 - Households/invitations: #25–#26
 - Recurrence: #36
 - Assignment/rotation: #44
@@ -116,7 +116,7 @@ Manual work supplements rather than replaces automation:
 - real iPhone Home Screen install, safe-area layout, permission prompt, push receipt/click;
 - VoiceOver and keyboard dialog/navigation pass;
 - Supabase production password-provider settings, including disabled email confirmation;
-- initial platform administrator UUID bootstrap and approval workflow;
+- both signup-policy modes, administrator-only policy changes, and initial platform-administrator UUID bootstrap;
 - free-tier scheduled job timing and delivery monitoring;
 - GitHub Pages repository subpath and optional custom domain.
 
@@ -126,10 +126,10 @@ Manual results are recorded in the release issue with device/browser versions an
 
 `supabase/tests/milestone_3_rls.test.sql` and
 `supabase/tests/platform_access_rls.test.sql` provide deterministic local coverage
-for pending/approved/suspended access, non-administrator decision denial, direct
+for both signup-policy modes and pending/approved/suspended access, non-administrator setting/transition denial, direct
 table-write denial, administrator non-bypass, household isolation, guest assigned-only
-occurrences, and approval-gated household/invitation RPCs. `AccessGate.test.tsx`
-asserts that an unapproved session cannot mount product routes and that protected
+occurrences, and access-state-gated household/invitation RPCs. `AccessGate.test.tsx`
+asserts that an inactive session cannot mount product routes and that protected
 query data is cleared. `e2e/households.spec.ts` verifies unauthenticated visitors
 cannot reach household management. The production administrator bootstrap and
 hosted Auth configuration remain manual, credential-bound validation steps.

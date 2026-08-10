@@ -47,7 +47,7 @@ export function MoreRoute() {
             <Icon className="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron-right" size={18} />
           </summary>
           <div className="settings-panel-content space-y-3 border-t border-border pt-4">
-            {access.data?.isAdministrator && <Link className="inline-flex min-h-11 items-center gap-2 font-semibold text-brand hover:underline" to="/admin/access"><Icon name="lock" size={17} /> Review access requests</Link>}
+            {access.data?.isAdministrator && <Link className="inline-flex min-h-11 items-center gap-2 font-semibold text-brand hover:underline" to="/admin/access"><Icon name="lock" size={17} /> Manage account access</Link>}
             <div><Button onClick={() => void handleSignOut()} variant="secondary">Sign out</Button></div>
             {error && <p className="text-sm text-danger" role="alert">{error}</p>}
           </div>

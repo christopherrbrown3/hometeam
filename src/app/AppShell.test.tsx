@@ -37,9 +37,9 @@ describe('AppShell', () => {
     )
   })
 
-  it('shows the access-request view only to platform administrators', () => {
+  it('shows account-access controls only to platform administrators', () => {
     renderShell(true)
 
-    expect(screen.getByRole('link', { name: 'Access requests' })).toHaveAttribute('href', '/admin/access')
+    expect(screen.getByRole('link', { name: 'Account access' })).toHaveAttribute('href', '/admin/access')
   })
 })
