@@ -10,7 +10,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select lives_ok($$ select public.edit_task_series('00000000-0000-0000-0000-000000000402', '{"title":"Feed the dog later"}'::jsonb, 'entire_series', now()) $$, 'a full member can apply an entire-series edit');
 select is((select title from public.task_series where id = '00000000-0000-0000-0000-000000000402'), 'Feed the dog later', 'an edit updates the authoritative series');
-select ok(exists (select 1 from public.task_events where series_id = '00000000-0000-0000-0000-000000000402' and event_type = 'series_updated'), 'an edit appends a series audit event');
+select ok(exists (select 1 from public.list_history('00000000-0000-0000-0000-000000000201'::uuid) where series_id = '00000000-0000-0000-0000-000000000402' and event_type = 'series_updated'), 'an edit appends a series audit event');
 
 reset role;
 insert into public.task_occurrences (id, series_id, household_id, occurrence_key, original_due_start, original_due_end, is_all_day)

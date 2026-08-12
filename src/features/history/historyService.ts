@@ -3,7 +3,7 @@ import type { Database } from '../../types/database'
 import type { AssigneeColor, ProfileColor } from '../profiles/profileColors'
 
 type Client = SupabaseClient<Database>
-type Event = Database['public']['Tables']['task_events']['Row']
+type Event = Database['public']['Functions']['list_history']['Returns'][number]
 
 export type HistoryEvent = Event & Readonly<{
   assigneeColor: AssigneeColor
@@ -15,9 +15,7 @@ export type HistoryEvent = Event & Readonly<{
 }>
 
 export async function listHistory(client: Client, householdId?: string): Promise<HistoryEvent[]> {
-  let query = client.from('task_events').select('*').order('created_at', { ascending: false }).limit(200)
-  if (householdId) query = query.eq('household_id', householdId)
-  const { data: events, error } = await query
+  const { data: events, error } = await client.rpc('list_history', { input_household_id: householdId ?? null })
   if (error) throw error
 
   const seriesIds = [...new Set(events.map((event) => event.series_id))]

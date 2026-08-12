@@ -55,6 +55,7 @@ describe('Realtime subscription manager integration contract', () => {
     expect(fake.registrations).not.toEqual(expect.arrayContaining([
       expect.objectContaining({ filter: 'household_id=eq.home-a', table: 'task_series' }),
       expect.objectContaining({ filter: 'household_id=eq.home-a', table: 'household_memberships' }),
+      expect.objectContaining({ table: 'task_events' }),
     ]))
 
     await manager.stop()

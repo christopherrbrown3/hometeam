@@ -26,10 +26,11 @@ test('publishes rich invite metadata and an installable HomeTeam manifest', asyn
   expect(previewResponse.headers()['content-type']).toContain('image/png')
 })
 
-test('share-friendly invite URLs preserve the protected join route', async ({ page }) => {
+test('fragment-only invite URLs preserve the protected join route', async ({ page }) => {
   const token = '123e4567-e89b-42d3-a456-426614174000'
-  await page.goto(`/?invite=${token}`)
+  await page.goto(`/#/join/${token}`)
 
   await expect(page).toHaveURL(/#\/login$/)
+  expect(new URL(page.url()).search).toBe('')
   expect(await page.evaluate(() => sessionStorage.getItem('hometeam.intended-route'))).toBe(`/join/${token}`)
 })

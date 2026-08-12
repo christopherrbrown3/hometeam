@@ -1,11 +1,13 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(7);
+select plan(11);
 
 select has_function('private', 'write_task_event', array['public.task_occurrences', 'uuid', 'public.task_event_type', 'jsonb'], 'safe occurrence event writer is present');
 select has_trigger('public', 'task_events', 'task_events_reject_mutation', 'events have a database append-only trigger');
 select ok(not pg_catalog.has_table_privilege('authenticated', 'public.task_events', 'insert'), 'clients cannot insert events directly');
+select ok(not pg_catalog.has_table_privilege('authenticated', 'public.task_events', 'select'), 'clients cannot read the raw event table directly');
+select ok(pg_catalog.has_function_privilege('authenticated', 'public.list_history(uuid)', 'execute'), 'clients use the scoped history RPC');
 select throws_ok(
   $$ update public.task_events set event_payload = '{}'::jsonb where id = '00000000-0000-0000-0000-000000000801' $$,
   '42501', 'task events are append-only', 'event updates are rejected even for a privileged test role'
@@ -23,7 +25,9 @@ insert into public.task_events (id, household_id, series_id, occurrence_id, acto
 values ('00000000-0000-0000-0000-000000000809', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000401', '00000000-0000-0000-0000-000000000709', '00000000-0000-0000-0000-000000000101', 'assigned', '{}'::jsonb);
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000103', true);
-select is((select count(*) from public.task_events where id = '00000000-0000-0000-0000-000000000809'), 1::bigint, 'an assigned guest can read the safe event for their occurrence');
+select is((select count(*) from public.list_history('00000000-0000-0000-0000-000000000201') where id = '00000000-0000-0000-0000-000000000809'), 1::bigint, 'an assigned guest can read the safe event for their occurrence');
+select is((select event_payload from public.list_history('00000000-0000-0000-0000-000000000201') where id = '00000000-0000-0000-0000-000000000809'), '{}'::jsonb, 'guest history payloads contain no raw assignment details');
+select is((select actor_user_id from public.list_history('00000000-0000-0000-0000-000000000201') where id = '00000000-0000-0000-0000-000000000809'), null::uuid, 'guest history omits actor identity');
 reset role;
 
 select * from finish();
