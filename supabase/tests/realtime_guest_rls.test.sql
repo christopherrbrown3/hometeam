@@ -24,7 +24,7 @@ update public.household_memberships set status = 'removed', removed_at = now() w
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000103', true);
 select is((select count(*)::integer from public.task_occurrences where household_id = '00000000-0000-0000-0000-000000000201'), 0, 'removed guest cannot refetch previously assigned occurrence data');
-select is((select count(*)::integer from public.task_events where household_id = '00000000-0000-0000-0000-000000000201'), 0, 'removed guest cannot receive or refetch related event data');
+select is((select count(*)::integer from public.list_history('00000000-0000-0000-0000-000000000201')), 0, 'removed guest cannot receive or refetch related event data');
 reset role;
 
 select * from finish();

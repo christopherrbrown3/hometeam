@@ -83,9 +83,6 @@ export function createSubscriptionManager(client: RealtimeClient, onChange: (cha
 
     const guestMemberships = input.memberships.filter((candidate) => candidate.role === 'guest')
     if (guestMemberships.length > 0) {
-      // task_events has no assignee column. Its RLS policy joins each event to
-      // an occurrence currently assigned to this guest before delivery.
-      addChannel(channelName('guest-events', input.userId), [{ table: 'task_events' }])
       for (const membership of guestMemberships) {
         addChannel(channelName('guest-occurrences', membership.householdId), [
           { filter: `assignee_user_id=eq.${input.userId}`, table: 'task_occurrences' },

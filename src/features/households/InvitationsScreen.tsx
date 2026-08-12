@@ -4,10 +4,7 @@ import { Button } from '../../components/ui/Button'
 import { supabase } from '../../lib/supabase'
 import { createHouseholdJoinLink, getHouseholdJoinLinkStatus, revokeHouseholdJoinLink } from './membershipService'
 import { Icon } from '../../components/ui/Icon'
-
-function invitationLink(token: string) {
-  return `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(token)}`
-}
+import { buildHouseholdJoinLink } from './invitationLinks'
 
 export function InvitationsScreen({ householdId }: Readonly<{ householdId: string }>) {
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +46,7 @@ export function InvitationsScreen({ householdId }: Readonly<{ householdId: strin
       setError(null)
       setMessage(null)
       const created = await createHouseholdJoinLink(supabase, householdId, String(form.get('role')) as 'full_member' | 'guest')
-      const url = invitationLink(created.token)
+      const url = buildHouseholdJoinLink(window.location.origin, window.location.pathname, created.token)
       setShareUrl(url)
       await linkStatus.refetch()
       await copyLink(url)

@@ -1239,6 +1239,19 @@ export type Database = {
           status: Database["public"]["Enums"]["invitation_status"]
         }[]
       }
+      list_history: {
+        Args: { input_household_id?: string | null }
+        Returns: {
+          actor_user_id: string | null
+          created_at: string
+          event_payload: Json
+          event_type: Database["public"]["Enums"]["task_event_type"]
+          household_id: string
+          id: string
+          occurrence_id: string | null
+          series_id: string
+        }[]
+      }
       next_interval_successor: {
         Args: { input_anchor: string; input_series_id: string }
         Returns: string

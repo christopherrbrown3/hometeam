@@ -54,7 +54,7 @@ select is(
   'recalculation preserves a manually locked assignment'
 );
 select ok(
-  exists (select 1 from public.task_events where series_id = '00000000-0000-0000-0000-000000000406' and event_type = 'rotation_recalculated' and event_payload->>'version' = '1'),
+  exists (select 1 from public.list_history('00000000-0000-0000-0000-000000000201'::uuid) where series_id = '00000000-0000-0000-0000-000000000406' and event_type = 'rotation_recalculated' and event_payload->>'version' = '1'),
   'recalculation appends a versioned audit event'
 );
 

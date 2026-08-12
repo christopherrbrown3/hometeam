@@ -18,7 +18,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000102
 select lives_ok($$ select public.complete_occurrence('00000000-0000-0000-0000-000000000702', 1, false) $$, 'first complete contender wins');
 select throws_ok($$ select public.skip_occurrence('00000000-0000-0000-0000-000000000702', 1, 'race') $$, '40001', 'stale occurrence version', 'second contender loses with the authoritative version conflict');
 select is((select lifecycle_state::text || ':' || version::text from public.task_occurrences where id = '00000000-0000-0000-0000-000000000702'), 'completed:2', 'completion changes state and increments version exactly once');
-select ok(exists (select 1 from public.task_events where occurrence_id = '00000000-0000-0000-0000-000000000702' and event_type = 'completed'), 'completion appends an immutable event');
+select ok(exists (select 1 from public.list_history('00000000-0000-0000-0000-000000000201'::uuid) where occurrence_id = '00000000-0000-0000-0000-000000000702' and event_type = 'completed'), 'completion appends an immutable event');
 
 select lives_ok($$ select public.snooze_occurrence('00000000-0000-0000-0000-000000000703', 1, now() + interval '30 minutes') $$, 'assigned full member can snooze');
 select is((select version from public.task_occurrences where id = '00000000-0000-0000-0000-000000000703'), 2::bigint, 'snooze increments version exactly once');
