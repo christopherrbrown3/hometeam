@@ -88,7 +88,9 @@ Completion interval:
 
 ## D-013 — Web Push implementation selection
 
-- **Decision:** Do not preselect a package. A High Intelligence compatibility spike must validate a standards-based implementation in the then-current Supabase Deno runtime and commit the decision before delivery code begins.
+- **Decision:** Use `@mmmike/web-push@1.3.0`, pinned through the delivery Edge Function's local `deno.json` and lockfile. The issue #70 probe validates native Web Crypto encryption, RFC 8291 `aes128gcm`, RFC 8292 VAPID authorization, Fetch-based delivery, and invalid-endpoint rejection in the current Deno 2.1-compatible Supabase Edge Runtime.
+- **Reason:** The package is ESM-only, zero-dependency, and runtime-neutral. It avoids a Node compatibility layer and avoids maintaining protocol cryptography in HomeTeam while exposing the expired-subscription and retry signals required by the delivery contract.
+- **Upgrade rule:** Re-run `supabase/functions/web-push-spike` before changing the package version or Edge Runtime. Real device delivery remains a credential-bound acceptance check for #75/#77/#86/#90.
 
 ## D-014 — Offline writes
 

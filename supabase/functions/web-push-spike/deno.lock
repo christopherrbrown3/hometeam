@@ -1,0 +1,16 @@
+{
+  "version": "4",
+  "specifiers": {
+    "npm:@mmmike/web-push@1.3.0": "1.3.0"
+  },
+  "npm": {
+    "@mmmike/web-push@1.3.0": {
+      "integrity": "sha512-E039fy/Ux27Aa9HpTzmPu92jHCksioALxn1rVJLKjuoJ0OdgtEJ9os+1FEEJ/1h4Tlk+szWZoWhmhxZbuzGl/A=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:@mmmike/web-push@1.3.0"
+    ]
+  }
+}
