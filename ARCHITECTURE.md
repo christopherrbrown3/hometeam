@@ -290,7 +290,7 @@ Channel managers are keyed by user and membership set. On sign-out or membership
 
 The following is the target delivery architecture. Web Push delivery is not enabled in the current preview.
 
-Mutation and scheduled transactions create `notification_outbox` rows with a unique semantic idempotency key. A once-per-minute scheduled processor claims due work using `FOR UPDATE SKIP LOCKED`, materializes recipients according to role and preferences, and invokes delivery in bounded batches.
+Mutation and scheduled transactions call the private `enqueue_notifications` boundary, which derives the household from the stored occurrence, filters active approved recipients by role and preference, excludes the actor, and creates `notification_outbox` rows with a unique semantic idempotency key. Guests are eligible only when they are the occurrence assignee. The exact producer and recipient contract is recorded in `supabase/docs/notification-outbox.md`. A once-per-minute scheduled processor claims due work using `FOR UPDATE SKIP LOCKED` and invokes delivery in bounded batches.
 
 ```mermaid
 flowchart LR
@@ -307,7 +307,7 @@ flowchart LR
 
 Subscriptions are per device. Endpoints and keys are readable only by the owning user and privileged delivery code. Payload privacy is selected per user; guests are never considered for unrelated occurrences. Notification clicks contain an occurrence ID and open its hash route after authorization.
 
-The Web Push implementation must be validated against the current Supabase Deno runtime in the dedicated compatibility issue before a library is selected.
+Issue #70 selected pinned `@mmmike/web-push` after exercising RFC 8291 encryption, RFC 8292 VAPID authorization, Fetch delivery, and invalid-input rejection in the Deno 2.1-compatible local Edge Runtime. `supabase/docs/web-push-compatibility.md` records the evidence and upgrade rule.
 
 ## 14. Scheduled processing
 
