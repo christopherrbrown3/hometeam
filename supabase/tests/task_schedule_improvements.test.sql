@@ -23,7 +23,7 @@ select lives_ok($$ select private.bootstrap_platform_administrator('00000000-000
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select lives_ok(
-  $$ select public.save_task_series('{"householdId":"00000000-0000-0000-0000-000000000201","title":"Bring in bins test","seriesType":"one_time","recurrenceType":"one_time","recurrenceConfig":{"version":1},"effectiveFrom":"2026-08-20","assignmentMode":"fixed","fixedAssigneeId":"00000000-0000-0000-0000-000000000101","slots":[{"isAllDay":true}]}'::jsonb) $$,
+  $$ select public.save_task_series('{"householdId":"00000000-0000-0000-0000-000000000201","title":"Bring in bins test","seriesType":"one_time","recurrenceType":"one_time","recurrenceConfig":{"version":1},"effectiveFrom":"2099-08-20","assignmentMode":"fixed","fixedAssigneeId":"00000000-0000-0000-0000-000000000101","slots":[{"isAllDay":true}]}'::jsonb) $$,
   'an initial one-time task is saved'
 );
 select is(
@@ -32,12 +32,12 @@ select is(
   'the newly saved task has one visible occurrence'
 );
 select lives_ok(
-  $$ select public.save_task_series(jsonb_build_object('id', (select id from public.task_series where title = 'Bring in bins test'), 'householdId', '00000000-0000-0000-0000-000000000201', 'title', 'Bring in bins test', 'seriesType', 'one_time', 'recurrenceType', 'one_time', 'recurrenceConfig', jsonb_build_object('version', 1), 'effectiveFrom', '2026-08-21', 'assignmentMode', 'fixed', 'fixedAssigneeId', '00000000-0000-0000-0000-000000000102', 'slots', jsonb_build_array(jsonb_build_object('isAllDay', true)))); $$,
+  $$ select public.save_task_series(jsonb_build_object('id', (select id from public.task_series where title = 'Bring in bins test'), 'householdId', '00000000-0000-0000-0000-000000000201', 'title', 'Bring in bins test', 'seriesType', 'one_time', 'recurrenceType', 'one_time', 'recurrenceConfig', jsonb_build_object('version', 1), 'effectiveFrom', '2099-08-21', 'assignmentMode', 'fixed', 'fixedAssigneeId', '00000000-0000-0000-0000-000000000102', 'slots', jsonb_build_array(jsonb_build_object('isAllDay', true)))); $$,
   'editing a task reschedules its future occurrence'
 );
 select is(
   (select occurrence_key from public.task_occurrences o join public.task_series s on s.id = o.series_id where s.title = 'Bring in bins test' and o.lifecycle_state = 'open'),
-  '2026-08-21|all-day|0|0',
+  '2099-08-21|all-day|0|0',
   'the edited due date is the only open occurrence'
 );
 select is(
