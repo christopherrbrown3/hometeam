@@ -59,7 +59,11 @@ begin
   order by occurrence.original_due_start, occurrence.id
   limit 1;
 
-  if first_occurrence.id is not null then
+  -- Trusted imports and seed batches can contain historical rows whose creator
+  -- is not currently approved. They should not abort the surrounding
+  -- transaction or manufacture notifications for an inactive actor.
+  if first_occurrence.id is not null
+    and private.is_active_member(new.household_id, new.created_by) then
     perform private.enqueue_notifications(
       first_occurrence.id,
       new.created_by,

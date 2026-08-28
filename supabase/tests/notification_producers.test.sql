@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(17);
 
 select has_function(
   'public',
@@ -154,6 +154,63 @@ select is(
   0,
   'a guest does not receive household-wide new task notifications'
 );
+
+set constraints task_series_enqueue_new_task deferred;
+insert into auth.users (id, email)
+values ('00000000-0000-0000-0000-000000000109', 'pending-producer@example.test');
+insert into public.household_memberships (
+  id,
+  household_id,
+  user_id,
+  role,
+  invited_by
+) values (
+  '00000000-0000-0000-0000-000000000309',
+  '00000000-0000-0000-0000-000000000201',
+  '00000000-0000-0000-0000-000000000109',
+  'full_member',
+  '00000000-0000-0000-0000-000000000101'
+);
+insert into public.task_series (
+  id,
+  household_id,
+  title,
+  series_type,
+  recurrence_type,
+  recurrence_config,
+  assignment_mode,
+  effective_from,
+  created_by
+) values (
+  '00000000-0000-0000-0000-000000000499',
+  '00000000-0000-0000-0000-000000000201',
+  'Pending producer fixture',
+  'one_time',
+  'one_time',
+  '{"version":1}',
+  'unassigned',
+  '2026-01-20',
+  '00000000-0000-0000-0000-000000000109'
+);
+insert into public.task_occurrences (
+  id,
+  series_id,
+  household_id,
+  occurrence_key,
+  original_due_start,
+  original_due_end,
+  assignment_source
+) values (
+  '00000000-0000-0000-0000-000000000799',
+  '00000000-0000-0000-0000-000000000499',
+  '00000000-0000-0000-0000-000000000201',
+  'producer:pending-creator',
+  '2026-01-20T15:00:00Z',
+  '2026-01-20T15:15:00Z',
+  'unassigned'
+);
+set constraints task_series_enqueue_new_task immediate;
+select pass('trusted imports skip notification production for an inactive creator');
 
 delete from public.notification_outbox;
 update public.task_occurrences
