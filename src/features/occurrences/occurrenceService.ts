@@ -16,6 +16,7 @@ import {
   type UndoCompletionInput,
 } from './mutationContracts'
 import { translateOccurrenceRpcError } from '../../lib/rpcErrors'
+import { requireOnline } from '../pwa/onlineState'
 
 type HomeTeamClient = SupabaseClient<Database>
 export type Occurrence = Database['public']['Tables']['task_occurrences']['Row']
@@ -26,31 +27,37 @@ function result<T>(rpcResult: { data: T | null; error: { code?: string; message?
 }
 
 export async function completeOccurrence(client: HomeTeamClient, input: CompleteOccurrenceInput): Promise<MutationResult<Occurrence>> {
+  requireOnline()
   const value = completeOccurrenceInput.parse(input)
   return result(await client.rpc('complete_occurrence', { input_expected_version: value.expectedVersion, input_keep_original_rotation: value.keepOriginalRotation, input_occurrence_id: value.occurrenceId }))
 }
 
 export async function snoozeOccurrence(client: HomeTeamClient, input: SnoozeOccurrenceInput): Promise<MutationResult<Occurrence>> {
+  requireOnline()
   const value = snoozeOccurrenceInput.parse(input)
   return result(await client.rpc('snooze_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_snoozed_until: value.snoozedUntil }))
 }
 
 export async function skipOccurrence(client: HomeTeamClient, input: SkipOccurrenceInput): Promise<MutationResult<Occurrence>> {
+  requireOnline()
   const value = skipOccurrenceInput.parse(input)
   return result(await client.rpc('skip_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_reason: value.reason ?? null }))
 }
 
 export async function cancelOccurrence(client: HomeTeamClient, input: CancelOccurrenceInput): Promise<MutationResult<Occurrence>> {
+  requireOnline()
   const value = cancelOccurrenceInput.parse(input)
   return result(await client.rpc('cancel_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_reason: value.reason ?? null }))
 }
 
 export async function undoCompletion(client: HomeTeamClient, input: UndoCompletionInput): Promise<MutationResult<Occurrence>> {
+  requireOnline()
   const value = undoCompletionInput.parse(input)
   return result(await client.rpc('undo_completion', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId }))
 }
 
 export async function reopenOccurrence(client: HomeTeamClient, input: ReopenOccurrenceInput): Promise<MutationResult<Occurrence>> {
+  requireOnline()
   const value = reopenOccurrenceInput.parse(input)
   return result(await client.rpc('reopen_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId }))
 }

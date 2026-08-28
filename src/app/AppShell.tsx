@@ -9,6 +9,7 @@ import { useRemoteChangeNotifier } from '../features/realtime/useRemoteChangeNot
 import { useRealtimeSync } from '../features/realtime/useRealtimeSync'
 import { HomeMark } from '../components/ui/HomeMark'
 import { Icon } from '../components/ui/Icon'
+import { PwaStatusBanner } from '../features/pwa/PwaStatusBanner'
 
 type AppShellProps = Readonly<{
   children: ReactNode
@@ -70,6 +71,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </aside>
       <div className="min-w-0">
+        <PwaStatusBanner />
         <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-5 md:hidden">
           <NavLink className="flex items-center gap-2.5" to="/today">
             <HomeMark className="text-brand" size={32} />

@@ -93,7 +93,7 @@ HomeTeam is a working, access-controlled preview deployed on a public URL:
 
 - New accounts require approval by default; a platform administrator can switch future signups to automatic activation.
 - Task mutations are online-only; the PWA does not queue changes for later replay.
-- The notification schema and preferences foundation exist, but the current preview does not yet deliver Web Push notifications.
+- Notification preferences, per-device subscriptions, and durable notification producers are implemented, but the current preview does not yet deliver Web Push notifications.
 - HomeTeam is a coordination tool, not the sole medically reliable reminder system.
 
 ## 🚀 Run it locally
@@ -112,6 +112,7 @@ Set the browser-safe values in `.env.local`:
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 VITE_APP_BASE_PATH=/
+VITE_VAPID_PUBLIC_KEY=your-browser-safe-vapid-public-key
 ```
 
 Never put a database password, service-role key, VAPID private key, or other privileged secret in a `VITE_` variable. Vite embeds those values in the browser bundle.
@@ -174,6 +175,7 @@ See [SECURITY_MODEL.md](SECURITY_MODEL.md) for the trust boundaries, permission 
 - [Architecture decisions](DECISIONS.md) — settled defaults and trade-offs
 - [Dependency map](DEPENDENCY_MAP.md) — original implementation order and external blockers
 - [Migration guide](supabase/migrations/README.md) — local database and migration workflow
+- [PWA and notification foundation](supabase/docs/pwa-notification-foundation.md) — install, offline, subscription, and producer contracts
 - [Contributing guide](CONTRIBUTING.md) — setup, checks, and working agreement
 
 ## 🤝 Contributing

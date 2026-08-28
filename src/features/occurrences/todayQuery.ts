@@ -87,3 +87,40 @@ export async function getAuthorizedOccurrences(client: Client, filters: Occurren
     }))
     .sort((left, right) => dueStateOrder[occurrenceDueState(left, now)] - dueStateOrder[occurrenceDueState(right, now)] || left.original_due_start.localeCompare(right.original_due_start))
 }
+
+export async function getAuthorizedOccurrence(client: Client, occurrenceId: string): Promise<OccurrenceWithTitle | null> {
+  const { data: occurrence, error: occurrenceError } = await client
+    .from('task_occurrences')
+    .select('*')
+    .eq('id', occurrenceId)
+    .maybeSingle()
+  if (occurrenceError) throw occurrenceError
+  if (!occurrence) return null
+
+  const [{ data: household, error: householdError }, { data: series, error: seriesError }] = await Promise.all([
+    client.from('households').select('timezone').eq('id', occurrence.household_id).maybeSingle(),
+    client.from('task_series').select('title, category_id').eq('id', occurrence.series_id).maybeSingle(),
+  ])
+  if (householdError) throw householdError
+  if (seriesError) throw seriesError
+
+  const [{ data: assignee, error: assigneeError }, categoryResult] = await Promise.all([
+    occurrence.assignee_user_id
+      ? client.from('profiles').select('display_name, profile_color, user_id').eq('user_id', occurrence.assignee_user_id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    series?.category_id
+      ? client.from('categories').select('name').eq('id', series.category_id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+  ])
+  if (assigneeError) throw assigneeError
+  if (categoryResult.error) throw categoryResult.error
+
+  return {
+    ...occurrence,
+    assigneeColor: assigneeColorFor(occurrence.assignee_user_id, assignee ? [{ profileColor: assignee.profile_color, userId: assignee.user_id }] : []),
+    assigneeName: assignee?.display_name ?? null,
+    categoryName: categoryResult.data?.name ?? null,
+    householdTimeZone: household?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+    title: series?.title ?? 'Household task',
+  }
+}

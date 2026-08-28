@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { OccurrenceDetails } from '../features/occurrences/OccurrenceDetails'
 import { TodayFilters } from '../features/occurrences/TodayFilters'
 import { TodaySections } from '../features/occurrences/TodaySections'
-import { getAuthorizedOccurrences, type OccurrenceWithTitle } from '../features/occurrences/todayQuery'
+import { getAuthorizedOccurrence, getAuthorizedOccurrences, type OccurrenceWithTitle } from '../features/occurrences/todayQuery'
 import type { DisplayDueState } from '../features/occurrences/dueState'
 import { supabase } from '../lib/supabase'
 import { EmptyState } from '../components/ui/EmptyState'
@@ -16,6 +16,8 @@ import { householdDateAt } from '../lib/householdTime'
 export function TodayRoute() {
   const [status, setStatus] = useState<DisplayDueState | 'all'>('all')
   const [selected, setSelected] = useState<OccurrenceWithTitle | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const linkedOccurrenceId = searchParams.get('occurrence')
   const householdId = localStorage.getItem('hometeam.household-id') ?? undefined
   const timeZoneQuery = useQuery({
     enabled: Boolean(householdId),
@@ -33,7 +35,18 @@ export function TodayRoute() {
     queryFn: () => getAuthorizedOccurrences(supabase, { date: isoDate, householdId, householdTimeZone: householdId ? timeZone : undefined, status }),
     queryKey: ['occurrences', householdId, isoDate, status, timeZone],
   })
+  const linkedOccurrence = useQuery({
+    enabled: Boolean(linkedOccurrenceId),
+    queryFn: () => getAuthorizedOccurrence(supabase, linkedOccurrenceId!),
+    queryKey: ['notification-occurrence', linkedOccurrenceId],
+  })
   const date = new Date(`${isoDate}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
+  const activeOccurrence = selected ?? linkedOccurrence.data
+
+  function closeOccurrence() {
+    setSelected(null)
+    if (linkedOccurrenceId) setSearchParams({}, { replace: true })
+  }
 
   return (
     <section className="page-stack">
@@ -46,9 +59,11 @@ export function TodayRoute() {
       <div className="mb-6"><TodayFilters onStatus={setStatus} status={status} /></div>
       {query.isPending && <LoadingState label="Loading today’s tasks…" />}
       {query.isError && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{query.error.message}</p>}
+      {linkedOccurrence.isError && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">The notification’s task could not be loaded.</p>}
+      {linkedOccurrenceId && linkedOccurrence.isSuccess && linkedOccurrence.data === null && <p className="rounded-control bg-surface-strong p-3 text-sm text-muted" role="status">This task is no longer available to your account.</p>}
       {!query.isPending && query.data?.length === 0 && <EmptyState description={status === 'all' ? 'There is nothing on the household list right now.' : 'Try another filter to see the rest of your household tasks.'} icon="check" title={status === 'all' ? 'You’re all caught up' : 'No tasks match'} />}
       {query.data && <TodaySections occurrences={query.data} onOpen={setSelected} />}
-      {selected && <OccurrenceDetails occurrence={selected} onClose={() => setSelected(null)} />}
+      {activeOccurrence && <OccurrenceDetails occurrence={activeOccurrence} onClose={closeOccurrence} />}
     </section>
   )
 }

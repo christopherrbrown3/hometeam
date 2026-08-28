@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, Json } from '../../types/database'
 import type { TaskFormValues } from './taskFormSchema'
+import { requireOnline } from '../pwa/onlineState'
 
 type HomeTeamClient = SupabaseClient<Database>
 
@@ -13,6 +14,7 @@ function removeEmptyValues(value: unknown): Json {
 }
 
 export async function saveTaskSeries(client: HomeTeamClient, values: TaskFormValues & { householdId: string; id?: string }) {
+  requireOnline()
   const { data, error } = await client.rpc('save_task_series', { input: removeEmptyValues(values) })
   if (error || !data) throw error ?? new Error('The task could not be saved.')
   return data

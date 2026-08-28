@@ -64,16 +64,16 @@ export function OccurrenceDetails({ occurrence, onClose }: Readonly<{ occurrence
         <div className="sheet-actions">
           {open && authoritativeOccurrence.data !== null && (
             <>
-              <Button className="sheet-action-primary" disabled={complete.isPending} onClick={() => void run(() => complete.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id, keepOriginalRotation: false }))}>
+              <Button className="sheet-action-primary" disabled={complete.isPending} onClick={() => void run(() => complete.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id, keepOriginalRotation: false }))} requiresOnline>
                 <Icon name="check" size={18} weight="bold" /> Complete
               </Button>
-              <Button className="sheet-action-secondary" disabled={snooze.isPending} onClick={() => void run(() => snooze.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id, snoozedUntil: new Date(Date.now() + 30 * 60_000).toISOString() }))} variant="secondary">
+              <Button className="sheet-action-secondary" disabled={snooze.isPending} onClick={() => void run(() => snooze.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id, snoozedUntil: new Date(Date.now() + 30 * 60_000).toISOString() }))} requiresOnline variant="secondary">
                 <Icon name="clock" size={17} /> Snooze 30 min
               </Button>
-              <Button className="sheet-action-secondary" disabled={skip.isPending} onClick={() => void run(() => skip.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id }))} variant="secondary">Skip</Button>
+              <Button className="sheet-action-secondary" disabled={skip.isPending} onClick={() => void run(() => skip.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id }))} requiresOnline variant="secondary">Skip</Button>
             </>
           )}
-          {current.lifecycle_state === 'completed' && authoritativeOccurrence.data !== null && <Button className="sheet-action-primary" disabled={undo.isPending} onClick={() => void run(() => undo.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id }))} variant="secondary">Undo completion</Button>}
+          {current.lifecycle_state === 'completed' && authoritativeOccurrence.data !== null && <Button className="sheet-action-primary" disabled={undo.isPending} onClick={() => void run(() => undo.mutateAsync({ expectedVersion: current.version, occurrenceId: current.id }))} requiresOnline variant="secondary">Undo completion</Button>}
         </div>
       </section>
     </div>

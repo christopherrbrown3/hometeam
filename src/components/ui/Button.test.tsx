@@ -8,4 +8,14 @@ describe('Button', () => {
 
     expect(screen.getByRole('button', { name: 'Complete task' })).toBeDisabled()
   })
+
+  it('disables shared mutations while offline', () => {
+    const original = navigator.onLine
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+
+    render(<Button requiresOnline>Complete task</Button>)
+
+    expect(screen.getByRole('button', { name: 'Complete task' })).toBeDisabled()
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: original })
+  })
 })

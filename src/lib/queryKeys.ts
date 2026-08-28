@@ -38,4 +38,6 @@ export const queryKeys = {
     ['history', householdScope, filters] as const,
   notificationPreferences: (userId: string) =>
     ['notification-preferences', userId] as const,
+  pushSubscriptions: (userId: string) =>
+    ['push-subscriptions', userId] as const,
 }

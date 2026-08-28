@@ -1305,6 +1305,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      produce_scheduled_notifications: {
+        Args: { input_limit?: number; input_now?: string }
+        Returns: number
+      }
       recalculate_future_assignments: {
         Args: { input_cursor_user_id?: string; input_series_id: string }
         Returns: number

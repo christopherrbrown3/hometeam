@@ -1,6 +1,6 @@
 # HomeTeam Architecture
 
-> **Document status:** Sections 1–12 and the GitHub Pages deployment describe the current application architecture. Sections 13–15 retain the intended version 1 notification, scheduler, and offline-safety design; the current preview has the notification schema and some outbox/generation foundations, but not end-to-end Web Push delivery or a comprehensive offline action guard.
+> **Document status:** Sections 1–13, the PWA/offline boundary, and the GitHub Pages deployment describe the current application architecture. The preview has owner-scoped notification preferences and subscriptions, transactional and scheduled outbox producers, and a push-capable service worker; it does not yet have end-to-end Web Push delivery or the complete scheduled orchestration owned by #75–#76.
 
 ## 1. Architecture goals
 
@@ -288,9 +288,9 @@ Channel managers are keyed by user and membership set. On sign-out or membership
 
 ## 13. Notification outbox and Web Push
 
-The following is the target delivery architecture. Web Push delivery is not enabled in the current preview.
+The outbox, owner-scoped preference/device services, mutation producers, and bounded due/overdue producer are implemented. Web Push delivery is not enabled in the current preview.
 
-Mutation and scheduled transactions call the private `enqueue_notifications` boundary, which derives the household from the stored occurrence, filters active approved recipients by role and preference, excludes the actor, and creates `notification_outbox` rows with a unique semantic idempotency key. Guests are eligible only when they are the occurrence assignee. The exact producer and recipient contract is recorded in `supabase/docs/notification-outbox.md`. A once-per-minute scheduled processor claims due work using `FOR UPDATE SKIP LOCKED` and invokes delivery in bounded batches.
+Mutation and scheduled transactions call the private `enqueue_notifications` boundary, which derives the household from the stored occurrence, filters active approved recipients by role and preference, excludes the actor, and creates `notification_outbox` rows with a unique semantic idempotency key. Guests are eligible only when they are the occurrence assignee. Assignment, completion, skip, snooze, new-task, due-soon, and overdue producers use this boundary. The exact producer and recipient contract is recorded in `supabase/docs/notification-outbox.md` and `supabase/docs/pwa-notification-foundation.md`. A once-per-minute scheduled processor will claim due work using `FOR UPDATE SKIP LOCKED` and invoke delivery in bounded batches.
 
 ```mermaid
 flowchart LR
@@ -311,7 +311,7 @@ Issue #70 selected pinned `@mmmike/web-push` after exercising RFC 8291 encryptio
 
 ## 14. Scheduled processing
 
-The repository currently contains scheduled occurrence-generation logic. The complete orchestration and notification-delivery pipeline below remains the target design.
+The repository contains scheduled occurrence-generation logic plus an idempotent, service-role-only `produce_scheduled_notifications` function for bounded due-soon/overdue production. The complete orchestration and notification-delivery pipeline below remains the target design.
 
 One idempotent Edge Function, invoked about once per minute, orchestrates:
 
@@ -326,9 +326,9 @@ Jobs use advisory locks or claim tables plus deterministic keys. Each phase has 
 
 ## 15. PWA and offline behavior
 
-`vite-plugin-pwa`/Workbox precaches the app shell and safe static assets. HomeTeam does not register background sync or queue task mutations for replay.
+`vite-plugin-pwa`/Workbox precaches the app shell and safe static assets. A custom service worker handles privacy-minimal push payloads, opens the authorized occurrence route, and participates in an explicit update prompt. HomeTeam does not register background sync or queue task mutations for replay.
 
-A comprehensive online-state guard and user-initiated push-subscription flow remain target behavior rather than current-preview capabilities.
+The application announces offline state, disables shared-task actions, and enforces the same online-only rule again inside mutation services. Installation settings detect standalone display mode, provide iPhone instructions, and request notification permission only from the user's Enable Notifications action. Subscriptions are stored per device; disabling one device leaves the user's other devices active.
 
 ## 16. GitHub Pages and configuration
 
