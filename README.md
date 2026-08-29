@@ -93,7 +93,7 @@ HomeTeam is a working, access-controlled preview deployed on a public URL:
 
 - New accounts require approval by default; a platform administrator can switch future signups to automatic activation.
 - Task mutations are online-only; the PWA does not queue changes for later replay.
-- Notification preferences, per-device subscriptions, and durable notification producers are implemented, but the current preview does not yet deliver Web Push notifications.
+- Notification preferences, per-device subscriptions, durable producers, isolated Web Push retries, and once-per-minute orchestration are implemented. Production delivery still requires the documented Supabase function deployment, cron, VAPID values, and browser-safe public key.
 - HomeTeam is a coordination tool, not the sole medically reliable reminder system.
 
 ## 🚀 Run it locally
@@ -176,6 +176,7 @@ See [SECURITY_MODEL.md](SECURITY_MODEL.md) for the trust boundaries, permission 
 - [Dependency map](DEPENDENCY_MAP.md) — original implementation order and external blockers
 - [Migration guide](supabase/migrations/README.md) — local database and migration workflow
 - [PWA and notification foundation](supabase/docs/pwa-notification-foundation.md) — install, offline, subscription, and producer contracts
+- [Scheduled processing and Web Push](supabase/docs/scheduled-processing.md) — secrets, function deployment, cron wiring, and delivery operations
 - [Contributing guide](CONTRIBUTING.md) — setup, checks, and working agreement
 
 ## 🤝 Contributing

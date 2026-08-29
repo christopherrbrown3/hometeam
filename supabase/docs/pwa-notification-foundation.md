@@ -1,9 +1,8 @@
 # PWA and notification foundation
 
-Issues #71, #72, and #74 establish the install/offline boundary, user-owned
-notification settings, per-device Web Push subscriptions, and the producers that
-write durable notification work. Delivery and once-per-minute orchestration
-remain owned by #75 and #76.
+Issues #71–#77 establish the install/offline boundary, user-owned notification
+settings, per-device Web Push subscriptions, durable producers, isolated
+delivery attempts, once-per-minute orchestration, and their contract tests.
 
 ## PWA and offline contract
 
@@ -59,5 +58,8 @@ all-day due reminders, and produces overdue work after `original_due_end`.
 Unassigned overdue work targets eligible full members. Repeated or concurrent
 scans remain safe because the semantic outbox key is unique.
 
-The function produces work only. #76 owns the advisory/claim locking,
-generation/missed-policy ordering, retry orchestration, and per-run time budget.
+The function produces work only. `scheduled-task-processor` owns the durable run
+lease, generation/missed-policy ordering, retry orchestration, and per-run time
+budget. `process-notifications` claims endpoint work with row locks and persists
+one attempt sequence per device, so a retry cannot re-send to a device that
+already succeeded. See `scheduled-processing.md` for deployment and operations.

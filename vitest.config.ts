@@ -6,7 +6,10 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: 'jsdom',
-      include: ['src/**/*.test.{ts,tsx}'],
+      include: [
+        'src/**/*.test.{ts,tsx}',
+        'supabase/functions/**/*.test.ts',
+      ],
       setupFiles: ['./src/test/setup.ts'],
     },
   }),

@@ -1,6 +1,6 @@
 # HomeTeam Security Model
 
-> **Document status:** The authentication, platform-access, household, task, Realtime, notification-preference/subscription, and outbox-producer boundaries describe the current preview. Push delivery and full scheduled orchestration remain required downstream boundaries.
+> **Document status:** The authentication, platform-access, household, task, Realtime, notification, per-device delivery, and scheduled-processing boundaries describe the current implementation. Production push remains inactive until the documented secrets, functions, and cron job are configured.
 
 ## 1. Protected assets and security goals
 
@@ -123,6 +123,13 @@ Every security-definer function:
 - grants EXECUTE only to intended roles;
 - does not return fields the actor could not read under the output contract.
 
+The service-role-only scheduler/delivery functions have no browser actor. Their
+public EXECUTE grants are revoked from `public`, `anon`, and `authenticated`;
+the Edge Functions authenticate a separate high-entropy processor secret before
+calling them. Delivery claims re-check current platform access, membership,
+guest assignment, occurrence state, and notification preferences under a row
+lock before returning endpoint material.
+
 Dynamic SQL is prohibited unless unavoidable, fixed-format, and separately reviewed. Ownership belongs to a migration role that is not exposed to clients.
 
 ## 7. Cross-household isolation
@@ -152,7 +159,11 @@ Policies exclude `deleted_at IS NOT NULL` records from normal management screens
 ## 13. Secrets and deployment
 
 - Browser: only Supabase URL, publishable key, base path, and VAPID public key.
-- Supabase secrets: service-role key, VAPID private key, and VAPID subject.
+- Supabase Edge Function secrets: `NOTIFICATION_PROCESSOR_SECRET`,
+  `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT`. Hosted runtime
+  `SUPABASE_URL` and `SUPABASE_SECRET_KEYS` (or the legacy local
+  `SUPABASE_SERVICE_ROLE_KEY`) are server-only defaults, never application
+  configuration.
 - GitHub: Pages deployment token/permissions only; no service-role or private VAPID value.
 - Local development: ignored `.env.local`; committed `.env.example` contains names only.
 
@@ -183,6 +194,8 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 | Removed member retains live data | Membership required in RLS, channel teardown, protected cache purge |
 | Malicious push endpoint or payload leak | Owner-only subscription policies, payload privacy, URL/key redaction |
 | Scheduler processes same work twice | Row locks/advisory lock, bounded claims, semantic idempotency |
+| One device retry duplicates another device's push | Terminal per-device attempts are excluded from later claims; attempt numbers and a unique active-attempt index enforce isolation |
+| Public invocation of no-JWT cron handler | Constant-time comparison of a separate 32+ byte processor secret before any service client or endpoint claim is created |
 
 ## 16. Required security tests before release
 
@@ -201,6 +214,7 @@ Operational logs default to IDs, result codes, counts, and correlation IDs. Do n
 - event update/delete rejection;
 - join-link expiry, revocation, usage limits, and concurrent acceptance, plus username mismatch for legacy recipient-bound invitations;
 - subscription owner isolation and invalid-device disabling;
+- service-only scheduler/delivery grants, stale-lease recovery, and successful-device retry exclusion;
 - Realtime guest filtering and membership revocation;
 - repository/bundle secret scan;
 - soft-delete history visibility and normal-screen exclusion.

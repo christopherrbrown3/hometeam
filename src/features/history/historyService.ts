@@ -15,7 +15,7 @@ export type HistoryEvent = Event & Readonly<{
 }>
 
 export async function listHistory(client: Client, householdId?: string): Promise<HistoryEvent[]> {
-  const { data: events, error } = await client.rpc('list_history', { input_household_id: householdId ?? null })
+  const { data: events, error } = await client.rpc('list_history', { input_household_id: householdId })
   if (error) throw error
 
   const seriesIds = [...new Set(events.map((event) => event.series_id))]
