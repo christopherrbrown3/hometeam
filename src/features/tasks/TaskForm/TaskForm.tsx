@@ -129,7 +129,7 @@ export function TaskForm({ categories, currentUserId, formTitle = 'New household
       </details>
 
       {error && <p className="rounded-control bg-danger/10 p-3 text-sm text-danger" role="alert">{error}</p>}
-      <div className="flex flex-wrap gap-3"><Button className="w-full sm:w-auto" disabled={saving} type="submit">{saving ? 'Saving…' : formTitle === 'Edit task' ? 'Save changes' : 'Save task'}</Button>{onCancel && <Button disabled={saving} onClick={onCancel} type="button" variant="secondary">Cancel</Button>}</div>
+      <div className="flex flex-wrap gap-3"><Button className="w-full sm:w-auto" disabled={saving} requiresOnline type="submit">{saving ? 'Saving…' : formTitle === 'Edit task' ? 'Save changes' : 'Save task'}</Button>{onCancel && <Button disabled={saving} onClick={onCancel} type="button" variant="secondary">Cancel</Button>}</div>
     </form>
   )
 }

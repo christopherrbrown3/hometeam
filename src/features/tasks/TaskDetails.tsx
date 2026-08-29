@@ -22,7 +22,7 @@ export function TaskDetails({ assigneeColor, assigneeLabel, categoryName, series
           <div><dt className="text-muted">Assignment</dt><dd className="mt-0.5 font-medium capitalize">{series.assignment_mode.replaceAll('_', ' ')}</dd></div>
           <div><dt className="text-muted">Missed tasks</dt><dd className="mt-0.5 font-medium capitalize">{series.missed_policy.replaceAll('_', ' ')}</dd></div>
         </dl>
-        <div className="mt-4 space-y-3">{series.series_status !== 'deleted' && <Button onClick={onEdit} variant="secondary">Edit task</Button>}<SeriesActions onChanged={onChanged} seriesId={series.id} status={series.series_status} /></div>
+        <div className="mt-4 space-y-3">{series.series_status !== 'deleted' && <Button onClick={onEdit} requiresOnline variant="secondary">Edit task</Button>}<SeriesActions onChanged={onChanged} seriesId={series.id} status={series.series_status} /></div>
       </div>
     </details>
   )

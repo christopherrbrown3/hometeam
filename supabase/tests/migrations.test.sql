@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(12);
+select plan(13);
 
 select has_table('public', 'profiles', 'profiles migration is replayed');
 select has_table('public', 'households', 'households migration is replayed');
@@ -15,6 +15,12 @@ select has_table('public', 'task_events', 'events migration is replayed');
 select has_table('public', 'notification_preferences', 'notification preferences migration is replayed');
 select has_table('public', 'push_subscriptions', 'push subscriptions migration is replayed');
 select has_table('public', 'notification_outbox', 'notification outbox migration is replayed');
+select has_function(
+  'public',
+  'produce_scheduled_notifications',
+  array['timestamptz', 'integer'],
+  'scheduled notification producer migration is replayed'
+);
 
 select ok(
   exists (

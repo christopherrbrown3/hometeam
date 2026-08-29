@@ -3,6 +3,7 @@ import { z } from 'zod'
 const appEnvironmentSchema = z.object({
   VITE_SUPABASE_URL: z.string().url(),
   VITE_SUPABASE_PUBLISHABLE_KEY: z.string().trim().min(1),
+  VITE_VAPID_PUBLIC_KEY: z.string().trim().min(1).optional(),
 })
 
 export type AppEnvironment = z.infer<typeof appEnvironmentSchema>
@@ -25,4 +26,8 @@ export function readAppEnvironment(
   }
 
   return parsed.data
+}
+
+export function readVapidPublicKey(environment: unknown = import.meta.env) {
+  return appEnvironmentSchema.parse(environment).VITE_VAPID_PUBLIC_KEY
 }

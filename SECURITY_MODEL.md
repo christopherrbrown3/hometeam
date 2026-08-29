@@ -1,6 +1,6 @@
 # HomeTeam Security Model
 
-> **Document status:** The authentication, platform-access, household, task, and Realtime boundaries describe the current preview. Push-delivery and scheduled-notification controls describe the required boundary for that work when it is enabled.
+> **Document status:** The authentication, platform-access, household, task, Realtime, notification-preference/subscription, and outbox-producer boundaries describe the current preview. Push delivery and full scheduled orchestration remain required downstream boundaries.
 
 ## 1. Protected assets and security goals
 

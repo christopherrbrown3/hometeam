@@ -6,7 +6,7 @@ test('publishes rich invite metadata and an installable HomeTeam manifest', asyn
   await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Join my household on HomeTeam')
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /hometeam-invite-preview\.png$/)
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
-  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', 'favicon.svg')
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', /favicon\.svg$/)
 
   const manifestHref = await page.locator('link[rel="manifest"]').getAttribute('href')
   expect(manifestHref).toBeTruthy()
@@ -14,12 +14,16 @@ test('publishes rich invite metadata and an installable HomeTeam manifest', asyn
   const manifestResponse = await request.get(new URL(manifestHref, page.url()).toString())
   expect(manifestResponse.ok()).toBe(true)
   const manifest = await manifestResponse.json()
-  expect(manifest).toMatchObject({ display: 'standalone', name: 'HomeTeam' })
+  expect(manifest).toMatchObject({ display: 'standalone', name: 'HomeTeam', scope: './', start_url: './' })
   expect(manifest.icons).toEqual(expect.arrayContaining([
-    expect.objectContaining({ src: '/pwa-192x192.png' }),
-    expect.objectContaining({ src: '/pwa-512x512.png' }),
-    expect.objectContaining({ purpose: 'maskable', src: '/pwa-maskable-512x512.png' }),
+    expect.objectContaining({ src: 'pwa-192x192.png' }),
+    expect.objectContaining({ src: 'pwa-512x512.png' }),
+    expect.objectContaining({ purpose: 'maskable', src: 'pwa-maskable-512x512.png' }),
   ]))
+
+  const serviceWorkerResponse = await request.get(new URL('service-worker.js', page.url()).toString())
+  expect(serviceWorkerResponse.ok()).toBe(true)
+  expect(await serviceWorkerResponse.text()).toContain('Household task update')
 
   const previewResponse = await request.get(new URL('/hometeam-invite-preview.png', page.url()).toString())
   expect(previewResponse.ok()).toBe(true)
