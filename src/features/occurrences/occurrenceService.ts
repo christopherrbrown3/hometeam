@@ -41,13 +41,13 @@ export async function snoozeOccurrence(client: HomeTeamClient, input: SnoozeOccu
 export async function skipOccurrence(client: HomeTeamClient, input: SkipOccurrenceInput): Promise<MutationResult<Occurrence>> {
   requireOnline()
   const value = skipOccurrenceInput.parse(input)
-  return result(await client.rpc('skip_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_reason: value.reason ?? null }))
+  return result(await client.rpc('skip_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_reason: value.reason }))
 }
 
 export async function cancelOccurrence(client: HomeTeamClient, input: CancelOccurrenceInput): Promise<MutationResult<Occurrence>> {
   requireOnline()
   const value = cancelOccurrenceInput.parse(input)
-  return result(await client.rpc('cancel_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_reason: value.reason ?? null }))
+  return result(await client.rpc('cancel_occurrence', { input_expected_version: value.expectedVersion, input_occurrence_id: value.occurrenceId, input_reason: value.reason }))
 }
 
 export async function undoCompletion(client: HomeTeamClient, input: UndoCompletionInput): Promise<MutationResult<Occurrence>> {

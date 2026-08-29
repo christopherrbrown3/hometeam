@@ -57,3 +57,12 @@ otp_expiry = 3600
 [auth.sms]
 enable_signup = false
 enable_confirmations = false
+
+# These functions validate a separate, high-entropy scheduler secret before
+# creating a server-only Supabase client. Disabling gateway JWT verification is
+# required for pg_cron/pg_net calls, but does not make the handlers anonymous.
+[functions.process-notifications]
+verify_jwt = false
+
+[functions.scheduled-task-processor]
+verify_jwt = false

@@ -1,6 +1,6 @@
 # HomeTeam Architecture
 
-> **Document status:** Sections 1–13, the PWA/offline boundary, and the GitHub Pages deployment describe the current application architecture. The preview has owner-scoped notification preferences and subscriptions, transactional and scheduled outbox producers, and a push-capable service worker; it does not yet have end-to-end Web Push delivery or the complete scheduled orchestration owned by #75–#76.
+> **Document status:** Sections 1–16 describe the current application architecture, including owner-scoped notification settings, transactional producers, per-device Web Push delivery, leased scheduled orchestration, the PWA/offline boundary, and GitHub Pages deployment. Production push remains configuration-bound.
 
 ## 1. Architecture goals
 
@@ -288,9 +288,9 @@ Channel managers are keyed by user and membership set. On sign-out or membership
 
 ## 13. Notification outbox and Web Push
 
-The outbox, owner-scoped preference/device services, mutation producers, and bounded due/overdue producer are implemented. Web Push delivery is not enabled in the current preview.
+The outbox, owner-scoped preference/device services, mutation producers, bounded due/overdue producer, and Web Push worker are implemented. Production delivery is enabled only after the Supabase secrets, functions, and cron job in `supabase/docs/scheduled-processing.md` are configured.
 
-Mutation and scheduled transactions call the private `enqueue_notifications` boundary, which derives the household from the stored occurrence, filters active approved recipients by role and preference, excludes the actor, and creates `notification_outbox` rows with a unique semantic idempotency key. Guests are eligible only when they are the occurrence assignee. Assignment, completion, skip, snooze, new-task, due-soon, and overdue producers use this boundary. The exact producer and recipient contract is recorded in `supabase/docs/notification-outbox.md` and `supabase/docs/pwa-notification-foundation.md`. A once-per-minute scheduled processor will claim due work using `FOR UPDATE SKIP LOCKED` and invoke delivery in bounded batches.
+Mutation and scheduled transactions call the private `enqueue_notifications` boundary, which derives the household from the stored occurrence, filters active approved recipients by role and preference, excludes the actor, and creates `notification_outbox` rows with a unique semantic idempotency key. Guests are eligible only when they are the occurrence assignee. The delivery claim re-authorizes that recipient immediately before exposing a device endpoint, uses `FOR UPDATE SKIP LOCKED`, and records one immutable attempt sequence per outbox/device pair. Successful and permanently failed devices are excluded from retry claims. HTTP 404/410 disables only the matching subscription.
 
 ```mermaid
 flowchart LR
@@ -311,7 +311,7 @@ Issue #70 selected pinned `@mmmike/web-push` after exercising RFC 8291 encryptio
 
 ## 14. Scheduled processing
 
-The repository contains scheduled occurrence-generation logic plus an idempotent, service-role-only `produce_scheduled_notifications` function for bounded due-soon/overdue production. The complete orchestration and notification-delivery pipeline below remains the target design.
+The repository contains a leased, service-role-only scheduled processor. A singleton database row supplies a recoverable run token and generation cursor; overlapping invocations return without performing phases.
 
 One idempotent Edge Function, invoked about once per minute, orchestrates:
 
@@ -322,7 +322,7 @@ One idempotent Edge Function, invoked about once per minute, orchestrates:
 5. bounded notification delivery/retry;
 6. invalid subscription disabling.
 
-Jobs use advisory locks or claim tables plus deterministic keys. Each phase has a time budget and cursor so the free-tier workload can resume safely. Completion-interval generation remains inside lifecycle RPCs, not the scheduler.
+Jobs use the durable scheduler lease, `FOR UPDATE SKIP LOCKED` delivery claims, deterministic producer keys, bounded horizons/batches, a 45-second phase budget, and recoverable stale-device leases. Completion-interval generation remains inside lifecycle RPCs, not the scheduler.
 
 ## 15. PWA and offline behavior
 
@@ -346,10 +346,14 @@ VITE_VAPID_PUBLIC_KEY
 Supabase secrets:
 
 ```text
-SUPABASE_SERVICE_ROLE_KEY
+NOTIFICATION_PROCESSOR_SECRET
+VAPID_PUBLIC_KEY
 VAPID_PRIVATE_KEY
 VAPID_SUBJECT
 ```
+
+The hosted Edge Runtime supplies `SUPABASE_URL` and `SUPABASE_SECRET_KEYS`;
+local/legacy runtimes may instead supply `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## 17. Testing layers
 

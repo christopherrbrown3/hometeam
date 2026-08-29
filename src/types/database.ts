@@ -308,6 +308,60 @@ export type Database = {
           },
         ]
       }
+      notification_delivery_attempts: {
+        Row: {
+          attempt_number: number
+          completed_at: string | null
+          error_code: string | null
+          id: string
+          next_retry_at: string | null
+          outbox_id: string
+          response_status: number | null
+          started_at: string
+          status: Database["public"]["Enums"]["notification_delivery_status"]
+          subscription_id: string
+        }
+        Insert: {
+          attempt_number: number
+          completed_at?: string | null
+          error_code?: string | null
+          id?: string
+          next_retry_at?: string | null
+          outbox_id: string
+          response_status?: number | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["notification_delivery_status"]
+          subscription_id: string
+        }
+        Update: {
+          attempt_number?: number
+          completed_at?: string | null
+          error_code?: string | null
+          id?: string
+          next_retry_at?: string | null
+          outbox_id?: string
+          response_status?: number | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["notification_delivery_status"]
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_delivery_attempts_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "notification_outbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_delivery_attempts_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "push_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_outbox: {
         Row: {
           attempt_count: number
@@ -1026,11 +1080,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      accept_household_join_link: {
+      accept_household_invitation: {
         Args: { input_token: string }
         Returns: string
       }
-      accept_household_invitation: {
+      accept_household_join_link: {
         Args: { input_token: string }
         Returns: string
       }
@@ -1074,6 +1128,59 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      cancel_occurrence: {
+        Args: {
+          input_expected_version: number
+          input_occurrence_id: string
+          input_reason?: string
+        }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      claim_notification_deliveries: {
+        Args: {
+          input_limit?: number
+          input_now?: string
+          input_stale_after_seconds?: number
+        }
+        Returns: {
+          attempt_id: string
+          auth_key: string
+          endpoint: string
+          outbox_id: string
+          p256dh_key: string
+          payload: Json
+        }[]
+      }
       claim_occurrence: {
         Args: { input_expected_version: number; input_occurrence_id: string }
         Returns: {
@@ -1108,15 +1215,60 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      cancel_occurrence: {
-        Args: { input_expected_version: number; input_occurrence_id: string; input_reason?: string | null }
-        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
-        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
+      claim_scheduled_task_run: {
+        Args: { input_lease_seconds?: number; input_now?: string }
+        Returns: {
+          acquired: boolean
+          generation_through: string
+          run_token: string
+        }[]
       }
       complete_occurrence: {
-        Args: { input_expected_version: number; input_keep_original_rotation?: boolean; input_occurrence_id: string }
-        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
-        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
+        Args: {
+          input_expected_version: number
+          input_keep_original_rotation?: boolean
+          input_occurrence_id: string
+        }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_scheduled_task_run: {
+        Args: {
+          input_error?: string
+          input_generation_through?: string
+          input_now?: string
+          input_run_token: string
+        }
+        Returns: boolean
       }
       create_category: {
         Args: {
@@ -1188,34 +1340,86 @@ export type Database = {
       }
       delete_task_series: {
         Args: { input_series_id: string }
-        Returns: Database["public"]["Tables"]["task_series"]["Row"]
-        SetofOptions: { from: "*"; to: "task_series"; isOneToOne: true; isSetofReturn: false }
+        Returns: {
+          assignment_mode: Database["public"]["Enums"]["task_assignment_mode"]
+          category_id: string | null
+          confirmation_required: boolean
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          effective_from: string
+          end_after_occurrences: number | null
+          end_at: string | null
+          end_type: Database["public"]["Enums"]["task_end_type"]
+          fixed_assignee_id: string | null
+          household_id: string
+          id: string
+          missed_policy: Database["public"]["Enums"]["task_missed_policy"]
+          recurrence_config: Json
+          recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at: string | null
+          rotation_cursor_user_id: string | null
+          series_status: Database["public"]["Enums"]["task_series_status"]
+          series_type: Database["public"]["Enums"]["task_series_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_series"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       edit_task_series: {
-        Args: { input_effective_from?: string; input_patch: Json; input_scope?: string; input_series_id: string }
-        Returns: Database["public"]["Tables"]["task_series"]["Row"]
-        SetofOptions: { from: "*"; to: "task_series"; isOneToOne: true; isSetofReturn: false }
+        Args: {
+          input_effective_from?: string
+          input_patch: Json
+          input_scope?: string
+          input_series_id: string
+        }
+        Returns: {
+          assignment_mode: Database["public"]["Enums"]["task_assignment_mode"]
+          category_id: string | null
+          confirmation_required: boolean
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          effective_from: string
+          end_after_occurrences: number | null
+          end_at: string | null
+          end_type: Database["public"]["Enums"]["task_end_type"]
+          fixed_assignee_id: string | null
+          household_id: string
+          id: string
+          missed_policy: Database["public"]["Enums"]["task_missed_policy"]
+          recurrence_config: Json
+          recurrence_type: Database["public"]["Enums"]["task_recurrence_type"]
+          rotation_cursor_updated_at: string | null
+          rotation_cursor_user_id: string | null
+          series_status: Database["public"]["Enums"]["task_series_status"]
+          series_type: Database["public"]["Enums"]["task_series_type"]
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_series"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       generate_calendar_occurrences: {
         Args: { input_from: string; input_through: string }
         Returns: number
-      }
-      reopen_occurrence: {
-        Args: { input_expected_version: number; input_occurrence_id: string }
-        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
-        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
       }
       get_current_access: {
         Args: never
         Returns: {
           is_administrator: boolean
           status: Database["public"]["Enums"]["platform_access_status"]
-        }[]
-      }
-      get_signup_approval_setting: {
-        Args: never
-        Returns: {
-          require_signup_approval: boolean
         }[]
       }
       get_household_join_link_status: {
@@ -1226,6 +1430,25 @@ export type Database = {
           max_uses: number
           role: Database["public"]["Enums"]["household_member_role"]
           use_count: number
+        }[]
+      }
+      get_signup_approval_setting: {
+        Args: never
+        Returns: {
+          require_signup_approval: boolean
+        }[]
+      }
+      list_history: {
+        Args: { input_household_id?: string }
+        Returns: {
+          actor_user_id: string
+          created_at: string
+          event_payload: Json
+          event_type: Database["public"]["Enums"]["task_event_type"]
+          household_id: string
+          id: string
+          occurrence_id: string
+          series_id: string
         }[]
       }
       list_household_invitations: {
@@ -1239,37 +1462,9 @@ export type Database = {
           status: Database["public"]["Enums"]["invitation_status"]
         }[]
       }
-      list_history: {
-        Args: { input_household_id?: string | null }
-        Returns: {
-          actor_user_id: string | null
-          created_at: string
-          event_payload: Json
-          event_type: Database["public"]["Enums"]["task_event_type"]
-          household_id: string
-          id: string
-          occurrence_id: string | null
-          series_id: string
-        }[]
-      }
       next_interval_successor: {
         Args: { input_anchor: string; input_series_id: string }
         Returns: string
-      }
-      skip_occurrence: {
-        Args: { input_expected_version: number; input_occurrence_id: string; input_reason?: string | null }
-        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
-        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
-      }
-      snooze_occurrence: {
-        Args: { input_expected_version: number; input_occurrence_id: string; input_snoozed_until: string }
-        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
-        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
-      }
-      undo_completion: {
-        Args: { input_expected_version: number; input_occurrence_id: string }
-        Returns: Database["public"]["Tables"]["task_occurrences"]["Row"]
-        SetofOptions: { from: "*"; to: "task_occurrences"; isOneToOne: true; isSetofReturn: false }
       }
       pause_task_series: {
         Args: { input_series_id: string }
@@ -1312,6 +1507,51 @@ export type Database = {
       recalculate_future_assignments: {
         Args: { input_cursor_user_id?: string; input_series_id: string }
         Returns: number
+      }
+      record_notification_delivery_result: {
+        Args: {
+          input_attempt_id: string
+          input_error_code?: string
+          input_now?: string
+          input_outcome: string
+          input_response_status?: number
+          input_retry_after_seconds?: number
+        }
+        Returns: undefined
+      }
+      reopen_occurrence: {
+        Args: { input_expected_version: number; input_occurrence_id: string }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       replace_rotation_roster: {
         Args: { input_member_ids: string[]; input_series_id: string }
@@ -1443,6 +1683,116 @@ export type Database = {
         Args: { input_require_signup_approval: boolean }
         Returns: boolean
       }
+      skip_occurrence: {
+        Args: {
+          input_expected_version: number
+          input_occurrence_id: string
+          input_reason?: string
+        }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      snooze_occurrence: {
+        Args: {
+          input_expected_version: number
+          input_occurrence_id: string
+          input_snoozed_until: string
+        }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      undo_completion: {
+        Args: { input_expected_version: number; input_occurrence_id: string }
+        Returns: {
+          assignee_user_id: string | null
+          assignment_locked: boolean
+          assignment_source: Database["public"]["Enums"]["task_assignment_source"]
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_all_day: boolean
+          lifecycle_state: Database["public"]["Enums"]["task_lifecycle_state"]
+          occurrence_key: string
+          original_due_end: string
+          original_due_start: string
+          rotation_override: boolean
+          series_id: string
+          skip_reason: string | null
+          skipped_at: string | null
+          skipped_by: string | null
+          snoozed_by: string | null
+          snoozed_until: string | null
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "task_occurrences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       update_category: {
         Args: {
           archive?: boolean
@@ -1480,6 +1830,11 @@ export type Database = {
       household_member_role: "full_member" | "guest"
       household_membership_status: "active" | "removed"
       invitation_status: "active" | "accepted" | "revoked" | "expired"
+      notification_delivery_status:
+        | "processing"
+        | "sent"
+        | "retryable"
+        | "permanent_failure"
       notification_outbox_status:
         | "pending"
         | "processing"
@@ -1670,6 +2025,12 @@ export const Constants = {
       household_member_role: ["full_member", "guest"],
       household_membership_status: ["active", "removed"],
       invitation_status: ["active", "accepted", "revoked", "expired"],
+      notification_delivery_status: [
+        "processing",
+        "sent",
+        "retryable",
+        "permanent_failure",
+      ],
       notification_outbox_status: [
         "pending",
         "processing",
