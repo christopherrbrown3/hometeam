@@ -133,3 +133,14 @@ asserts that an inactive session cannot mount product routes and that protected
 query data is cleared. `e2e/households.spec.ts` verifies unauthenticated visitors
 cannot reach household management. The production administrator bootstrap and
 hosted Auth configuration remain manual, credential-bound validation steps.
+
+## 10. Release authorization evidence
+
+`supabase/tests/rls_matrix.test.sql` inventories every public table and executes
+the full member, assigned guest, approved outsider, removed user, all inactive
+platform states, administrator, and non-administrator matrix against a shared
+two-household fixture. `supabase/tests/security_definer_audit.test.sql` audits
+function owners, pinned search paths, exact browser/service execution
+allowlists, deny-by-default function privileges, and the append-only event
+trigger from PostgreSQL catalogs. The maintained contract and commands are in
+`supabase/docs/security-authorization-audit.md`.

@@ -16,7 +16,7 @@ update public.task_occurrences set assignee_user_id = '00000000-0000-0000-0000-0
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000103', true);
 select is((select count(*)::integer from public.task_occurrences where household_id = '00000000-0000-0000-0000-000000000201'), 1, 'guest can receive only the assigned occurrence signal');
-select is((select count(*)::integer from public.task_series where household_id = '00000000-0000-0000-0000-000000000201'), 0, 'guest cannot receive household-wide series signals');
+select is((select count(*)::integer from public.task_series where household_id = '00000000-0000-0000-0000-000000000201'), 1, 'guest can refetch only the assigned occurrence parent after its signal');
 select is((select count(*)::integer from public.household_memberships where household_id = '00000000-0000-0000-0000-000000000201'), 1, 'guest can read only their own membership signal');
 reset role;
 

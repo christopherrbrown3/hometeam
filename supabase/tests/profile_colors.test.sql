@@ -21,6 +21,11 @@ select throws_ok(
   'gray remains reserved for unassigned work'
 );
 
+-- Profile mutations are product writes and require active platform access.
+update public.platform_access
+set status = 'approved'
+where user_id = '00000000-0000-0000-0000-000000000101';
+
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000101', true);
 select lives_ok(
