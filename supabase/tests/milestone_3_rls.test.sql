@@ -26,8 +26,8 @@ select is(
 );
 reset role;
 
--- Give the approved guest one explicit Maple occurrence and prove the guest cannot
--- enumerate its parent series or somebody else's occurrence.
+-- Give the approved guest one explicit Maple occurrence and prove the guest can
+-- load only that occurrence's parent projection, not unrelated definitions.
 update public.task_occurrences
 set assignee_user_id = '00000000-0000-0000-0000-000000000103'
 where id = '00000000-0000-0000-0000-000000000701';
@@ -39,8 +39,8 @@ select is(
   'guest reads only the explicitly assigned occurrence'
 );
 select is(
-  (select count(*)::integer from public.task_series where household_id = '00000000-0000-0000-0000-000000000201'), 0,
-  'guest cannot read household-wide task definitions'
+  (select count(*)::integer from public.task_series where household_id = '00000000-0000-0000-0000-000000000201'), 1,
+  'guest reads only the parent definition for the assigned occurrence'
 );
 select ok(
   not has_table_privilege('authenticated', 'public.household_invitations', 'select'),

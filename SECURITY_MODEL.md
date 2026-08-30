@@ -229,3 +229,19 @@ The initial preview-access and household boundary matrix is executable locally i
 Query state when access is no longer approved; database RLS remains authoritative if
 a stale client tries another request. The Realtime subscription manager also scopes
 channels to the approved user and active membership set.
+
+## 18. Release authorization audit evidence
+
+`supabase/tests/rls_matrix.test.sql` and its deterministic two-household fixture
+cover every public table across approved full-member, assigned-guest, outsider,
+removed, pending, rejected, suspended, administrator, and non-administrator
+states. Assigned guests receive only the parent task/category rows required to
+render their authorized occurrence; inactive and removed actors receive no
+membership or household rows. Administrator visibility remains limited to the
+minimum profile/access review surface.
+
+`supabase/tests/security_definer_audit.test.sql` audits the live function and
+trigger catalogs for ownership, explicit safe search paths, API execution
+allowlists, default function privileges, and append-only `task_events`
+protections. The durable contract and local verification commands are recorded
+in `supabase/docs/security-authorization-audit.md`.
